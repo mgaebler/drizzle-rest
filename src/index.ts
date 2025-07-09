@@ -1,12 +1,26 @@
 import express from 'express';
+import { createDrizzleRestAdapter } from '@/drizzle-rest-adapter';
+import { db } from '@/db/connection';
+import * as schema from '@/db/schema';
+import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
+import { seed } from '@/db/seed';
 
 const app = express();
-const port = 3000;
+app.use(express.json());
 
-app.get('/', (req, res) => {
-  res.send('Hello World!');
+// Run migrations
+migrate(db, { migrationsFolder: './drizzle' });
+
+// Seed database
+seed();
+
+const drizzleApiRouter = createDrizzleRestAdapter({
+  db: db,
+  schema: schema,
 });
 
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+app.use('/api/v1', drizzleApiRouter);
+
+app.listen(3000, () => {
+  console.log('Server with Drizzle REST Adapter is running on port 3000');
 });
