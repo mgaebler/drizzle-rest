@@ -1,9 +1,9 @@
 import request from 'supertest';
 import express from 'express';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { createDrizzleRestAdapter } from '../drizzle-rest-adapter.js';
-import { db } from '../db/connection.js';
-import * as schema from '../db/schema.js';
+import { createDrizzleRestAdapter } from '../drizzle-rest-adapter';
+import { db } from '@/db/connection';
+import * as schema from '@/db/schema.js';
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
 import { seed } from '../db/seed.js';
 
