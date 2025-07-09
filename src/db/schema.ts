@@ -6,7 +6,3 @@ export const users = pgTable('users', {
   phone: text('phone'),
 });
 
-
-export const dbTables = {
-  users,
-};
