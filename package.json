@@ -18,6 +18,7 @@
   "dependencies": {
     "@electric-sql/pglite": "^0.3.4",
     "drizzle-orm": "^0.44.2",
+    "drizzle-seed": "^0.3.1",
     "drizzle-zod": "^0.5.1",
     "express": "^4.18.2",
     "zod": "^3.22.4"

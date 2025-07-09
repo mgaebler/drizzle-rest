@@ -5,3 +5,8 @@ export const users = pgTable('users', {
   fullName: text('full_name'),
   phone: text('phone'),
 });
+
+
+export const dbTables = {
+  users,
+};
