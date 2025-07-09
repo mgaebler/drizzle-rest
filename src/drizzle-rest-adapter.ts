@@ -1,19 +1,19 @@
 import express from 'express';
-import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
+import { PgliteDatabase } from 'drizzle-orm/pglite';
 import { asc, desc, eq, getTableColumns } from 'drizzle-orm';
-import { SQLiteTable } from 'drizzle-orm/sqlite-core';
+import { PgTable } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
 
 // A more specific type can be used if the schema is known.
 // Using `any` for the schema makes the adapter more generic.
-type DrizzleDb = BetterSQLite3Database<any>;
+type DrizzleDb = PgliteDatabase<any>;
 
 export interface DrizzleRestAdapterOptions {
   /** The Drizzle database instance. */
   db: DrizzleDb;
 
   /** The imported Drizzle schema object. */
-  schema: Record<string, SQLiteTable | any>;
+  schema: Record<string, PgTable | any>;
 
   /** Detailed configuration per table. */
   tableOptions?: {
@@ -32,7 +32,7 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
 
     // This is a simplified check. A more robust check might be needed
     // to differentiate between tables and relations.
-    if (table instanceof SQLiteTable) {
+    if (table instanceof PgTable) {
       const basePath = `/${tableName}`;
       const itemPath = `${basePath}/:id`;
 
@@ -75,11 +75,8 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
         try {
           const insertSchema = createInsertSchema(table);
           const validatedBody = insertSchema.parse(req.body);
-          const result = await db.insert(table).values(validatedBody);
-          const insertedId = result.lastInsertRowid;
-          const columns = getTableColumns(table);
-          const newRecord = await db.select().from(table).where(eq(columns.id, insertedId));
-          res.status(201).json(newRecord[0]);
+          const result = await db.insert(table).values(validatedBody).returning();
+          res.status(201).json(result[0]);
         } catch (error: any) {
           console.error('Error in createOne:', error);
           if (error.issues) {
@@ -151,12 +148,14 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
         try {
           const { id } = req.params;
           const columns = getTableColumns(table);
-          const result = await db.delete(table).where(eq(columns.id, id));
 
-          if (result.changes === 0) {
+          // First check if the record exists
+          const existingRecord = await db.select().from(table).where(eq(columns.id, id));
+          if (existingRecord.length === 0) {
             return res.status(404).json({ error: 'Not Found' });
           }
 
+          await db.delete(table).where(eq(columns.id, id));
           res.status(204).send();
         } catch (error: any) {
           console.error('Error in deleteOne:', error);

@@ -1,4 +1,4 @@
-import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
+import { migrate } from 'drizzle-orm/pglite/migrator';
 import { db } from '@/db/connection';
 
-migrate(db, { migrationsFolder: 'drizzle' });
+await migrate(db, { migrationsFolder: 'drizzle' });

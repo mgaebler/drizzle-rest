@@ -1,5 +1,5 @@
-import { drizzle } from 'drizzle-orm/better-sqlite3';
-import Database from 'better-sqlite3';
+import { drizzle } from 'drizzle-orm/pglite';
+import { PGlite } from '@electric-sql/pglite';
 
-const sqlite = new Database(':memory:');
-export const db = drizzle(sqlite);
+const client = new PGlite();
+export const db = drizzle(client);

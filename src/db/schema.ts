@@ -1,7 +1,7 @@
-import { sqliteTable, integer, text } from 'drizzle-orm/sqlite-core';
+import { pgTable, serial, text } from 'drizzle-orm/pg-core';
 
-export const users = sqliteTable('users', {
-  id: integer('id').primaryKey(),
+export const users = pgTable('users', {
+  id: serial('id').primaryKey(),
   fullName: text('full_name'),
   phone: text('phone'),
 });

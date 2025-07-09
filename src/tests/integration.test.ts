@@ -4,7 +4,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { createDrizzleRestAdapter } from '../drizzle-rest-adapter';
 import { db } from '@/db/connection';
 import * as schema from '@/db/schema.js';
-import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
+import { migrate } from 'drizzle-orm/pglite/migrator';
 import { seed } from '../db/seed.js';
 
 const app = express();
@@ -19,8 +19,9 @@ app.use('/api/v1', drizzleApiRouter);
 
 describe('Drizzle REST Adapter Integration Tests', () => {
   beforeEach(async () => {
+    // Run migrations first
+    await migrate(db, { migrationsFolder: './drizzle' });
     // Clear the table before each test
-    migrate(db, { migrationsFolder: './drizzle' });
     await db.delete(schema.users);
     // Re-seed the database
     await seed();
@@ -46,27 +47,39 @@ describe('Drizzle REST Adapter Integration Tests', () => {
   });
 
   it('should get a user by ID', async () => {
-    const res = await request(app).get('/api/v1/users/1');
+    // First get all users to find a valid ID
+    const allUsers = await request(app).get('/api/v1/users');
+    const firstUserId = allUsers.body[0].id;
+
+    const res = await request(app).get(`/api/v1/users/${firstUserId}`);
     expect(res.statusCode).toEqual(200);
     expect(res.body.fullName).toEqual('Alice Smith');
   });
 
   it('should update a user by ID', async () => {
+    // First get all users to find a valid ID
+    const allUsers = await request(app).get('/api/v1/users');
+    const firstUserId = allUsers.body[0].id;
+
     const updatedUser = { fullName: 'Alice Wonderland' };
-    const res = await request(app).patch('/api/v1/users/1').send(updatedUser);
+    const res = await request(app).patch(`/api/v1/users/${firstUserId}`).send(updatedUser);
     expect(res.statusCode).toEqual(200);
     expect(res.body.fullName).toEqual('Alice Wonderland');
 
-    const fetchedUser = await request(app).get('/api/v1/users/1');
+    const fetchedUser = await request(app).get(`/api/v1/users/${firstUserId}`);
     expect(fetchedUser.body.fullName).toEqual('Alice Wonderland');
   });
 
   it('should delete a user by ID', async () => {
-    const res = await request(app).delete('/api/v1/users/1');
+    // First get all users to find a valid ID
+    const allUsers = await request(app).get('/api/v1/users');
+    const firstUserId = allUsers.body[0].id;
+
+    const res = await request(app).delete(`/api/v1/users/${firstUserId}`);
     expect(res.statusCode).toEqual(204);
 
-    const allUsers = await request(app).get('/api/v1/users');
-    expect(allUsers.body).toHaveLength(2);
+    const updatedUsers = await request(app).get('/api/v1/users');
+    expect(updatedUsers.body).toHaveLength(2);
   });
 
   it('should return 404 for a non-existent user', async () => {

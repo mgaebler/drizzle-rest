@@ -1,12 +1,12 @@
 {
-  "version": "5",
-  "dialect": "sqlite",
+  "version": "7",
+  "dialect": "postgresql",
   "entries": [
     {
       "idx": 0,
-      "version": "5",
-      "when": 1751980939851,
-      "tag": "0000_fine_umar",
+      "version": "7",
+      "when": 1752073280447,
+      "tag": "0000_big_champions",
       "breakpoints": true
     }
   ]
