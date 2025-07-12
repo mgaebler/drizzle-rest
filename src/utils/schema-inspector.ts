@@ -139,24 +139,6 @@ export class SchemaInspector {
         return undefined;
     }
 
-    private extractRelations(tableName: string, columns: ColumnMetadata[]): RelationMetadata[] {
-        const relations: RelationMetadata[] = [];
-
-        // Add belongs_to relations for each foreign key column
-        columns.forEach(column => {
-            if (column.references) {
-                relations.push({
-                    type: 'belongs_to',
-                    relatedTable: column.references.table,
-                    foreignKey: column.name,
-                    relatedColumn: column.references.column
-                });
-            }
-        });
-
-        return relations;
-    }
-
     private buildTableRelations(table: TableMetadata, allTables: TableMetadata[]): RelationMetadata[] {
         const relations: RelationMetadata[] = [];
 
@@ -189,13 +171,5 @@ export class SchemaInspector {
         });
 
         return relations;
-    }
-
-    private getRelationName(columnOrTable: string, relatedTable: string, isPlural = false): string {
-        // Simple naming convention: remove 'Id' suffix for belongs_to, pluralize for has_many
-        if (isPlural) {
-            return relatedTable.endsWith('s') ? relatedTable : relatedTable + 's';
-        }
-        return columnOrTable.replace(/Id$/, '').toLowerCase();
     }
 }

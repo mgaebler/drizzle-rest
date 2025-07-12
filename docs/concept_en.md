@@ -102,46 +102,11 @@ All standard REST methods are supported:
 * **PUT**: Complete resource replacement
 * **PATCH**: Partial resource update
 
-### Embed
-
-Basic relational data embedding:
-
-* **Syntax**: `?_embed=<related_table>`
-* **Example**: `GET /posts?_embed=comments`
-
 ### Design Decision: Nested and Array Fields
 
 **Status**: **Not Implemented**
 
 While the original JSON-Server specification includes nested and array field access (`?user.name=John`, `?tags[0]=javascript`), this feature has been **intentionally excluded** from the Drizzle REST Adapter for the following reasons:
-
-#### Relational vs Document Paradigm Mismatch
-
-* **JSON-Server** operates on JSON files with document-like structures that naturally support nested objects and arrays
-* **Drizzle** is designed for relational databases with normalized table structures
-* Most Drizzle schemas follow relational design patterns where data is split across multiple tables rather than nested within single records
-
-#### Typical Usage Patterns
-
-```typescript
-// Relational design (typical Drizzle usage)
-const users = pgTable('users', {
-  id: serial('id').primaryKey(),
-  name: text('name'),
-  email: text('email')
-});
-
-const profiles = pgTable('profiles', {
-  id: serial('id').primaryKey(),
-  userId: integer('user_id').references(() => users.id),
-  age: integer('age'),
-  location: text('location')
-});
-
-// Instead of nested queries: ?user.profile.age=25
-// Use relational queries: GET /profiles?age=25&userId=123
-// Or use embed: GET /users/123?_embed=profile
-```
 
 #### Implementation Complexity vs Value
 
@@ -155,8 +120,6 @@ const profiles = pgTable('profiles', {
 Instead of nested field access, use the `_embed` parameter for relational data:
 
 ```bash
-# Instead of: GET /posts?author.name=John (not supported)
-# Use relational approach:
 GET /posts?_embed=author
 GET /authors?name=John  # Get author ID first
 GET /posts?authorId=123 # Then filter posts
@@ -238,7 +201,7 @@ export class SchemaInspector {
         tableName: table[Table.Symbol.Name],
         columns: this.extractColumns(table),
         primaryKey: this.extractPrimaryKey(table),
-        relations: this.extractRelations(name)
+        relations: [] // Will be populated later
       }));
   }
 

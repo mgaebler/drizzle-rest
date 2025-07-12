@@ -177,7 +177,7 @@ export class SchemaInspector {
         tableName: table[Table.Symbol.Name],
         columns: this.extractColumns(table),
         primaryKey: this.extractPrimaryKey(table),
-        relations: this.extractRelations(name)
+        relations: [] // Will be populated later
       }));
   }
 
