@@ -62,7 +62,7 @@ The `createDrizzleRestAdapter` function performs the following steps at runtime 
 
 ## 3. API Query Language (JSON-Server Dialect)
 
-To enable seamless migration from JSON-Server and maintain the familiar syntax, the adapter fully implements the **JSON-Server dialect** based on [JSON-Server v1.0.0-beta.3](https://github.com/typicode/json-server/releases/tag/v1.0.0-beta.3).
+To enable seamless migration from JSON-Server and maintain the familiar syntax, the adapter implements the **JSON-Server dialect** based on [JSON-Server v1.0.0-beta.3](https://github.com/typicode/json-server/releases/tag/v1.0.0-beta.3), with adaptations for relational database usage.
 
 ### Filtering
 
@@ -94,14 +94,6 @@ Sorting supports multiple fields with comma separation:
 * **Descending**: Use `-` prefix (e.g., `-created_at`)
 * **Example**: `GET /users?_sort=name,-created_at`
 
-### Nested and Array Fields
-
-Advanced field access is supported:
-
-* **Nested objects**: `?user.name=John&user.age_gte=18`
-* **Array elements**: `?tags[0]=javascript`
-* **Operators on nested**: `?metadata.score_gt=100`
-
 ### HTTP Methods
 
 All standard REST methods are supported:
@@ -123,6 +115,61 @@ Cascading deletion with dependencies:
 
 * **Syntax**: `DELETE /<table>/:id?_dependent=<related_table>`
 * **Example**: `DELETE /posts/1?_dependent=comments`
+
+### Design Decision: Nested and Array Fields
+
+**Status**: **Not Implemented**
+
+While the original JSON-Server specification includes nested and array field access (`?user.name=John`, `?tags[0]=javascript`), this feature has been **intentionally excluded** from the Drizzle REST Adapter for the following reasons:
+
+#### Relational vs Document Paradigm Mismatch
+
+* **JSON-Server** operates on JSON files with document-like structures that naturally support nested objects and arrays
+* **Drizzle** is designed for relational databases with normalized table structures
+* Most Drizzle schemas follow relational design patterns where data is split across multiple tables rather than nested within single records
+
+#### Typical Usage Patterns
+
+```typescript
+// Relational design (typical Drizzle usage)
+const users = pgTable('users', {
+  id: serial('id').primaryKey(),
+  name: text('name'),
+  email: text('email')
+});
+
+const profiles = pgTable('profiles', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').references(() => users.id),
+  age: integer('age'),
+  location: text('location')
+});
+
+// Instead of nested queries: ?user.profile.age=25
+// Use relational queries: GET /profiles?age=25&userId=123
+// Or use embed: GET /users/123?_embed=profile
+```
+
+#### Implementation Complexity vs Value
+
+* Nested field support would require complex PostgreSQL JSON operators
+* Would only be useful for schemas with JSON/JSONB columns (edge case)
+* Adds significant complexity to type safety and query generation
+* Alternative solutions (`_embed` for relationships) provide better relational patterns
+
+#### Alternative: Use Embed for Relationships
+
+Instead of nested field access, use the `_embed` parameter for relational data:
+
+```bash
+# Instead of: GET /posts?author.name=John (not supported)
+# Use relational approach:
+GET /posts?_embed=author
+GET /authors?name=John  # Get author ID first
+GET /posts?authorId=123 # Then filter posts
+```
+
+This design decision keeps the adapter focused on relational database best practices while maintaining JSON-Server compatibility for the most commonly used features.
 
 -----
 
