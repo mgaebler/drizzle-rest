@@ -17,6 +17,65 @@ const drizzleApiRouter = createDrizzleRestAdapter({
 
 app.use('/api/v1', drizzleApiRouter);
 
+// Test data constants
+const TEST_USERS = {
+  alice: { fullName: 'Alice Smith', phone: '123-456-7890' },
+  bob: { fullName: 'Bob Johnson', phone: '234-567-8901' },
+  charlie: { fullName: 'Charlie Brown', phone: '345-678-9012' },
+  david: { fullName: 'David Wilson', phone: '456-789-0123' },
+  eve: { fullName: 'Eve Davis', phone: '567-890-1234' },
+  aliceWonder: { fullName: 'Alice Wonder', phone: '678-901-2345' },
+  newUser: { fullName: 'New User', phone: '999-888-7777' },
+  primaryKeyTest: { fullName: 'Primary Key Test User', phone: '111-222-3333' },
+  specialChars: { fullName: 'Test User (Special)', phone: '+1-800-TEST' }
+} as const;
+
+// Helper functions
+const createTestUser = async (userData: { fullName: string; phone: string } = TEST_USERS.alice) => {
+  const [user] = await db.insert(schema.users).values(userData).returning();
+  return user;
+};
+
+const createTestUsers = async (count: number, prefix = 'User') => {
+  const users = Array.from({ length: count }, (_, i) => ({
+    fullName: `${prefix} ${i + 1}`,
+    phone: `${(i + 1).toString().padStart(3, '0')}-000-0000`
+  }));
+  return await db.insert(schema.users).values(users).returning();
+};
+
+const createFilteringTestData = async () => {
+  return await db.insert(schema.users).values([
+    TEST_USERS.alice,
+    TEST_USERS.bob,
+    TEST_USERS.charlie,
+    TEST_USERS.david,
+    TEST_USERS.eve,
+    TEST_USERS.aliceWonder,
+  ]).returning();
+};
+
+const expectSuccessResponse = (res: any, expectedStatus = 200) => {
+  expect(res.statusCode).toEqual(expectedStatus);
+};
+
+const expectUserProperties = (user: any, expectedData?: any) => {
+  expect(user).toHaveProperty('id');
+  if (expectedData) {
+    expect(user.fullName).toEqual(expectedData.fullName);
+    if (expectedData.phone) {
+      expect(user.phone).toEqual(expectedData.phone);
+    }
+  }
+};
+
+const apiRequest = {
+  get: (path: string) => request(app).get(`/api/v1${path}`),
+  post: (path: string, data?: any) => request(app).post(`/api/v1${path}`).send(data),
+  patch: (path: string, data?: any) => request(app).patch(`/api/v1${path}`).send(data),
+  delete: (path: string) => request(app).delete(`/api/v1${path}`)
+};
+
 describe('Drizzle REST Adapter Integration Tests', () => {
   beforeEach(async () => {
     // Run migrations first
@@ -28,350 +87,267 @@ describe('Drizzle REST Adapter Integration Tests', () => {
   });
 
   it('should get all users', async () => {
-    // Create test data
-    await db.insert(schema.users).values([
-      { fullName: 'Alice Smith', phone: '123-456-7890' },
-      { fullName: 'Bob Johnson', phone: '234-567-8901' },
-      { fullName: 'Charlie Brown', phone: '345-678-9012' },
-    ]);
+    await createTestUsers(3);
 
-    const res = await request(app).get('/api/v1/users');
-    expect(res.statusCode).toEqual(200);
+    const res = await apiRequest.get('/users');
+    expectSuccessResponse(res);
     expect(res.body).toHaveLength(3);
-    expect(res.body[0]).toHaveProperty('id');
-    expect(res.body[0].fullName).toEqual('Alice Smith');
+    expectUserProperties(res.body[0], { fullName: 'User 1' });
   });
 
   it('should create a new user', async () => {
-    const newUser = { fullName: 'New User', phone: '999-888-7777' };
-    const res = await request(app).post('/api/v1/users').send(newUser);
-    expect(res.statusCode).toEqual(201);
-    expect(res.body).toHaveProperty('id');
-    expect(res.body.fullName).toEqual('New User');
+    const res = await apiRequest.post('/users', TEST_USERS.newUser);
+    expectSuccessResponse(res, 201);
+    expectUserProperties(res.body, TEST_USERS.newUser);
 
-    const allUsers = await request(app).get('/api/v1/users');
+    const allUsers = await apiRequest.get('/users');
     expect(allUsers.body).toHaveLength(1);
   });
 
   it('should get a user by ID', async () => {
-    // Create test data
-    const [createdUser] = await db.insert(schema.users).values({
-      fullName: 'Alice Smith',
-      phone: '123-456-7890'
-    }).returning();
+    const createdUser = await createTestUser();
 
-    const res = await request(app).get(`/api/v1/users/${createdUser.id}`);
-    expect(res.statusCode).toEqual(200);
-    expect(res.body.fullName).toEqual('Alice Smith');
+    const res = await apiRequest.get(`/users/${createdUser.id}`);
+    expectSuccessResponse(res);
+    expectUserProperties(res.body, TEST_USERS.alice);
   });
 
   it('should update a user by ID', async () => {
-    // Create test data
-    const [createdUser] = await db.insert(schema.users).values({
-      fullName: 'Alice Smith',
-      phone: '123-456-7890'
-    }).returning();
+    const createdUser = await createTestUser();
+    const updateData = { fullName: 'Alice Wonderland' };
 
-    const updatedUser = { fullName: 'Alice Wonderland' };
-    const res = await request(app).patch(`/api/v1/users/${createdUser.id}`).send(updatedUser);
-    expect(res.statusCode).toEqual(200);
-    expect(res.body.fullName).toEqual('Alice Wonderland');
+    const res = await apiRequest.patch(`/users/${createdUser.id}`, updateData);
+    expectSuccessResponse(res);
+    expect(res.body.fullName).toEqual(updateData.fullName);
 
-    const fetchedUser = await request(app).get(`/api/v1/users/${createdUser.id}`);
-    expect(fetchedUser.body.fullName).toEqual('Alice Wonderland');
+    const fetchedUser = await apiRequest.get(`/users/${createdUser.id}`);
+    expect(fetchedUser.body.fullName).toEqual(updateData.fullName);
   });
 
   it('should delete a user by ID', async () => {
-    // Create test data
-    const [createdUser] = await db.insert(schema.users).values({
-      fullName: 'Alice Smith',
-      phone: '123-456-7890'
-    }).returning();
+    const createdUser = await createTestUser();
 
-    const res = await request(app).delete(`/api/v1/users/${createdUser.id}`);
-    expect(res.statusCode).toEqual(204);
+    const res = await apiRequest.delete(`/users/${createdUser.id}`);
+    expectSuccessResponse(res, 204);
 
-    const updatedUsers = await request(app).get('/api/v1/users');
+    const updatedUsers = await apiRequest.get('/users');
     expect(updatedUsers.body).toHaveLength(0);
   });
 
   it('should return 404 for a non-existent user', async () => {
-    const res = await request(app).get('/api/v1/users/999');
+    const res = await apiRequest.get('/users/999');
     expect(res.statusCode).toEqual(404);
   });
 
   it('should handle dynamic primary key detection', async () => {
-    // This test verifies that the adapter correctly identifies the primary key column
-    // Even though our current schema uses 'id', the adapter should work with any primary key name
+    const createdUser = await createTestUser(TEST_USERS.primaryKeyTest);
 
-    // Create test data using the actual primary key
-    const [createdUser] = await db.insert(schema.users).values({
-      fullName: 'Primary Key Test User',
-      phone: '111-222-3333'
-    }).returning();
+    const res = await apiRequest.get(`/users/${createdUser.id}`);
+    expectSuccessResponse(res);
+    expectUserProperties(res.body, TEST_USERS.primaryKeyTest);
 
-    // The adapter should use the detected primary key ('id' in this case)
-    // rather than hardcoding 'id' in the query
-    const res = await request(app).get(`/api/v1/users/${createdUser.id}`);
-    expect(res.statusCode).toEqual(200);
-    expect(res.body.fullName).toEqual('Primary Key Test User');
-
-    // Verify that the same record can be updated using the dynamic primary key
-    const updateRes = await request(app)
-      .patch(`/api/v1/users/${createdUser.id}`)
-      .send({ fullName: 'Updated Primary Key Test User' });
-
-    expect(updateRes.statusCode).toEqual(200);
+    const updateRes = await apiRequest.patch(`/users/${createdUser.id}`,
+      { fullName: 'Updated Primary Key Test User' });
+    expectSuccessResponse(updateRes);
     expect(updateRes.body.fullName).toEqual('Updated Primary Key Test User');
   });
 
   describe('Basic Pagination Tests', () => {
     beforeEach(async () => {
-      // Create test data for pagination tests - 15 users
-      const users = Array.from({ length: 15 }, (_, i) => ({
-        fullName: `User ${i + 1}`,
-        phone: `${(i + 1).toString().padStart(3, '0')}-000-0000`
-      }));
-
-      await db.insert(schema.users).values(users);
+      await createTestUsers(15);
     });
 
+    const expectPaginationHeaders = (res: any, totalCount: string) => {
+      expectSuccessResponse(res);
+      expect(res.headers['x-total-count']).toEqual(totalCount);
+    };
+
     it('should apply default pagination (first 10 items)', async () => {
-      const res = await request(app).get('/api/v1/users');
+      const res = await apiRequest.get('/users');
 
-      expect(res.statusCode).toEqual(200);
-      expect(res.body).toHaveLength(10); // Default page size
-      expect(res.headers['x-total-count']).toEqual('15');
-
-      // Should return first 10 items
+      expectPaginationHeaders(res, '15');
+      expect(res.body).toHaveLength(10);
       expect(res.body[0].fullName).toEqual('User 1');
       expect(res.body[9].fullName).toEqual('User 10');
     });
 
     it('should paginate with _page and _per_page parameters', async () => {
-      const res = await request(app).get('/api/v1/users?_page=2&_per_page=5');
+      const res = await apiRequest.get('/users?_page=2&_per_page=5');
 
-      expect(res.statusCode).toEqual(200);
+      expectPaginationHeaders(res, '15');
       expect(res.body).toHaveLength(5);
-      expect(res.headers['x-total-count']).toEqual('15');
-
-      // Second page with 5 items should return users 6-10
       expect(res.body[0].fullName).toEqual('User 6');
       expect(res.body[4].fullName).toEqual('User 10');
     });
 
     it('should handle last page with fewer items', async () => {
-      const res = await request(app).get('/api/v1/users?_page=3&_per_page=5');
+      const res = await apiRequest.get('/users?_page=3&_per_page=5');
 
-      expect(res.statusCode).toEqual(200);
-      expect(res.body).toHaveLength(5); // Users 11-15
-      expect(res.headers['x-total-count']).toEqual('15');
-
+      expectPaginationHeaders(res, '15');
+      expect(res.body).toHaveLength(5);
       expect(res.body[0].fullName).toEqual('User 11');
       expect(res.body[4].fullName).toEqual('User 15');
     });
 
     it('should return empty array for page beyond available data', async () => {
-      const res = await request(app).get('/api/v1/users?_page=5&_per_page=5');
+      const res = await apiRequest.get('/users?_page=5&_per_page=5');
 
-      expect(res.statusCode).toEqual(200);
+      expectPaginationHeaders(res, '15');
       expect(res.body).toHaveLength(0);
-      expect(res.headers['x-total-count']).toEqual('15');
     });
   });
 
   describe('JSON-Server Filtering Tests', () => {
     beforeEach(async () => {
-      // Create test data with various data types for filtering tests
-      await db.insert(schema.users).values([
-        { fullName: 'Alice Smith', phone: '123-456-7890' },
-        { fullName: 'Bob Johnson', phone: '234-567-8901' },
-        { fullName: 'Charlie Brown', phone: '345-678-9012' },
-        { fullName: 'David Wilson', phone: '456-789-0123' },
-        { fullName: 'Eve Davis', phone: '567-890-1234' },
-        { fullName: 'Alice Wonder', phone: '678-901-2345' },
-      ]);
+      await createFilteringTestData();
     });
+
+    const expectFilterResults = (res: any, expectedLength: number, validator?: (users: any[]) => boolean) => {
+      expectSuccessResponse(res);
+      expect(res.body).toHaveLength(expectedLength);
+      if (validator) {
+        expect(validator(res.body)).toBe(true);
+      }
+    };
 
     describe('Direct Equality Filtering', () => {
       it('should filter by exact match', async () => {
-        const res = await request(app).get('/api/v1/users?fullName=Alice Smith');
-
-        expect(res.statusCode).toEqual(200);
-        expect(res.body).toHaveLength(1);
-        expect(res.body[0].fullName).toEqual('Alice Smith');
+        const res = await apiRequest.get('/users?fullName=Alice Smith');
+        expectFilterResults(res, 1, (users) => users[0].fullName === 'Alice Smith');
       });
 
       it('should support multiple filters with AND logic', async () => {
-        const res = await request(app).get('/api/v1/users?fullName=Alice Smith&phone=123-456-7890');
-
-        expect(res.statusCode).toEqual(200);
-        expect(res.body).toHaveLength(1);
-        expect(res.body[0].fullName).toEqual('Alice Smith');
-        expect(res.body[0].phone).toEqual('123-456-7890');
+        const res = await apiRequest.get('/users?fullName=Alice Smith&phone=123-456-7890');
+        expectFilterResults(res, 1, (users) =>
+          users[0].fullName === 'Alice Smith' && users[0].phone === '123-456-7890'
+        );
       });
 
       it('should return empty array when no match found', async () => {
-        const res = await request(app).get('/api/v1/users?fullName=NonExistent User');
-
-        expect(res.statusCode).toEqual(200);
-        expect(res.body).toHaveLength(0);
+        const res = await apiRequest.get('/users?fullName=NonExistent User');
+        expectFilterResults(res, 0);
       });
     });
 
     describe('String Search Filtering (_like operator)', () => {
       it('should filter with substring search using _like', async () => {
-        const res = await request(app).get('/api/v1/users?fullName_like=Alice');
-
-        expect(res.statusCode).toEqual(200);
-        expect(res.body).toHaveLength(2); // Alice Smith and Alice Wonder
-        expect(res.body.every((user: any) => user.fullName.includes('Alice'))).toBe(true);
+        const res = await apiRequest.get('/users?fullName_like=Alice');
+        expectFilterResults(res, 2, (users) =>
+          users.every((user: any) => user.fullName.includes('Alice'))
+        );
       });
 
       it('should be case-sensitive for _like search', async () => {
-        const res = await request(app).get('/api/v1/users?fullName_like=alice');
-
-        expect(res.statusCode).toEqual(200);
-        expect(res.body).toHaveLength(0); // Should not match lowercase
+        const res = await apiRequest.get('/users?fullName_like=alice');
+        expectFilterResults(res, 0);
       });
 
       it('should work with phone number _like search', async () => {
-        const res = await request(app).get('/api/v1/users?phone_like=456-7890');
-
-        expect(res.statusCode).toEqual(200);
-        expect(res.body).toHaveLength(1);
-        expect(res.body[0].phone).toEqual('123-456-7890');
+        const res = await apiRequest.get('/users?phone_like=456-7890');
+        expectFilterResults(res, 1, (users) => users[0].phone === '123-456-7890');
       });
     });
 
     describe('Negation Filtering (_ne operator)', () => {
       it('should exclude records with _ne operator', async () => {
-        const res = await request(app).get('/api/v1/users?fullName_ne=Alice Smith');
-
-        expect(res.statusCode).toEqual(200);
-        expect(res.body).toHaveLength(5); // All except Alice Smith
-        expect(res.body.every((user: any) => user.fullName !== 'Alice Smith')).toBe(true);
+        const res = await apiRequest.get('/users?fullName_ne=Alice Smith');
+        expectFilterResults(res, 5, (users) =>
+          users.every((user: any) => user.fullName !== 'Alice Smith')
+        );
       });
 
       it('should work with _ne on phone numbers', async () => {
-        const res = await request(app).get('/api/v1/users?phone_ne=123-456-7890');
-
-        expect(res.statusCode).toEqual(200);
-        expect(res.body).toHaveLength(5); // All except the one with that phone
-        expect(res.body.every((user: any) => user.phone !== '123-456-7890')).toBe(true);
+        const res = await apiRequest.get('/users?phone_ne=123-456-7890');
+        expectFilterResults(res, 5, (users) =>
+          users.every((user: any) => user.phone !== '123-456-7890')
+        );
       });
     });
 
     describe('Array Membership Filtering', () => {
       it('should filter by multiple IDs', async () => {
-        // Get first two users to get their IDs
-        const allUsers = await request(app).get('/api/v1/users');
+        const allUsers = await apiRequest.get('/users');
         const firstTwoIds = allUsers.body.slice(0, 2).map((user: any) => user.id);
 
-        const res = await request(app).get(`/api/v1/users?id=${firstTwoIds[0]}&id=${firstTwoIds[1]}`);
-
-        expect(res.statusCode).toEqual(200);
-        expect(res.body).toHaveLength(2);
-        expect(res.body.map((user: any) => user.id).sort()).toEqual(firstTwoIds.sort());
+        const res = await apiRequest.get(`/users?id=${firstTwoIds[0]}&id=${firstTwoIds[1]}`);
+        expectFilterResults(res, 2, (users) =>
+          users.map((user: any) => user.id).sort().join(',') === firstTwoIds.sort().join(',')
+        );
       });
 
       it('should filter by multiple fullName values', async () => {
-        const res = await request(app).get('/api/v1/users?fullName=Alice Smith&fullName=Bob Johnson');
-
-        expect(res.statusCode).toEqual(200);
-        expect(res.body).toHaveLength(2);
-        const names = res.body.map((user: any) => user.fullName).sort();
-        expect(names).toEqual(['Alice Smith', 'Bob Johnson']);
+        const res = await apiRequest.get('/users?fullName=Alice Smith&fullName=Bob Johnson');
+        expectFilterResults(res, 2, (users) => {
+          const names = users.map((user: any) => user.fullName).sort();
+          return names.join(',') === 'Alice Smith,Bob Johnson';
+        });
       });
     });
 
     describe('Combined Filtering', () => {
       it('should combine different filter types with AND logic', async () => {
-        const res = await request(app).get('/api/v1/users?fullName_like=Alice&phone_ne=678-901-2345');
-
-        expect(res.statusCode).toEqual(200);
-        expect(res.body).toHaveLength(1); // Only Alice Smith, not Alice Wonder
-        expect(res.body[0].fullName).toEqual('Alice Smith');
+        const res = await apiRequest.get('/users?fullName_like=Alice&phone_ne=678-901-2345');
+        expectFilterResults(res, 1, (users) => users[0].fullName === 'Alice Smith');
       });
 
       it('should work with filtering + pagination', async () => {
-        const res = await request(app).get('/api/v1/users?fullName_like=Alice&_page=1&_per_page=1');
-
-        expect(res.statusCode).toEqual(200);
+        const res = await apiRequest.get('/users?fullName_like=Alice&_page=1&_per_page=1');
+        expectSuccessResponse(res);
         expect(res.body).toHaveLength(1);
-        expect(res.headers['x-total-count']).toEqual('2'); // Total matching records
+        expect(res.headers['x-total-count']).toEqual('2');
         expect(res.body[0].fullName.includes('Alice')).toBe(true);
       });
 
       it('should work with filtering + sorting', async () => {
-        const res = await request(app).get('/api/v1/users?fullName_like=Alice&sort=fullName.desc');
-
-        expect(res.statusCode).toEqual(200);
-        expect(res.body).toHaveLength(2);
-        expect(res.body[0].fullName).toEqual('Alice Wonder'); // Alphabetically last
-        expect(res.body[1].fullName).toEqual('Alice Smith');
+        const res = await apiRequest.get('/users?fullName_like=Alice&sort=fullName.desc');
+        expectFilterResults(res, 2, (users) =>
+          users[0].fullName === 'Alice Wonder' && users[1].fullName === 'Alice Smith'
+        );
       });
     });
 
     describe('Edge Cases', () => {
       it('should handle empty filter values', async () => {
-        const res = await request(app).get('/api/v1/users?fullName=');
-
-        expect(res.statusCode).toEqual(200);
-        expect(res.body).toHaveLength(0); // No user with empty name
+        const res = await apiRequest.get('/users?fullName=');
+        expectFilterResults(res, 0);
       });
 
       it('should ignore invalid filter parameters', async () => {
-        const res = await request(app).get('/api/v1/users?nonExistentColumn=value');
-
-        expect(res.statusCode).toEqual(200);
-        expect(res.body).toHaveLength(6); // Should return all users (ignore invalid filter)
+        const res = await apiRequest.get('/users?nonExistentColumn=value');
+        expectFilterResults(res, 6);
       });
 
       it('should handle special characters in filter values', async () => {
-        // First create a user with special characters
-        await db.insert(schema.users).values({
-          fullName: 'Test User (Special)',
-          phone: '+1-800-TEST'
-        });
-
-        const res = await request(app).get('/api/v1/users?fullName_like=(Special)');
-
-        expect(res.statusCode).toEqual(200);
-        expect(res.body).toHaveLength(1);
-        expect(res.body[0].fullName).toEqual('Test User (Special)');
+        await createTestUser(TEST_USERS.specialChars);
+        const res = await apiRequest.get('/users?fullName_like=(Special)');
+        expectFilterResults(res, 1, (users) => users[0].fullName === 'Test User (Special)');
       });
     });
 
     describe('Range Filtering (_gte and _lte operators)', () => {
-      beforeEach(async () => {
-        // Create test data with numerical IDs for range testing
-        // The auto-increment should give us IDs 1, 2, 3, 4, 5, 6
-        // (6 users were created in the main beforeEach)
-      });
+      const expectRangeFilter = (users: any[], condition: (id: number) => boolean) => {
+        return users.every((user: any) => condition(user.id));
+      };
 
       it('should filter with _gte operator', async () => {
-        const res = await request(app).get('/api/v1/users?id_gte=4');
-
-        expect(res.statusCode).toEqual(200);
-        expect(res.body.length).toBeGreaterThanOrEqual(3); // IDs 4, 5, 6
-        expect(res.body.every((user: any) => user.id >= 4)).toBe(true);
+        const res = await apiRequest.get('/users?id_gte=4');
+        expectSuccessResponse(res);
+        expect(res.body.length).toBeGreaterThanOrEqual(3);
+        expect(expectRangeFilter(res.body, (id) => id >= 4)).toBe(true);
       });
 
       it('should filter with _lte operator', async () => {
-        const res = await request(app).get('/api/v1/users?id_lte=3');
-
-        expect(res.statusCode).toEqual(200);
-        expect(res.body.length).toBeGreaterThanOrEqual(3); // IDs 1, 2, 3
-        expect(res.body.every((user: any) => user.id <= 3)).toBe(true);
+        const res = await apiRequest.get('/users?id_lte=3');
+        expectSuccessResponse(res);
+        expect(res.body.length).toBeGreaterThanOrEqual(3);
+        expect(expectRangeFilter(res.body, (id) => id <= 3)).toBe(true);
       });
 
       it('should combine _gte and _lte for range filtering', async () => {
-        const res = await request(app).get('/api/v1/users?id_gte=2&id_lte=5');
-
-        expect(res.statusCode).toEqual(200);
-        expect(res.body.length).toBeGreaterThanOrEqual(4); // IDs 2, 3, 4, 5
-        expect(res.body.every((user: any) => user.id >= 2 && user.id <= 5)).toBe(true);
+        const res = await apiRequest.get('/users?id_gte=2&id_lte=5');
+        expectSuccessResponse(res);
+        expect(res.body.length).toBeGreaterThanOrEqual(4);
+        expect(expectRangeFilter(res.body, (id) => id >= 2 && id <= 5)).toBe(true);
       });
     });
   });
