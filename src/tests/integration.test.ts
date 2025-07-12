@@ -124,4 +124,59 @@ describe('Drizzle REST Adapter Integration Tests', () => {
     expect(updateRes.statusCode).toEqual(200);
     expect(updateRes.body.fullName).toEqual('Updated Primary Key Test User');
   });
+
+  describe('Basic Pagination Tests', () => {
+    beforeEach(async () => {
+      // Create test data for pagination tests - 15 users
+      const users = Array.from({ length: 15 }, (_, i) => ({
+        fullName: `User ${i + 1}`,
+        phone: `${(i + 1).toString().padStart(3, '0')}-000-0000`
+      }));
+
+      await db.insert(schema.users).values(users);
+    });
+
+    it('should apply default pagination (first 10 items)', async () => {
+      const res = await request(app).get('/api/v1/users');
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toHaveLength(10); // Default page size
+      expect(res.headers['x-total-count']).toEqual('15');
+
+      // Should return first 10 items
+      expect(res.body[0].fullName).toEqual('User 1');
+      expect(res.body[9].fullName).toEqual('User 10');
+    });
+
+    it('should paginate with _page and _per_page parameters', async () => {
+      const res = await request(app).get('/api/v1/users?_page=2&_per_page=5');
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toHaveLength(5);
+      expect(res.headers['x-total-count']).toEqual('15');
+
+      // Second page with 5 items should return users 6-10
+      expect(res.body[0].fullName).toEqual('User 6');
+      expect(res.body[4].fullName).toEqual('User 10');
+    });
+
+    it('should handle last page with fewer items', async () => {
+      const res = await request(app).get('/api/v1/users?_page=3&_per_page=5');
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toHaveLength(5); // Users 11-15
+      expect(res.headers['x-total-count']).toEqual('15');
+
+      expect(res.body[0].fullName).toEqual('User 11');
+      expect(res.body[4].fullName).toEqual('User 15');
+    });
+
+    it('should return empty array for page beyond available data', async () => {
+      const res = await request(app).get('/api/v1/users?_page=5&_per_page=5');
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toHaveLength(0);
+      expect(res.headers['x-total-count']).toEqual('15');
+    });
+  });
 });
