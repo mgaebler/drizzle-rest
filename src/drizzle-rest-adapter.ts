@@ -51,14 +51,36 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
     // GET /<table-name>
     router.get(resourcePath, async (req, res) => {
       try {
-        const { page = 1, limit = 10, sort } = req.query;
+        // Parse JSON-Server style pagination parameters
+        const _page = parseInt(req.query._page as string) || 1;
+        const _per_page = parseInt(req.query._per_page as string) || 10;
+        const sort = req.query.sort;
 
+        // Build the main query
         const query = db.select().from(table).$dynamic();
 
-        // Pagination
-        query.limit(Number(limit)).offset((Number(page) - 1) * Number(limit));
+        // Apply filtering (exclude pagination and sorting params)
+        const excludeParams = ['_page', '_per_page', 'sort'];
+        for (const key in req.query) {
+          if (!excludeParams.includes(key) && columns[key]) {
+            query.where(eq(columns[key], req.query[key]));
+          }
+        }
 
-        // Sorting
+        // Get total count for X-Total-Count header (before pagination)
+        const countQuery = db.select().from(table).$dynamic();
+
+        // Apply same filtering to count query
+        for (const key in req.query) {
+          if (!excludeParams.includes(key) && columns[key]) {
+            countQuery.where(eq(columns[key], req.query[key]));
+          }
+        }
+
+        const totalRecords = await countQuery;
+        const totalCount = totalRecords.length;
+
+        // Apply sorting
         if (typeof sort === 'string') {
           const [sortColumn, sortOrder] = sort.split('.');
           if (sortColumn && columns[sortColumn]) {
@@ -66,14 +88,17 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
           }
         }
 
-        // Filtering
-        for (const key in req.query) {
-          if (columns[key]) {
-            query.where(eq(columns[key], req.query[key]));
-          }
-        }
+        // Apply pagination
+        const limit = Math.max(1, _per_page); // Ensure minimum of 1
+        const offset = Math.max(0, (_page - 1) * limit); // Ensure non-negative offset
+
+        query.limit(limit).offset(offset);
 
         const data = await query;
+
+        // Set X-Total-Count header
+        res.set('X-Total-Count', totalCount.toString());
+
         res.json(data);
       } catch (error: any) {
         console.error('Error in getMany:', error);
