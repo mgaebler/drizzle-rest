@@ -8,8 +8,8 @@
     "start": "node dist/index.js",
     "dev": "tsx --require tsconfig-paths/register --watch src/",
     "build": "tsc --project tsconfig.json && tsc-alias -p tsconfig.json",
-    "migrate": "tsx --require tsconfig-paths/register migrate.ts",
-    "generate": "drizzle-kit generate",
+    "db:migrate": "tsx --require tsconfig-paths/register src/migrate.ts",
+    "db:generate": "drizzle-kit generate",
     "test": "vitest --run"
   },
   "keywords": [],
