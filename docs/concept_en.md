@@ -104,17 +104,10 @@ All standard REST methods are supported:
 
 ### Embed
 
-Relational data embedding:
+Basic relational data embedding:
 
 * **Syntax**: `?_embed=<related_table>`
 * **Example**: `GET /posts?_embed=comments`
-
-### Advanced Deletion
-
-Cascading deletion with dependencies:
-
-* **Syntax**: `DELETE /<table>/:id?_dependent=<related_table>`
-* **Example**: `DELETE /posts/1?_dependent=comments`
 
 ### Design Decision: Nested and Array Fields
 

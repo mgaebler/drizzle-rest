@@ -68,8 +68,6 @@ This document tracks the implementation progress of the Drizzle REST Adapter bas
 
 #### 2.4 Embed & Relations
 - [ ] Basic `_embed` functionality
-- [ ] Relation route support
-- [ ] Nested relation queries
 
 ### Files Created ✅
 - [x] `src/utils/query-builder.ts` - **Complete with filtering + pagination**
@@ -104,7 +102,7 @@ This document tracks the implementation progress of the Drizzle REST Adapter bas
 - [x] `updateOne`: Both PUT and PATCH variants implemented
 - [x] `deleteOne`: 404 handling, 204 No Content response
 - [ ] **TODO**: `getOne` `?select=` parameter support
-- [ ] **TODO**: `deleteOne` `?_dependent=` parameter support
+- [ ] **TODO**: `deleteOne` `?_dependent=` parameter support (deferred)
 
 #### 3.3 Error Handling ✅
 - [x] Standardized error responses via ErrorHandler
@@ -139,9 +137,9 @@ This document tracks the implementation progress of the Drizzle REST Adapter bas
 - [ ] **TODO**: Hook system foundation
 
 #### 4.2 Relation Routes
-- [ ] Nested resource routes: `GET /<table>/:id/<relation>`
-- [ ] Relation metadata extraction
-- [ ] Cross-table query support
+- [ ] **Future Feature**: Nested resource routes: `GET /<table>/:id/<relation>` (deferred)
+- [ ] **Future Feature**: Relation metadata extraction (deferred)
+- [ ] **Future Feature**: Cross-table query support (deferred)
 
 #### 4.3 Router Optimization ✅
 - [x] Route registration efficiency - All routes created dynamically
@@ -249,7 +247,7 @@ Based on current implementation status, focus on these immediate tasks:
 ### Medium Priority (Phase 5 - Advanced Features)
 1. **Implement basic embed functionality** - `_embed=related_table`
 2. **Add hook system foundation** - `beforeOperation`, `afterOperation`
-3. **Implement advanced deletion** - `DELETE /posts/1?_dependent=comments`
+3. **Future Features**: Nested routes, advanced deletion (deferred)
 
 ### Low Priority (Phase 6 - Production)
 1. **Add request/response logging**
@@ -263,7 +261,7 @@ Based on current implementation status, focus on these immediate tasks:
 - ✅ **HTTP Methods**: Complete (GET, POST, PUT, PATCH, DELETE)
 - 🔄 **Sorting**: Partial (single field only, needs multi-field)
 - ❌ **Embed**: Not implemented
-- ❌ **Advanced Deletion**: Not implemented
+- ❌ **Advanced Features**: Deferred (nested routes, dependent deletion)
 
 ---
 
