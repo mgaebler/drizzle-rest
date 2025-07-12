@@ -103,11 +103,11 @@ npm test
 
 Run specific test categories:
 ```bash
-npx vitest src/tests/crud.integration.test.ts
-npx vitest src/tests/pagination.integration.test.ts
-npx vitest src/tests/filtering.integration.test.ts
-npx vitest src/tests/sorting.integration.test.ts
-npx vitest src/tests/http-methods.integration.test.ts
+npm test -- crud.integration.test
+npm test -- pagination.integration.test
+npm test -- filtering.integration.test
+npm test -- sorting.integration.test
+npm test -- http-methods.integration.test
 ```
 
 ## Future Considerations
