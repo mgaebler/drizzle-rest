@@ -42,7 +42,7 @@ This document tracks the implementation progress of the Drizzle REST Adapter bas
 - [x] **Complete**: Page-based pagination (`_page`, `_per_page`)
 - [x] **Complete**: Range-based pagination (`_start`, `_end`, `_limit`)
 - [x] **Complete**: Basic single-field sorting
-- [ ] **Missing**: Multi-field sorting with JSON-Server syntax
+- [x] **Missing**: Multi-field sorting with JSON-Server syntax
 - [ ] **Missing**: Embed functionality
 - [ ] **Excluded by Design**: Nested field access (`user.name`)
 
