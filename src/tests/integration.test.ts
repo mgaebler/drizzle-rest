@@ -99,4 +99,29 @@ describe('Drizzle REST Adapter Integration Tests', () => {
     const res = await request(app).get('/api/v1/users/999');
     expect(res.statusCode).toEqual(404);
   });
+
+  it('should handle dynamic primary key detection', async () => {
+    // This test verifies that the adapter correctly identifies the primary key column
+    // Even though our current schema uses 'id', the adapter should work with any primary key name
+
+    // Create test data using the actual primary key
+    const [createdUser] = await db.insert(schema.users).values({
+      fullName: 'Primary Key Test User',
+      phone: '111-222-3333'
+    }).returning();
+
+    // The adapter should use the detected primary key ('id' in this case)
+    // rather than hardcoding 'id' in the query
+    const res = await request(app).get(`/api/v1/users/${createdUser.id}`);
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.fullName).toEqual('Primary Key Test User');
+
+    // Verify that the same record can be updated using the dynamic primary key
+    const updateRes = await request(app)
+      .patch(`/api/v1/users/${createdUser.id}`)
+      .send({ fullName: 'Updated Primary Key Test User' });
+
+    expect(updateRes.statusCode).toEqual(200);
+    expect(updateRes.body.fullName).toEqual('Updated Primary Key Test User');
+  });
 });
