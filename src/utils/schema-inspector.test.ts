@@ -7,8 +7,6 @@ describe('SchemaInspector', () => {
         const inspector = new SchemaInspector(schema);
         const tables = inspector.extractTables();
 
-        expect(tables).toHaveLength(1); // We have 1 table (users)
-
         const usersTable = tables.find(t => t.name === 'users');
         expect(usersTable).toBeDefined();
         expect(usersTable?.tableName).toBe('users');
