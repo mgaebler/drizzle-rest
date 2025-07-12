@@ -79,29 +79,44 @@ The following operators are supported:
   * **Negation**: `?status_ne=inactive`
   * **Array Membership**: `?id=1&id=2&id=3` (multiple IDs)
 
-### Sorting
-
-Sorting is controlled via the `_sort` and `_order` parameters.
-
-  * **Syntax**: `?_sort=column&_order=asc` or `?_sort=column&_order=desc`
-  * **Example**: `GET /users?_sort=created_at&_order=desc`
-  * **Default**: Ascending (asc) if `_order` is not specified
-
 ### Pagination
 
-Pagination is done via `_page` and `_limit` parameters.
+Pagination supports both page-based and range-based approaches:
 
-  * **Syntax**: `?_page=2&_limit=10`
-  * **Example**: `GET /users?_page=1&_limit=25`
-  * **Default**: `_limit=10` if not specified
+* **Page-based**: `?_page=1&_per_page=25`
+* **Range-based**: `?_start=10&_end=20` or `?_start=10&_limit=10`
+* **Default**: `_per_page=10` if not specified
 
-### Relationships
+### Sorting
 
-JSON-Server's relationship features are also supported:
+Sorting supports multiple fields with comma separation:
 
-  * **Embed**: `?_embed=comments` (embed 1:n relationships)
-  * **Expand**: `?_expand=user` (expand n:1 relationships)
-  * **Example**: `GET /posts?_embed=comments&_expand=author`
+* **Syntax**: `?_sort=field1,field2,-field3`
+* **Descending**: Use `-` prefix (e.g., `-created_at`)
+* **Example**: `GET /users?_sort=name,-created_at`
+
+### Nested and Array Fields
+
+Advanced field access is supported:
+
+* **Nested objects**: `?user.name=John&user.age_gte=18`
+* **Array elements**: `?tags[0]=javascript`
+* **Operators on nested**: `?metadata.score_gt=100`
+
+### HTTP Methods
+
+All standard REST methods are supported:
+
+* `GET`, `POST`, `PUT`, `PATCH`, `DELETE`
+* **PUT**: Complete resource replacement
+* **PATCH**: Partial resource update
+
+### Advanced Deletion
+
+Cascading deletion with dependencies:
+
+* **Syntax**: `DELETE /<table>/:id?_dependent=<related_table>`
+* **Example**: `DELETE /posts/1?_dependent=comments`
 
 -----
 
