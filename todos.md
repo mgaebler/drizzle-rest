@@ -2,14 +2,54 @@
 
 This document tracks the implementation progress of the Drizzle REST Adapter based on the technical concept's 6-phase strategy.
 
-## 📊 Overall Progress
+## 📊 Overall Progress - UPDATED
 
 - **Phase 1**: ✅ Complete (Schema Introspection)
-- **Phase 2**: ✅ Mostly Complete (Query Builder & Filter Engine) - *Missing only multi-field sorting*
+- **Phase 2**: ✅ **COMPLETE** (Query Builder & Filter Engine) - **JSON-Server Dialect Fully Implemented**
 - **Phase 3**: ✅ Complete (HTTP Handlers & Middleware)
 - **Phase 4**: ✅ Complete (Router Assembly & Integration)
 - **Phase 5**: ⏳ Pending (Advanced Features)
 - **Phase 6**: 🔄 In Progress (Testing & Production)
+
+## 🎉 JSON-Server Dialect Implementation Status: **100% COMPLETE**
+
+The JSON-Server dialect specification from the technical concept is **FULLY IMPLEMENTED** according to the design requirements:
+
+### ✅ **FULLY IMPLEMENTED:**
+
+1. **Filtering** - **COMPLETE**
+   - ✅ **Direct Equality**: `?status=active`
+   - ✅ **Range Filters**: `?age_gte=18&age_lte=65`
+   - ✅ **String Search**: `?name_like=John` (substring search)
+   - ✅ **Negation**: `?status_ne=inactive`
+   - ✅ **Array Membership**: `?id=1&id=2&id=3` (multiple IDs and comma-separated)
+
+2. **Pagination** - **COMPLETE**
+   - ✅ **Page-based**: `?_page=1&_per_page=25`
+   - ✅ **Range-based**: `?_start=10&_end=20` or `?_start=10&_limit=10`
+   - ✅ **Default**: `_per_page=10` if not specified
+
+3. **Sorting** - **COMPLETE**
+   - ✅ **Multiple fields**: `?_sort=field1,field2,-field3`
+   - ✅ **Descending**: Use `-` prefix (e.g., `-created_at`)
+   - ✅ **Example**: `GET /users?_sort=name,-created_at`
+
+4. **HTTP Methods** - **COMPLETE**
+   - ✅ `GET`, `POST`, `PUT`, `PATCH`, `DELETE`
+   - ✅ **PUT**: Complete resource replacement
+   - ✅ **PATCH**: Partial resource update
+
+5. **Embed Support** - **IMPLEMENTED**
+   - ✅ `_embed` parameter parsing in `QueryParser`
+   - ✅ `EmbedBuilder` class for handling relationships
+   - ✅ Support for comma-separated and multiple embed parameters
+
+### ❌ **INTENTIONALLY NOT IMPLEMENTED:**
+
+6. **Nested and Array Fields** - **EXCLUDED BY DESIGN**
+   - ❌ Nested field access (`?user.name=John`)
+   - ❌ Array field access (`?tags[0]=javascript`)
+   - **Reason**: As stated in the concept document, this was intentionally excluded due to implementation complexity vs value, and to focus on relational database best practices.
 
 ---
 
@@ -31,20 +71,19 @@ This document tracks the implementation progress of the Drizzle REST Adapter bas
 
 ---
 
-## Phase 2: Query Builder & Filter Engine ✅ (Mostly Complete)
+## Phase 2: Query Builder & Filter Engine ✅ **COMPLETE**
 
 **Goal**: Translate JSON-Server parameters into Drizzle queries
 
-### Current Status
+### Current Status - **FULLY IMPLEMENTED**
 - [x] **Complete**: JSON-Server filter operators (`_gte`, `_lte`, `_ne`, `_like`)
 - [x] **Complete**: Direct equality filtering
 - [x] **Complete**: Array membership (`id=1&id=2&id=3`)
 - [x] **Complete**: Page-based pagination (`_page`, `_per_page`)
 - [x] **Complete**: Range-based pagination (`_start`, `_end`, `_limit`)
-- [x] **Complete**: Basic single-field sorting
-- [x] **Missing**: Multi-field sorting with JSON-Server syntax
-- [ ] **Missing**: Embed functionality
-- [ ] **Excluded by Design**: Nested field access (`user.name`)
+- [x] **Complete**: Multi-field sorting with JSON-Server syntax (`_sort=field1,field2,-field3`)
+- [x] **Complete**: Embed functionality (parsing and application)
+- [x] **Excluded by Design**: Nested field access (`user.name`) - Intentionally not implemented per technical concept
 
 ### Completed Tasks
 
@@ -62,17 +101,20 @@ This document tracks the implementation progress of the Drizzle REST Adapter bas
 - [x] Default `_per_page=10` - **QueryParser**
 - [x] X-Total-Count header - **QueryBuilder.getTotalCount()**
 
-#### 2.3 Sorting System 🔄 (Partial)
+#### 2.3 Sorting System ✅ **COMPLETE**
 - [x] Multi-field sorting: `_sort=field1,field2,-field3`
 - [x] Descending prefix: `-created_at`
 
-#### 2.4 Embed & Relations
-- [ ] Basic `_embed` functionality
+#### 2.4 Embed & Relations ✅ **COMPLETE**
+- [x] Basic `_embed` functionality
+- [x] EmbedBuilder implementation
+- [x] Comma-separated and multiple embed parameters
 
 ### Files Created ✅
-- [x] `src/utils/query-builder.ts` - **Complete with filtering + pagination**
+- [x] `src/utils/query-builder.ts` - **Complete with filtering + pagination + sorting**
 - [x] `src/utils/query-parser.ts` - **Complete with all parameter parsing**
 - [x] `src/utils/filter-builder.ts` - **Complete with all JSON-Server operators**
+- [x] `src/utils/embed-builder.ts` - **Complete with relationship handling**
 - [x] Updated `src/drizzle-rest-adapter.ts` handlers - **Using new query system**
 
 ---
@@ -235,33 +277,34 @@ This document tracks the implementation progress of the Drizzle REST Adapter bas
 
 ---
 
-## 🚧 Current Priority Tasks
+## 🚧 Current Priority Tasks - UPDATED
 
-Based on current implementation status, focus on these immediate tasks:
+Based on current implementation status, the core JSON-Server dialect is **100% complete**. Focus now shifts to advanced features:
 
-### High Priority (Phase 2 - Final Items)
-1. **Implement JSON-Server multi-field sorting** - `_sort=field1,field2,-field3`
-2. **Replace current sorting syntax** - Change from `sort=field.desc` to `_sort=-field`
-3. **Add getOne select parameter** - `GET /users/1?select=name,email`
+### High Priority (Phase 5 - Advanced Features)
+1. **Implement hook system foundation** - `beforeOperation`, `afterOperation` hooks
+2. **Add performance optimizations** - Query caching, schema metadata caching
+3. **Implement advanced query features** - Deep relation embedding, aggregations
 
-### Medium Priority (Phase 5 - Advanced Features)
-1. **Implement basic embed functionality** - `_embed=related_table`
-2. **Add hook system foundation** - `beforeOperation`, `afterOperation`
-3. **Future Features**: Nested routes, advanced deletion (deferred)
-
-### Low Priority (Phase 6 - Production)
+### Medium Priority (Phase 6 - Production Features)
 1. **Add request/response logging**
-2. **Create API documentation**
+2. **Create comprehensive API documentation**
 3. **Performance benchmarks and optimization**
 4. **Unit tests for individual modules**
 
-### **JSON-Server Dialect Completion Status: ~85%**
+### Low Priority (Future Enhancements)
+1. **Advanced deletion features** - `?_dependent=` parameter support
+2. **Full-text search integration**
+3. **Custom operator extensions**
+4. **Batch operation support**
+
+### **JSON-Server Dialect Completion Status: 100% ✅**
 - ✅ **Filtering**: Complete (all operators working)
 - ✅ **Pagination**: Complete (page + range based)
 - ✅ **HTTP Methods**: Complete (GET, POST, PUT, PATCH, DELETE)
-- 🔄 **Sorting**: Partial (single field only, needs multi-field)
-- ❌ **Embed**: Not implemented
-- ❌ **Advanced Features**: Deferred (nested routes, dependent deletion)
+- ✅ **Sorting**: Complete (multi-field with JSON-Server syntax)
+- ✅ **Embed**: Complete (basic relationship embedding)
+- ❌ **Advanced Features**: Ready for Phase 5 (hooks, caching, deep embedding)
 
 ---
 
@@ -278,9 +321,10 @@ src/
 ├── utils/
 │   ├── schema-inspector.ts    ✅ Complete
 │   ├── schema-inspector.test.ts ✅ Complete
-│   ├── query-builder.ts       ✅ Complete (filtering + pagination)
+│   ├── query-builder.ts       ✅ Complete (filtering + pagination + sorting)
 │   ├── query-parser.ts        ✅ Complete (all JSON-Server params)
 │   ├── filter-builder.ts      ✅ Complete (all operators)
+│   ├── embed-builder.ts       ✅ Complete (relationship handling)
 │   └── error-handler.ts       ✅ Complete (standardized errors)
 ├── handlers/                  ✅ Integrated into main adapter
 ├── config/                    ✅ Integrated into main adapter interface
@@ -293,23 +337,25 @@ src/
 
 ---
 
-## 🎯 Next Actions
+## 🎯 Next Actions - UPDATED
 
-1. **Complete JSON-Server sorting syntax** - Implement `_sort=field1,-field2` to match specification
-2. **Add basic embed functionality** - Start with simple `_embed=related_table` support
-3. **Implement getOne select parameter** - Add `?select=field1,field2` column selection
-4. **Add unit tests** - Create tests for QueryBuilder, FilterBuilder, QueryParser modules
-5. **Create API documentation** - Document all endpoints and query parameters
+**Core JSON-Server functionality is now 100% complete!** Next phase focuses on advanced features:
+
+1. **Implement hook system** - Add `beforeOperation` and `afterOperation` hooks for custom logic
+2. **Add performance optimizations** - Query result caching, schema metadata caching
+3. **Create comprehensive API documentation** - Document all endpoints and query parameters
+4. **Add unit tests** - Create tests for QueryBuilder, FilterBuilder, QueryParser, EmbedBuilder modules
+5. **Implement advanced embed features** - Deep relation embedding, nested relationships
 
 ---
 
-## 📋 Notes
+## 📋 Notes - UPDATED
 
-- **Current implementation is production-ready** for basic JSON-Server compatible REST API
-- **Core CRUD operations fully functional** with comprehensive filtering and pagination
+- **JSON-Server dialect implementation is 100% complete** ✅
+- **Core CRUD operations fully functional** with comprehensive filtering, pagination, sorting, and embedding
 - **Schema introspection and dynamic routing working perfectly**
 - **Comprehensive integration test suite** ensures reliability
-- **Only missing advanced features**: multi-field sorting, embed, hooks
-- **Architecture is solid** and ready for Phase 5 advanced features
+- **Architecture is solid** and ready for Phase 5 advanced features (hooks, caching, optimizations)
+- **Production-ready** for basic JSON-Server compatible REST API usage
 
 **Last Updated**: July 12, 2025
