@@ -1,4 +1,41 @@
 import { Request } from 'express';
+import { z } from 'zod';
+
+// Define Zod schemas for validation and parsing
+const SortSchema = z.string().optional().transform((value) => {
+    if (!value) return undefined;
+
+    const sortFields = value.split(',').map(field => field.trim()).filter(Boolean);
+    if (sortFields.length === 0) return undefined;
+
+    return sortFields.map(field => {
+        if (field.startsWith('-')) {
+            return {
+                column: field.substring(1),
+                order: 'desc' as const
+            };
+        }
+        return {
+            column: field,
+            order: 'asc' as const
+        };
+    });
+});
+
+const EmbedSchema = z.union([
+    z.string().transform(str => str.split(',').map(item => item.trim()).filter(Boolean)),
+    z.array(z.string()).transform(arr => arr.map(item => item.trim()).filter(Boolean))
+]).optional();
+
+const QueryParamsSchema = z.object({
+    _page: z.coerce.number().min(1).default(1),
+    _per_page: z.coerce.number().min(1).max(100).default(10),
+    _start: z.coerce.number().min(0).optional(),
+    _end: z.coerce.number().min(0).optional(),
+    _limit: z.coerce.number().min(1).optional(),
+    _sort: SortSchema,
+    _embed: EmbedSchema,
+}).passthrough(); // Allow additional properties for filters
 
 export interface ParsedQueryParams {
     pagination: {
@@ -20,49 +57,67 @@ export class QueryParser {
     private static readonly EXCLUDE_PARAMS = ['_page', '_per_page', '_sort', '_start', '_end', '_limit', '_embed'];
 
     static parseQueryParams(req: Request): ParsedQueryParams {
+        try {
+            // Parse and validate using Zod
+            const parsed = QueryParamsSchema.parse(req.query);
+
+            // Extract filters (all params except the special ones)
+            const filters: Record<string, any> = {};
+            for (const [key, value] of Object.entries(parsed)) {
+                if (!this.EXCLUDE_PARAMS.includes(key) && value !== undefined && value !== null) {
+                    filters[key] = value;
+                }
+            }
+
+            return {
+                pagination: {
+                    page: parsed._page,
+                    perPage: parsed._per_page,
+                    start: parsed._start,
+                    end: parsed._end,
+                    limit: parsed._limit,
+                },
+                sort: parsed._sort,
+                filters,
+                embed: parsed._embed,
+            };
+        } catch (error) {
+            // Fallback to basic parsing if validation fails
+            console.warn('Query validation failed, using fallback parsing:', error);
+            return this.fallbackParse(req);
+        }
+    }
+
+    private static fallbackParse(req: Request): ParsedQueryParams {
         const query = req.query;
 
         return {
-            pagination: this.parsePagination(query),
+            pagination: {
+                page: Math.max(parseInt(query._page as string) || 1, 1),
+                perPage: Math.min(Math.max(parseInt(query._per_page as string) || 10, 1), 100),
+                start: isNaN(parseInt(query._start as string)) ? undefined : Math.max(parseInt(query._start as string), 0),
+                end: isNaN(parseInt(query._end as string)) ? undefined : Math.max(parseInt(query._end as string), 0),
+                limit: isNaN(parseInt(query._limit as string)) ? undefined : Math.max(parseInt(query._limit as string), 1),
+            },
             sort: this.parseSort(query._sort),
             filters: this.parseFilters(query),
             embed: this.parseEmbed(query._embed),
         };
     }
 
-    private static parsePagination(query: any) {
-        const _page = parseInt(query._page as string) || 1;
-        const _per_page = parseInt(query._per_page as string) || 10;
-        const _start = parseInt(query._start as string);
-        const _end = parseInt(query._end as string);
-        const _limit = parseInt(query._limit as string);
-
-        return {
-            page: _page,
-            perPage: _per_page,
-            start: isNaN(_start) ? undefined : _start,
-            end: isNaN(_end) ? undefined : _end,
-            limit: isNaN(_limit) ? undefined : _limit,
-        };
-    }
-
     private static parseSort(sortParam: any): Array<{ column: string; order: 'asc' | 'desc' }> | undefined {
         if (typeof sortParam !== 'string') return undefined;
 
-        // JSON-Server syntax: _sort=field1,field2,-field3
         const sortFields = sortParam.split(',').map(field => field.trim()).filter(Boolean);
-
         if (sortFields.length === 0) return undefined;
 
         return sortFields.map(field => {
             if (field.startsWith('-')) {
-                // Descending order with - prefix
                 return {
                     column: field.substring(1),
                     order: 'desc' as const
                 };
             } else {
-                // Ascending order (default)
                 return {
                     column: field,
                     order: 'asc' as const
@@ -90,12 +145,10 @@ export class QueryParser {
         if (!embedParam) return undefined;
 
         if (typeof embedParam === 'string') {
-            // Support comma-separated values: _embed=user,comments
             return embedParam.split(',').map(item => item.trim()).filter(Boolean);
         }
 
         if (Array.isArray(embedParam)) {
-            // Support multiple _embed parameters: _embed=user&_embed=comments
             return embedParam.map(item => String(item).trim()).filter(Boolean);
         }
 
