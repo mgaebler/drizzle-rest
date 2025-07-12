@@ -1,0 +1,85 @@
+import { asc, desc, and } from 'drizzle-orm';
+import { PgTable } from 'drizzle-orm/pg-core';
+import { FilterBuilder } from './filter-builder';
+import { ParsedQueryParams } from './query-parser';
+
+type DrizzleDb = any; // Using generic type for compatibility
+
+export class QueryBuilder {
+    private filterBuilder: FilterBuilder;
+
+    constructor(
+        private db: DrizzleDb,
+        private table: PgTable,
+        private columns: Record<string, any>
+    ) {
+        this.filterBuilder = new FilterBuilder(columns);
+    }
+
+    buildSelectQuery(params: ParsedQueryParams) {
+        const query = this.db.select().from(this.table).$dynamic();
+
+        // Apply filters
+        const whereConditions = this.filterBuilder.buildWhereConditions(params.filters);
+        if (whereConditions.length > 0) {
+            query.where(and(...whereConditions));
+        }
+
+        // Apply sorting
+        if (params.sort && this.columns[params.sort.column]) {
+            const sortFn = params.sort.order === 'desc' ? desc : asc;
+            query.orderBy(sortFn(this.columns[params.sort.column]));
+        }
+
+        // Apply pagination
+        const { limit, offset } = this.calculatePagination(params.pagination);
+        query.limit(limit).offset(offset);
+
+        return { query, whereConditions };
+    }
+
+    async getTotalCount(filters: Record<string, any>): Promise<number> {
+        const countQuery = this.db.select().from(this.table).$dynamic();
+
+        const whereConditions = this.filterBuilder.buildWhereConditions(filters);
+        if (whereConditions.length > 0) {
+            countQuery.where(and(...whereConditions));
+        }
+
+        const totalRecords = await countQuery;
+        return totalRecords.length;
+    }
+
+    private calculatePagination(pagination: ParsedQueryParams['pagination']) {
+        const { page, perPage, start, end, limit } = pagination;
+
+        // Prioritize range pagination over page-based pagination
+        if (start !== undefined && end !== undefined) {
+            // Range pagination with start and end (exclusive end)
+            const startIndex = Math.max(0, start);
+            const endIndex = Math.max(startIndex, end);
+            return {
+                limit: endIndex - startIndex,
+                offset: startIndex,
+            };
+        }
+
+        if (start !== undefined && limit !== undefined) {
+            // Range pagination with start and limit
+            const startIndex = Math.max(0, start);
+            const limitValue = Math.max(0, limit);
+            return {
+                limit: limitValue,
+                offset: startIndex,
+            };
+        }
+
+        // Default page-based pagination
+        const limitValue = Math.max(1, perPage);
+        const offset = Math.max(0, (page - 1) * limitValue);
+        return {
+            limit: limitValue,
+            offset,
+        };
+    }
+}

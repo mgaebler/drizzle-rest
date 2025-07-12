@@ -62,17 +62,6 @@ GET /posts?_page=1&_per_page=25
 GET /posts?_sort=id,-views
 ```
 
-### Nested and array fields
-
-- `x.y.z...`
-- `x.y.z[i]...`
-
-```
-GET /foo?a.b=bar
-GET /foo?x.y_lt=100
-GET /foo?arr[0]=bar
-```
-
 ### Embed
 
 ```
