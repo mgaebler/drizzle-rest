@@ -8,6 +8,13 @@
       "when": 1752073280447,
       "tag": "0000_big_champions",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1752334459718,
+      "tag": "0001_cynical_emma_frost",
+      "breakpoints": true
     }
   ]
 }
