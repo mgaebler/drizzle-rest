@@ -63,7 +63,7 @@ The `createDrizzleRestAdapter` function performs the following steps at runtime 
 
 ## 3. API Query Language (JSON-Server Dialect)
 
-To enable seamless migration from JSON-Server and maintain the familiar syntax, the adapter fully implements the **JSON-Server dialect**.
+To enable seamless migration from JSON-Server and maintain the familiar syntax, the adapter fully implements the **JSON-Server dialect** based on [JSON-Server v1.0.0-beta.3](https://github.com/typicode/json-server/releases/tag/v1.0.0-beta.3).
 
 ### Filtering
 
@@ -110,6 +110,13 @@ All standard REST methods are supported:
 * `GET`, `POST`, `PUT`, `PATCH`, `DELETE`
 * **PUT**: Complete resource replacement
 * **PATCH**: Partial resource update
+
+### Embed
+
+Relational data embedding:
+
+* **Syntax**: `?_embed=<related_table>`
+* **Example**: `GET /posts?_embed=comments`
 
 ### Advanced Deletion
 
