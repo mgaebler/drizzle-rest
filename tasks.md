@@ -63,10 +63,8 @@ This document tracks the implementation progress of the Drizzle REST Adapter bas
 - [x] X-Total-Count header - **QueryBuilder.getTotalCount()**
 
 #### 2.3 Sorting System 🔄 (Partial)
-- [x] Single-field sorting: `sort=field.desc` - **Current implementation**
-- [ ] **TODO**: Multi-field sorting: `_sort=field1,field2,-field3`
-- [ ] **TODO**: Descending prefix: `-created_at`
-- [ ] **TODO**: Replace current `sort=field.desc` with JSON-Server syntax
+- [x] Multi-field sorting: `_sort=field1,field2,-field3`
+- [x] Descending prefix: `-created_at`
 
 #### 2.4 Embed & Relations
 - [ ] Basic `_embed` functionality
