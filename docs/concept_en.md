@@ -57,7 +57,6 @@ The `createDrizzleRestAdapter` function performs the following steps at runtime 
       * `GET /<table-name>/:id`: Handler for `getOne`
       * `PATCH /<table-name>/:id`: Handler for `updateOne`
       * `DELETE /<table-name>/:id`: Handler for `deleteOne`
-      * Additionally, nested routes are created for defined relations: `GET /<table-name>/:id/<relation-name>`
 
 -----
 
