@@ -26,9 +26,17 @@ export class QueryBuilder {
         }
 
         // Apply sorting
-        if (params.sort && this.columns[params.sort.column]) {
-            const sortFn = params.sort.order === 'desc' ? desc : asc;
-            query.orderBy(sortFn(this.columns[params.sort.column]));
+        if (params.sort && params.sort.length > 0) {
+            const orderByExpressions = params.sort
+                .filter(sortField => this.columns[sortField.column]) // Only sort by valid columns
+                .map(sortField => {
+                    const sortFn = sortField.order === 'desc' ? desc : asc;
+                    return sortFn(this.columns[sortField.column]);
+                });
+
+            if (orderByExpressions.length > 0) {
+                query.orderBy(...orderByExpressions);
+            }
         }
 
         // Apply pagination

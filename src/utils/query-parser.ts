@@ -8,22 +8,22 @@ export interface ParsedQueryParams {
         end?: number;
         limit?: number;
     };
-    sort?: {
+    sort?: Array<{
         column: string;
         order: 'asc' | 'desc';
-    };
+    }>;
     filters: Record<string, any>;
 }
 
 export class QueryParser {
-    private static readonly EXCLUDE_PARAMS = ['_page', '_per_page', 'sort', '_start', '_end', '_limit'];
+    private static readonly EXCLUDE_PARAMS = ['_page', '_per_page', '_sort', '_start', '_end', '_limit'];
 
     static parseQueryParams(req: Request): ParsedQueryParams {
         const query = req.query;
 
         return {
             pagination: this.parsePagination(query),
-            sort: this.parseSort(query.sort),
+            sort: this.parseSort(query._sort),
             filters: this.parseFilters(query),
         };
     }
@@ -44,16 +44,29 @@ export class QueryParser {
         };
     }
 
-    private static parseSort(sortParam: any) {
+    private static parseSort(sortParam: any): Array<{ column: string; order: 'asc' | 'desc' }> | undefined {
         if (typeof sortParam !== 'string') return undefined;
 
-        const [sortColumn, sortOrder] = sortParam.split('.');
-        if (!sortColumn) return undefined;
+        // JSON-Server syntax: _sort=field1,field2,-field3
+        const sortFields = sortParam.split(',').map(field => field.trim()).filter(Boolean);
 
-        return {
-            column: sortColumn,
-            order: (sortOrder?.toLowerCase() === 'desc' ? 'desc' : 'asc') as 'asc' | 'desc',
-        };
+        if (sortFields.length === 0) return undefined;
+
+        return sortFields.map(field => {
+            if (field.startsWith('-')) {
+                // Descending order with - prefix
+                return {
+                    column: field.substring(1),
+                    order: 'desc' as const
+                };
+            } else {
+                // Ascending order (default)
+                return {
+                    column: field,
+                    order: 'asc' as const
+                };
+            }
+        });
     }
 
     private static parseFilters(query: any): Record<string, any> {
