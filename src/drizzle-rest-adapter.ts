@@ -56,11 +56,16 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
         const _per_page = parseInt(req.query._per_page as string) || 10;
         const sort = req.query.sort;
 
+        // Parse range pagination parameters (priority over page-based pagination)
+        const _start = parseInt(req.query._start as string);
+        const _end = parseInt(req.query._end as string);
+        const _limit = parseInt(req.query._limit as string);
+
         // Build the main query
         const query = db.select().from(table).$dynamic();
 
         // Apply filtering (exclude pagination and sorting params)
-        const excludeParams = ['_page', '_per_page', 'sort'];
+        const excludeParams = ['_page', '_per_page', 'sort', '_start', '_end', '_limit'];
         const whereConditions: any[] = [];
 
         // Parse and apply filters
@@ -133,9 +138,27 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
           }
         }
 
-        // Apply pagination
-        const limit = Math.max(1, _per_page); // Ensure minimum of 1
-        const offset = Math.max(0, (_page - 1) * limit); // Ensure non-negative offset
+        // Apply pagination - prioritize range pagination over page-based pagination
+        let limit: number;
+        let offset: number;
+
+        if (!isNaN(_start) && !isNaN(_end)) {
+          // Range pagination with _start and _end (exclusive end)
+          const startIndex = Math.max(0, _start); // Ensure non-negative
+          const endIndex = Math.max(startIndex, _end); // Ensure end >= start
+          limit = endIndex - startIndex;
+          offset = startIndex;
+        } else if (!isNaN(_start) && !isNaN(_limit)) {
+          // Range pagination with _start and _limit
+          const startIndex = Math.max(0, _start); // Ensure non-negative
+          const limitValue = Math.max(0, _limit); // Ensure non-negative
+          limit = limitValue;
+          offset = startIndex;
+        } else {
+          // Default page-based pagination
+          limit = Math.max(1, _per_page); // Ensure minimum of 1
+          offset = Math.max(0, (_page - 1) * limit); // Ensure non-negative offset
+        }
 
         query.limit(limit).offset(offset);
 
