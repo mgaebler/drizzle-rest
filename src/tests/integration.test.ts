@@ -179,4 +179,200 @@ describe('Drizzle REST Adapter Integration Tests', () => {
       expect(res.headers['x-total-count']).toEqual('15');
     });
   });
+
+  describe('JSON-Server Filtering Tests', () => {
+    beforeEach(async () => {
+      // Create test data with various data types for filtering tests
+      await db.insert(schema.users).values([
+        { fullName: 'Alice Smith', phone: '123-456-7890' },
+        { fullName: 'Bob Johnson', phone: '234-567-8901' },
+        { fullName: 'Charlie Brown', phone: '345-678-9012' },
+        { fullName: 'David Wilson', phone: '456-789-0123' },
+        { fullName: 'Eve Davis', phone: '567-890-1234' },
+        { fullName: 'Alice Wonder', phone: '678-901-2345' },
+      ]);
+    });
+
+    describe('Direct Equality Filtering', () => {
+      it('should filter by exact match', async () => {
+        const res = await request(app).get('/api/v1/users?fullName=Alice Smith');
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body).toHaveLength(1);
+        expect(res.body[0].fullName).toEqual('Alice Smith');
+      });
+
+      it('should support multiple filters with AND logic', async () => {
+        const res = await request(app).get('/api/v1/users?fullName=Alice Smith&phone=123-456-7890');
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body).toHaveLength(1);
+        expect(res.body[0].fullName).toEqual('Alice Smith');
+        expect(res.body[0].phone).toEqual('123-456-7890');
+      });
+
+      it('should return empty array when no match found', async () => {
+        const res = await request(app).get('/api/v1/users?fullName=NonExistent User');
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body).toHaveLength(0);
+      });
+    });
+
+    describe('String Search Filtering (_like operator)', () => {
+      it('should filter with substring search using _like', async () => {
+        const res = await request(app).get('/api/v1/users?fullName_like=Alice');
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body).toHaveLength(2); // Alice Smith and Alice Wonder
+        expect(res.body.every((user: any) => user.fullName.includes('Alice'))).toBe(true);
+      });
+
+      it('should be case-sensitive for _like search', async () => {
+        const res = await request(app).get('/api/v1/users?fullName_like=alice');
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body).toHaveLength(0); // Should not match lowercase
+      });
+
+      it('should work with phone number _like search', async () => {
+        const res = await request(app).get('/api/v1/users?phone_like=456-7890');
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body).toHaveLength(1);
+        expect(res.body[0].phone).toEqual('123-456-7890');
+      });
+    });
+
+    describe('Negation Filtering (_ne operator)', () => {
+      it('should exclude records with _ne operator', async () => {
+        const res = await request(app).get('/api/v1/users?fullName_ne=Alice Smith');
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body).toHaveLength(5); // All except Alice Smith
+        expect(res.body.every((user: any) => user.fullName !== 'Alice Smith')).toBe(true);
+      });
+
+      it('should work with _ne on phone numbers', async () => {
+        const res = await request(app).get('/api/v1/users?phone_ne=123-456-7890');
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body).toHaveLength(5); // All except the one with that phone
+        expect(res.body.every((user: any) => user.phone !== '123-456-7890')).toBe(true);
+      });
+    });
+
+    describe('Array Membership Filtering', () => {
+      it('should filter by multiple IDs', async () => {
+        // Get first two users to get their IDs
+        const allUsers = await request(app).get('/api/v1/users');
+        const firstTwoIds = allUsers.body.slice(0, 2).map((user: any) => user.id);
+
+        const res = await request(app).get(`/api/v1/users?id=${firstTwoIds[0]}&id=${firstTwoIds[1]}`);
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body).toHaveLength(2);
+        expect(res.body.map((user: any) => user.id).sort()).toEqual(firstTwoIds.sort());
+      });
+
+      it('should filter by multiple fullName values', async () => {
+        const res = await request(app).get('/api/v1/users?fullName=Alice Smith&fullName=Bob Johnson');
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body).toHaveLength(2);
+        const names = res.body.map((user: any) => user.fullName).sort();
+        expect(names).toEqual(['Alice Smith', 'Bob Johnson']);
+      });
+    });
+
+    describe('Combined Filtering', () => {
+      it('should combine different filter types with AND logic', async () => {
+        const res = await request(app).get('/api/v1/users?fullName_like=Alice&phone_ne=678-901-2345');
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body).toHaveLength(1); // Only Alice Smith, not Alice Wonder
+        expect(res.body[0].fullName).toEqual('Alice Smith');
+      });
+
+      it('should work with filtering + pagination', async () => {
+        const res = await request(app).get('/api/v1/users?fullName_like=Alice&_page=1&_per_page=1');
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body).toHaveLength(1);
+        expect(res.headers['x-total-count']).toEqual('2'); // Total matching records
+        expect(res.body[0].fullName.includes('Alice')).toBe(true);
+      });
+
+      it('should work with filtering + sorting', async () => {
+        const res = await request(app).get('/api/v1/users?fullName_like=Alice&sort=fullName.desc');
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body).toHaveLength(2);
+        expect(res.body[0].fullName).toEqual('Alice Wonder'); // Alphabetically last
+        expect(res.body[1].fullName).toEqual('Alice Smith');
+      });
+    });
+
+    describe('Edge Cases', () => {
+      it('should handle empty filter values', async () => {
+        const res = await request(app).get('/api/v1/users?fullName=');
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body).toHaveLength(0); // No user with empty name
+      });
+
+      it('should ignore invalid filter parameters', async () => {
+        const res = await request(app).get('/api/v1/users?nonExistentColumn=value');
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body).toHaveLength(6); // Should return all users (ignore invalid filter)
+      });
+
+      it('should handle special characters in filter values', async () => {
+        // First create a user with special characters
+        await db.insert(schema.users).values({
+          fullName: 'Test User (Special)',
+          phone: '+1-800-TEST'
+        });
+
+        const res = await request(app).get('/api/v1/users?fullName_like=(Special)');
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body).toHaveLength(1);
+        expect(res.body[0].fullName).toEqual('Test User (Special)');
+      });
+    });
+
+    describe('Range Filtering (_gte and _lte operators)', () => {
+      beforeEach(async () => {
+        // Create test data with numerical IDs for range testing
+        // The auto-increment should give us IDs 1, 2, 3, 4, 5, 6
+        // (6 users were created in the main beforeEach)
+      });
+
+      it('should filter with _gte operator', async () => {
+        const res = await request(app).get('/api/v1/users?id_gte=4');
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body.length).toBeGreaterThanOrEqual(3); // IDs 4, 5, 6
+        expect(res.body.every((user: any) => user.id >= 4)).toBe(true);
+      });
+
+      it('should filter with _lte operator', async () => {
+        const res = await request(app).get('/api/v1/users?id_lte=3');
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body.length).toBeGreaterThanOrEqual(3); // IDs 1, 2, 3
+        expect(res.body.every((user: any) => user.id <= 3)).toBe(true);
+      });
+
+      it('should combine _gte and _lte for range filtering', async () => {
+        const res = await request(app).get('/api/v1/users?id_gte=2&id_lte=5');
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body.length).toBeGreaterThanOrEqual(4); // IDs 2, 3, 4, 5
+        expect(res.body.every((user: any) => user.id >= 2 && user.id <= 5)).toBe(true);
+      });
+    });
+  });
 });

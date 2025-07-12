@@ -1,6 +1,6 @@
 import express from 'express';
 import { PgliteDatabase } from 'drizzle-orm/pglite';
-import { asc, desc, eq, getTableColumns } from 'drizzle-orm';
+import { asc, desc, eq, ne, like, inArray, gte, lte, getTableColumns, and } from 'drizzle-orm';
 import { PgTable } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
 import { SchemaInspector } from './utils/schema-inspector';
@@ -61,20 +61,65 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
 
         // Apply filtering (exclude pagination and sorting params)
         const excludeParams = ['_page', '_per_page', 'sort'];
+        const whereConditions: any[] = [];
+
+        // Parse and apply filters
         for (const key in req.query) {
-          if (!excludeParams.includes(key) && columns[key]) {
-            query.where(eq(columns[key], req.query[key]));
+          if (excludeParams.includes(key)) continue;
+
+          const value = req.query[key];
+          if (value === undefined || value === null) continue;
+
+          // Handle JSON-Server filtering operators
+          if (key.endsWith('_like')) {
+            // Substring search
+            const columnName = key.replace('_like', '');
+            if (columns[columnName]) {
+              whereConditions.push(like(columns[columnName], `%${value}%`));
+            }
+          } else if (key.endsWith('_ne')) {
+            // Not equal
+            const columnName = key.replace('_ne', '');
+            if (columns[columnName]) {
+              whereConditions.push(ne(columns[columnName], value));
+            }
+          } else if (key.endsWith('_gte')) {
+            // Greater than or equal
+            const columnName = key.replace('_gte', '');
+            if (columns[columnName]) {
+              whereConditions.push(gte(columns[columnName], value));
+            }
+          } else if (key.endsWith('_lte')) {
+            // Less than or equal
+            const columnName = key.replace('_lte', '');
+            if (columns[columnName]) {
+              whereConditions.push(lte(columns[columnName], value));
+            }
+          } else if (columns[key]) {
+            // Direct equality or array membership
+            if (Array.isArray(value)) {
+              // Handle multiple values for the same parameter (array membership)
+              whereConditions.push(inArray(columns[key], value));
+            } else if (typeof value === 'string' && value.includes(',')) {
+              // Handle comma-separated values as array
+              const values = value.split(',').map(v => v.trim());
+              whereConditions.push(inArray(columns[key], values));
+            } else {
+              // Single value equality
+              whereConditions.push(eq(columns[key], value));
+            }
           }
+        }
+
+        // Apply all where conditions with AND logic
+        if (whereConditions.length > 0) {
+          query.where(and(...whereConditions));
         }
 
         // Get total count for X-Total-Count header (before pagination)
         const countQuery = db.select().from(table).$dynamic();
-
-        // Apply same filtering to count query
-        for (const key in req.query) {
-          if (!excludeParams.includes(key) && columns[key]) {
-            countQuery.where(eq(columns[key], req.query[key]));
-          }
+        if (whereConditions.length > 0) {
+          countQuery.where(and(...whereConditions));
         }
 
         const totalRecords = await countQuery;
