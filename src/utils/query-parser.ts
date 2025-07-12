@@ -13,10 +13,11 @@ export interface ParsedQueryParams {
         order: 'asc' | 'desc';
     }>;
     filters: Record<string, any>;
+    embed?: string[];
 }
 
 export class QueryParser {
-    private static readonly EXCLUDE_PARAMS = ['_page', '_per_page', '_sort', '_start', '_end', '_limit'];
+    private static readonly EXCLUDE_PARAMS = ['_page', '_per_page', '_sort', '_start', '_end', '_limit', '_embed'];
 
     static parseQueryParams(req: Request): ParsedQueryParams {
         const query = req.query;
@@ -25,6 +26,7 @@ export class QueryParser {
             pagination: this.parsePagination(query),
             sort: this.parseSort(query._sort),
             filters: this.parseFilters(query),
+            embed: this.parseEmbed(query._embed),
         };
     }
 
@@ -82,5 +84,21 @@ export class QueryParser {
         }
 
         return filters;
+    }
+
+    private static parseEmbed(embedParam: any): string[] | undefined {
+        if (!embedParam) return undefined;
+
+        if (typeof embedParam === 'string') {
+            // Support comma-separated values: _embed=user,comments
+            return embedParam.split(',').map(item => item.trim()).filter(Boolean);
+        }
+
+        if (Array.isArray(embedParam)) {
+            // Support multiple _embed parameters: _embed=user&_embed=comments
+            return embedParam.map(item => String(item).trim()).filter(Boolean);
+        }
+
+        return undefined;
     }
 }

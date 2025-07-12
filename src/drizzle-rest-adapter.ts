@@ -35,6 +35,10 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
   const inspector = new SchemaInspector(schema);
   const tables = inspector.extractTables();
 
+  // Create a map for quick table metadata lookup
+  const tablesMetadataMap = new Map();
+  tables.forEach(table => tablesMetadataMap.set(table.name, table));
+
   tables.forEach(tableMetadata => {
     const table = schema[tableMetadata.name];
     const resourcePath = `/${tableMetadata.name}`;
@@ -57,13 +61,17 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
       router.get(resourcePath, async (req, res) => {
         try {
           const params = QueryParser.parseQueryParams(req);
-          const queryBuilder = new QueryBuilder(db, table, columns);
+          const queryBuilder = new QueryBuilder(db, table, columns, schema, tablesMetadataMap, tableMetadata.name);
 
-          const { query } = queryBuilder.buildSelectQuery(params);
-          const [data, totalCount] = await Promise.all([
-            query,
-            queryBuilder.getTotalCount(params.filters)
-          ]);
+          const { query, embedKeys } = queryBuilder.buildSelectQuery(params);
+          let data = await query;
+
+          // Apply embeds if requested
+          if (embedKeys && embedKeys.length > 0) {
+            data = await queryBuilder.applyEmbeds(data, embedKeys);
+          }
+
+          const totalCount = await queryBuilder.getTotalCount(params.filters);
 
           // Set X-Total-Count header
           res.set('X-Total-Count', totalCount.toString());

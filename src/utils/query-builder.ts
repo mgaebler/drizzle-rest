@@ -1,19 +1,26 @@
 import { asc, desc, and } from 'drizzle-orm';
 import { PgTable } from 'drizzle-orm/pg-core';
 import { FilterBuilder } from './filter-builder';
+import { EmbedBuilder } from './embed-builder';
 import { ParsedQueryParams } from './query-parser';
+import { TableMetadata } from './schema-inspector';
 
 type DrizzleDb = any; // Using generic type for compatibility
 
 export class QueryBuilder {
     private filterBuilder: FilterBuilder;
+    private embedBuilder: EmbedBuilder;
 
     constructor(
         private db: DrizzleDb,
         private table: PgTable,
-        private columns: Record<string, any>
+        private columns: Record<string, any>,
+        private schema: Record<string, any>,
+        private tablesMetadata: Map<string, TableMetadata>,
+        private tableName: string
     ) {
         this.filterBuilder = new FilterBuilder(columns);
+        this.embedBuilder = new EmbedBuilder(db, schema, tablesMetadata);
     }
 
     buildSelectQuery(params: ParsedQueryParams) {
@@ -43,7 +50,7 @@ export class QueryBuilder {
         const { limit, offset } = this.calculatePagination(params.pagination);
         query.limit(limit).offset(offset);
 
-        return { query, whereConditions };
+        return { query, whereConditions, embedKeys: params.embed };
     }
 
     async getTotalCount(filters: Record<string, any>): Promise<number> {
@@ -56,6 +63,14 @@ export class QueryBuilder {
 
         const totalRecords = await countQuery;
         return totalRecords.length;
+    }
+
+    async applyEmbeds(data: any[], embedKeys?: string[]): Promise<any[]> {
+        if (!embedKeys || embedKeys.length === 0) {
+            return data;
+        }
+
+        return await this.embedBuilder.applyEmbeds(data, this.tableName, embedKeys);
     }
 
     private calculatePagination(pagination: ParsedQueryParams['pagination']) {

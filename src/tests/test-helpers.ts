@@ -102,8 +102,14 @@ export const apiRequest = {
 export const setupTestDatabase = async () => {
     // Run migrations first
     await migrate(db, { migrationsFolder: './drizzle' });
-    // Clear the table before each test
-    await db.delete(schema.users);
-    // Reset the auto-increment counter
+
+    // Clear tables in correct order (child tables first to avoid foreign key violations)
+    await db.delete(schema.comments); // Delete comments first
+    await db.delete(schema.posts);    // Then posts
+    await db.delete(schema.users);    // Finally users
+
+    // Reset the auto-increment counters
+    await db.execute(sql`ALTER SEQUENCE comments_id_seq RESTART WITH 1`);
+    await db.execute(sql`ALTER SEQUENCE posts_id_seq RESTART WITH 1`);
     await db.execute(sql`ALTER SEQUENCE users_id_seq RESTART WITH 1`);
 };
