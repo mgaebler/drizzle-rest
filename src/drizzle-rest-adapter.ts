@@ -33,11 +33,11 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
     // This is a simplified check. A more robust check might be needed
     // to differentiate between tables and relations.
     if (table instanceof PgTable) {
-      const basePath = `/${tableName}`;
-      const itemPath = `${basePath}/:id`;
+      const resourcePath = `/${tableName}`;
+      const itemPath = `${resourcePath}/:id`;
 
       // GET /<table-name>
-      router.get(basePath, async (req, res) => {
+      router.get(resourcePath, async (req, res) => {
         try {
           const { page = 1, limit = 10, sort } = req.query;
           const columns = getTableColumns(table);
@@ -71,7 +71,7 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
       });
 
       // POST /<table-name>
-      router.post(basePath, async (req, res) => {
+      router.post(resourcePath, async (req, res) => {
         try {
           const insertSchema = createInsertSchema(table);
           const validatedBody = insertSchema.parse(req.body);
