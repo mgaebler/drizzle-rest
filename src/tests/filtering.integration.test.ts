@@ -1,13 +1,13 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { beforeEach,describe, expect, it } from 'vitest';
+
 import {
     apiRequest,
-    TEST_USERS,
-    createTestUser,
     createFilteringTestData,
-    expectSuccessResponse,
+    createTestUser,
     expectFilterResults,
-    setupTestDatabase
-} from './test-helpers';
+    expectSuccessResponse,
+    setupTestDatabase,
+    TEST_USERS} from './test-helpers';
 
 describe('JSON-Server Filtering', () => {
     beforeEach(async () => {

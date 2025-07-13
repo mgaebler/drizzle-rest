@@ -1,8 +1,7 @@
-import { db } from '@/db/connection';
-import * as schema from '@/db/schema';
-
 import { seed as drizzleSeed } from "drizzle-seed";
 
+import { db } from '@/db/connection';
+import * as schema from '@/db/schema';
 
 export async function seed() {
   console.log('Seeding database...');

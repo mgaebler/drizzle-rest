@@ -1,6 +1,8 @@
-import { describe, it, expect } from 'vitest';
-import { SchemaInspector } from './schema-inspector';
+import { describe, expect,it } from 'vitest';
+
 import * as schema from '@/db/schema';
+
+import { SchemaInspector } from './schema-inspector';
 
 describe('SchemaInspector', () => {
     it('should extract table metadata correctly', () => {

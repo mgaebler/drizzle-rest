@@ -1,12 +1,13 @@
-import express from 'express';
-import { PgliteDatabase } from 'drizzle-orm/pglite';
 import { eq, getTableColumns } from 'drizzle-orm';
 import { PgTable } from 'drizzle-orm/pg-core';
+import { PgliteDatabase } from 'drizzle-orm/pglite';
 import { createInsertSchema } from 'drizzle-zod';
-import { SchemaInspector } from './utils/schema-inspector';
-import { QueryParser } from './utils/query-parser';
-import { QueryBuilder } from './utils/query-builder';
+import express from 'express';
+
 import { ErrorHandler } from './utils/error-handler';
+import { QueryBuilder } from './utils/query-builder';
+import { QueryParser } from './utils/query-parser';
+import { SchemaInspector } from './utils/schema-inspector';
 
 // A more specific type can be used if the schema is known.
 // Using `any` for the schema makes the adapter more generic.

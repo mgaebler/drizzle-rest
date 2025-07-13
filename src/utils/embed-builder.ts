@@ -1,5 +1,6 @@
 import { eq } from 'drizzle-orm';
-import { TableMetadata, RelationMetadata } from './schema-inspector';
+
+import { RelationMetadata, TableMetadata } from './schema-inspector';
 
 type DrizzleDb = any;
 
@@ -130,7 +131,6 @@ export class EmbedBuilder {
         }
 
         // Fetch related records
-        const relatedTableColumns = this.schema[relation.relatedTable];
         const allRelatedRecords = await this.db
             .select()
             .from(relatedTable);

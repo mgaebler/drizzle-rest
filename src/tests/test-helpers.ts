@@ -1,11 +1,13 @@
-import request from 'supertest';
+import { sql } from 'drizzle-orm';
+import { migrate } from 'drizzle-orm/pglite/migrator';
 import express from 'express';
+import request from 'supertest';
 import { expect } from 'vitest';
-import { createDrizzleRestAdapter } from '../drizzle-rest-adapter';
+
 import { db } from '@/db/connection';
 import * as schema from '@/db/schema.js';
-import { migrate } from 'drizzle-orm/pglite/migrator';
-import { sql } from 'drizzle-orm';
+
+import { createDrizzleRestAdapter } from '../drizzle-rest-adapter';
 
 // Setup Express app with Drizzle REST adapter
 export const createTestApp = () => {

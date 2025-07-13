@@ -1,5 +1,4 @@
-import { eq, ne, like, inArray, gte, lte, and } from 'drizzle-orm';
-import { PgTable } from 'drizzle-orm/pg-core';
+import { eq, gte, inArray, like, lte, ne } from 'drizzle-orm';
 
 export class FilterBuilder {
     constructor(private columns: Record<string, any>) { }

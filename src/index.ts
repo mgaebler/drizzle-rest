@@ -1,9 +1,10 @@
+import { migrate } from 'drizzle-orm/pglite/migrator';
 import express from 'express';
-import { createDrizzleRestAdapter } from '@/drizzle-rest-adapter';
+
 import { db } from '@/db/connection';
 import * as schema from '@/db/schema';
-import { migrate } from 'drizzle-orm/pglite/migrator';
 import { seed } from '@/db/seed';
+import { createDrizzleRestAdapter } from '@/drizzle-rest-adapter';
 
 async function startServer() {
     const app = express();
