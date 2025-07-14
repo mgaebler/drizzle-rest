@@ -16,8 +16,8 @@ Transform your Drizzle schema into a fully functional REST API with a single fun
 - 🔒 **Type Safety**: Full TypeScript support with Zod validation
 - 🎯 **Production Ready**: Comprehensive error handling and HTTP status codes
 - 🔗 **Relationship Support**: Basic embedding with `_embed` parameter
-- ⚙️ **Configurable**: Disable endpoints per table, add custom hooks
-- 🗄️ **Multi-Database**: PostgreSQL, MySQL, SQLite support via Drizzle
+- ⚙️ **Configurable**: Disable endpoints per table (hooks and advanced features coming soon)
+- 🗄️ **PostgreSQL Support**: Full PostgreSQL database support
 - 📝 **Comprehensive Logging**: Built-in Pino logging with request tracing and debug modes
 
 ## 📦 Installation
@@ -159,30 +159,13 @@ const apiRouter = createDrizzleRestAdapter({
 });
 ```
 
-### Advanced Configuration (Coming Soon)
+### Additional Configuration Options (Coming Soon)
 
-```typescript
-const apiRouter = createDrizzleRestAdapter({
-  db: db,
-  schema: schema,
-  tableOptions: {
-    users: {
-      hooks: {
-        beforeOperation: async (context) => {
-          // Authentication, logging, etc.
-          if (context.operation === 'DELETE' && !context.user?.isAdmin) {
-            throw new Error('Unauthorized');
-          }
-        },
-        afterOperation: async (context, result) => {
-          // Transform response, logging, etc.
-          return result;
-        }
-      }
-    }
-  }
-});
-```
+Future releases will include:
+- **Hooks System**: `beforeOperation` and `afterOperation` hooks for authentication, validation, and response transformation
+- **Field-level Permissions**: Control read/write access to specific columns
+- **Custom Validation**: Override default Zod validation with custom rules
+- **Rate Limiting**: Built-in request rate limiting per table/endpoint
 
 ## 🎯 JSON-Server Migration
 
@@ -198,14 +181,13 @@ GET /posts?_embed=author&_embed=comments
 
 ## 🗄️ Database Support
 
-Works with all Drizzle-supported databases:
+Currently supports PostgreSQL databases:
 
-- ✅ **PostgreSQL** (recommended)
-- ✅ **MySQL**
-- ✅ **SQLite**
-- ✅ **PlanetScale**
-- ✅ **Neon**
-- ✅ **And more...**
+- ✅ **PostgreSQL** (PGlite and standard PostgreSQL)
+- ⏳ **MySQL** (planned for future release)
+- ⏳ **SQLite** (planned for future release)
+
+> **Note**: While Drizzle ORM supports multiple databases, this adapter currently focuses on PostgreSQL to ensure optimal performance and feature completeness. Support for additional databases is planned for future releases.
 
 ## 🔍 Query Operators Reference
 
@@ -356,9 +338,10 @@ For complete logging documentation, see [docs/logging.md](docs/logging.md).
 ## 🛣️ Roadmap
 
 - [ ] **v0.2.0**: Hook system for authentication & custom logic
-- [ ] **v0.3.0**: Advanced relationship queries & deep embedding
-- [ ] **v0.4.0**: Query result caching & performance optimizations
-- [ ] **v0.5.0**: Full-text search & aggregation queries
+- [ ] **v0.3.0**: MySQL and SQLite database support
+- [ ] **v0.4.0**: Advanced relationship queries & deep embedding
+- [ ] **v0.5.0**: Query result caching & performance optimizations
+- [ ] **v0.6.0**: Full-text search & aggregation queries
 - [ ] **v1.0.0**: Stable API with complete documentation
 
 ## 🤝 Contributing
