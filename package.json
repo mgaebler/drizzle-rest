@@ -2,26 +2,26 @@
     "name": "drizzle-rest-adapter",
     "version": "0.1.0",
     "description": "A dynamic REST API adapter for Drizzle ORM with JSON-Server compatible query syntax",
-    "main": "dist/index.js",
-    "types": "dist/index.d.ts",
+    "main": "src/index.ts",
+    "types": "src/index.ts",
     "type": "module",
     "exports": {
         ".": {
-            "import": "./dist/index.js",
-            "types": "./dist/index.d.ts"
+            "import": "./src/index.ts",
+            "types": "./src/index.ts"
         }
     },
     "files": [
-        "dist",
+        "src",
         "README.md",
         "LICENSE"
     ],
     "scripts": {
-        "start": "node dist/index.js",
+        "start": "tsx --require tsconfig-paths/register src/index.ts",
         "dev": "tsx --require tsconfig-paths/register --watch src/",
-        "build": "tsc --project tsconfig.build.json && tsc-alias -p tsconfig.build.json",
+        "build": "tsc && tsc-alias",
         "build:watch": "npm run build -- --watch",
-        "prepublishOnly": "npm run build && npm test",
+        "prepublishOnly": "npm test",
         "db:migrate": "drizzle-kit migrate",
         "db:generate": "drizzle-kit generate",
         "test": "vitest --run",

@@ -14,10 +14,7 @@ NC='\033[0m' # No Color
 echo -e "${BLUE}📦 Installing dependencies...${NC}"
 npm install
 
-echo -e "${BLUE}🔨 Building the project...${NC}"
-npm run build
-
-echo -e "${BLUE}🗄️ Generating database schema...${NC}"
+echo -e "${BLUE}️ Generating database schema...${NC}"
 npm run db:generate
 
 echo -e "${GREEN}✅ Setup complete!${NC}"
