@@ -17,10 +17,6 @@ This document tracks the implementation progress and **open source shipping chec
 
 ### 🏗️ **Distribution & Packaging**
 - [x] **TypeScript-First Distribution**: Publishing source TypeScript files
-- [x] **ES Modules Support**: Verify `"type": "module"` configuration
-- [ ] **CommonJS Compatibility**: Consider dual package.json if needed
-- [ ] **Bundle Size Optimization**: Check final package size
-- [ ] **Dependency Audit**: Review and optimize dependencies
 
 ### 🧪 **Quality Assurance**
 - [x] **Core Functionality**: JSON-Server dialect 100% complete
@@ -299,11 +295,6 @@ The JSON-Server dialect specification from the technical concept is **FULLY IMPL
 - [ ] Full-text search integration
 - [ ] Aggregation queries
 - [ ] Custom operator extensions
-
-### Files to Create
-- [ ] `src/hooks/hook-system.ts`
-- [ ] `src/cache/query-cache.ts`
-- [ ] `src/features/advanced-queries.ts`
 
 ---
 
