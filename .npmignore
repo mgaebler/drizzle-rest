@@ -1,79 +1,21 @@
-# Development files
-src/
-*.ts
-*.test.js
-*.test.ts
-tsconfig.json
-tsconfig.build.json
-vitest.config.ts
-eslint.config.js
+# Ignore everything by default
+*
 
-# Test files
-tests/
-__tests__/
-*.test.*
-*.spec.*
+# Then explicitly include what should be packaged
+!src/
+!src/db/
+!src/db/*.ts
+!src/utils/
+!src/utils/*.ts
+!src/*.ts
 
-# Development directories
-.vscode/
-.idea/
+# Explicitly exclude test files and directories
+src/tests
+src/tests/
+src/**/*.test.ts
+src/**/*.spec.ts
 
-# Build artifacts (keep dist/)
-node_modules/
-coverage/
-
-# Database files
-*.db
-*.sqlite
-*.db-journal
-
-# Environment files
-.env
-.env.local
-.env.*.local
-
-# Logs
-logs/
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Runtime data
-pids/
-*.pid
-*.seed
-*.pid.lock
-
-# Temporary directories
-.tmp/
-temp/
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Git
-.git/
-.gitignore
-
-# CI/CD
-.github/
-.circleci/
-.travis.yml
-
-# Documentation build
-docs/build/
-
-# Development database
-drizzle/
-migrate.ts
-
-# Specific development files
-todos.md
-concept_en.md
+# Include essential files
+!README.md
+!LICENSE
+!package.json
