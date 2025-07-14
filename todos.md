@@ -1,22 +1,28 @@
-# Drizzle REST Adapter - Open Source Release Checklist
+# Drizzle REST Adapter - Alpha Release & Open Source Checklist
 
-This document tracks the implementation progress and **open source shipping checklist** for the Drizzle REST Adapter.
+This document tracks the implementation progress and **alpha release checklist** for the Drizzle REST Adapter.
 
-## 🚢 **OPEN SOURCE SHIPPING CHECKLIST**
+## � **ALPHA RELEASE STATUS: v0.1.0-alpha**
+
+> **Current State**: The adapter is functional with core features implemented but still in active development. APIs may change and features are being finalized.
+
+## 🚢 **ALPHA RELEASE CHECKLIST**
 
 ### 📦 **Package Preparation**
 - [x] **Package.json Setup**: Updated for npm publishing with proper metadata
-- [x] **README.md**: Comprehensive documentation with examples and API reference
+- [x] **README.md**: Comprehensive documentation with alpha status warnings
 - [x] **LICENSE**: MIT license added
 - [x] **CHANGELOG.md**: Release notes and version history
 - [x] **CONTRIBUTING.md**: Contribution guidelines and development setup
 - [x] **TypeScript Source Distribution**: Publishing TypeScript source directly (no build step)
 - [x] **.npmignore**: Specify files to exclude from npm package
 - [x] **GitHub Repository Setup**: Create public repository
-- [ ] **Package Scope**: Consider npm scope (e.g., `@yourname/drizzle-rest-adapter`)
+- [x] **Alpha Status Documentation**: Clear warnings about alpha state and API changes
+- [ ] **Package Scope**: Consider npm scope (e.g., `@mgaebler/drizzle-rest-adapter`)
 
 ### 🏗️ **Distribution & Packaging**
 - [x] **TypeScript-First Distribution**: Publishing source TypeScript files
+- [ ] **Alpha npm Release**: Publish as v0.1.0-alpha to npm with alpha tag
 
 ### 🧪 **Quality Assurance**
 - [x] **Core Functionality**: JSON-Server dialect 100% complete
@@ -24,16 +30,17 @@ This document tracks the implementation progress and **open source shipping chec
 - [x] **Unit Test Coverage**: Individual module testing (schema-inspector, query-builder)
 - [ ] **Performance Benchmarks**: Basic performance testing
 - [ ] **Cross-Platform Testing**: Test on different Node.js versions
-- [ ] **Database Compatibility**: Test with PostgreSQL, MySQL, SQLite
+- [x] **Database Compatibility**: PostgreSQL support implemented (MySQL/SQLite planned for future)
 - [ ] **Memory Leak Testing**: Ensure no memory leaks in long-running servers
-- [ ] **Dependency Vulnerabilities**: Run `npm audit` and fix issues (7 moderate vulnerabilities found)
+- [x] **Dependency Vulnerabilities**: Run `npm audit` and fix issues (7 moderate vulnerabilities found)
 
 ### 📖 **Documentation**
-- [x] **Installation Guide**: Clear npm install instructions
+- [x] **Installation Guide**: GitHub installation instructions (npm pending alpha release)
 - [x] **Quick Start**: Simple example to get started
 - [x] **API Reference**: Complete query syntax documentation
-- [x] **Configuration Options**: Document all configuration parameters
+- [x] **Configuration Options**: Document current configuration parameters (hooks system coming soon)
 - [x] **Migration Guide**: JSON-Server to Drizzle REST Adapter migration
+- [x] **Alpha Warnings**: Clear documentation about alpha status and limitations
 - [ ] **Examples Directory**: Create working examples for different frameworks
 - [ ] **Video Tutorial**: Consider creating a demo video
 - [ ] **Blog Post**: Write announcement blog post
@@ -42,16 +49,9 @@ This document tracks the implementation progress and **open source shipping chec
 - [x] **TypeScript Definitions**: Ensure proper type exports
 - [x] **IDE Support**: Test autocomplete and IntelliSense
 - [x] **Error Messages**: Improve error message clarity
-- [ ] **Debug Logging**: Add optional debug logging
+- [x] **Debug Logging**: Comprehensive Pino logging implementation
 - [x] **Development Tools**: Schema inspection and query building utilities
 
-### 🌟 **Community & Marketing**
-- [x] **GitHub Repository**: Create public repo with proper description
-- [ ] **GitHub Topics**: Add relevant tags (drizzle, rest-api, json-server, etc.)
-- [ ] **Social Media**: Announce on Twitter, Reddit, Discord
-- [ ] **Drizzle Community**: Share in Drizzle Discord/GitHub discussions
-- [ ] **Show HN**: Consider Hacker News submission
-- [ ] **Dev.to Article**: Write technical article about the implementation
 
 ### 🔒 **Security & Compliance**
 - [ ] **Security Audit**: Basic security review
@@ -62,32 +62,35 @@ This document tracks the implementation progress and **open source shipping chec
 - [ ] **Security.md**: Create security policy file
 
 ### 📊 **Release Strategy**
-- [ ] **Version 0.1.0**: Initial release with core features
-- [ ] **Pre-release Testing**: Beta testing with a few users
+- [x] **Version 0.1.0-alpha**: Current alpha release with core features
+- [ ] **Alpha npm Publication**: Publish to npm with alpha tag
+- [ ] **Pre-release Testing**: Alpha testing with community feedback
+- [ ] **Version 0.1.0**: First stable release after alpha feedback integration
 - [ ] **Semantic Versioning**: Follow semver for future releases
-- [ ] **Release Notes**: Detailed changelog for v0.1.0
-- [ ] **Backwards Compatibility**: Plan for future breaking changes
+- [ ] **Release Notes**: Detailed changelog for alpha and stable releases
+- [ ] **Backwards Compatibility**: Plan for future breaking changes during alpha phase
 - [ ] **Deprecation Policy**: Define how to handle future API changes
 
-### 🎯 **Post-Release Tasks**
-- [ ] **Monitor Usage**: Track npm downloads and GitHub stars
-- [ ] **Issue Triage**: Set up issue templates and labels
-- [ ] **Community Building**: Respond to questions and feedback
-- [ ] **Performance Monitoring**: Collect real-world performance data
-- [ ] **Feature Requests**: Prioritize based on community feedback
-- [ ] **Regular Updates**: Plan regular maintenance releases
+### 🎯 **Post-Alpha Tasks**
+- [ ] **Monitor Alpha Usage**: Track GitHub downloads and issue feedback
+- [ ] **Issue Triage**: Set up issue templates and labels for alpha feedback
+- [ ] **Community Building**: Respond to alpha user questions and feedback
+- [ ] **Performance Monitoring**: Collect real-world alpha performance data
+- [ ] **Feature Requests**: Prioritize based on alpha community feedback
+- [ ] **Regular Alpha Updates**: Plan regular alpha maintenance releases
+- [ ] **Stable Release Planning**: Prepare for v0.1.0 stable based on alpha learnings
 
 ---
 
-## 📊 Overall Progress - UPDATED
+## 📊 Overall Progress - ALPHA STATUS
 
 - **Phase 1**: ✅ Complete (Schema Introspection)
 - **Phase 2**: ✅ **COMPLETE** (Query Builder & Filter Engine) - **JSON-Server Dialect Fully Implemented**
 - **Phase 3**: ✅ Complete (HTTP Handlers & Middleware)
 - **Phase 4**: ✅ Complete (Router Assembly & Integration)
-- **Phase 5**: ⏳ Pending (Advanced Features)
+- **Phase 5**: ⏳ Planned for v0.2.0 (Advanced Features - Hooks System)
 - **Phase 6**: 🔄 In Progress (Testing & Production)
-- **Phase 7**: 🚢 **NEW** (Open Source Release) - **IN PROGRESS**
+- **Phase 7**: � **IN PROGRESS** (Alpha Release) - **CURRENT FOCUS**
 
 ## 🎉 JSON-Server Dialect Implementation Status: **100% COMPLETE**
 
@@ -117,10 +120,19 @@ The JSON-Server dialect specification from the technical concept is **FULLY IMPL
    - ✅ **PUT**: Complete resource replacement
    - ✅ **PATCH**: Partial resource update
 
-5. **Embed Support** - **IMPLEMENTED**
+5. **Embed Support** - **BASIC IMPLEMENTATION**
    - ✅ `_embed` parameter parsing in `QueryParser`
    - ✅ `EmbedBuilder` class for handling relationships
    - ✅ Support for comma-separated and multiple embed parameters
+   - ⚠️ **Alpha Limitation**: Advanced relationship queries planned for v0.4.0
+
+6. **Database Support** - **POSTGRESQL ONLY (ALPHA)**
+   - ✅ **PostgreSQL**: Full support with PGlite and standard PostgreSQL
+   - ⏳ **MySQL/SQLite**: Planned for v0.3.0
+
+7. **Configuration System** - **BASIC IMPLEMENTATION**
+   - ✅ **Endpoint Disabling**: `disabledEndpoints` per table
+   - ⏳ **Hooks System**: `beforeOperation`/`afterOperation` planned for v0.2.0
 
 ### ❌ **INTENTIONALLY NOT IMPLEMENTED:**
 
@@ -229,12 +241,6 @@ The JSON-Server dialect specification from the technical concept is **FULLY IMPL
 - [x] HTTP status code consistency (200, 201, 204, 404)
 - [x] Validation error messages via Zod schemas
 - [x] Database constraint error handling
-
-### Files Created ✅
-- [x] `src/utils/error-handler.ts` - **Centralized error handling**
-- [x] Updated `src/drizzle-rest-adapter.ts` - **All CRUD operations complete**
-- [x] ~~`src/handlers/crud-handlers.ts`~~ - **Integrated directly into adapter**
-- [x] ~~`src/handlers/validation.ts`~~ - **Using drizzle-zod directly**
 
 ---
 

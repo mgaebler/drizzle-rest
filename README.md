@@ -1,10 +1,13 @@
 # Drizzle REST Adapter
 
-[![npm version](https://badge.fury.io/js/drizzle-rest-adapter.svg)](https://badge.fury.io/js/drizzle-rest-adapter)
 [![TypeScript](https://img.shields.io/badge/%3C%2F%3E-TypeScript-%230074c1.svg)](http://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Status: Alpha](https://img.shields.io/badge/Status-Alpha-red.svg)](https://github.com/mgaebler/drizzle-rest-adapter)
+[![Version: Pre-release](https://img.shields.io/badge/Version-v0.1.0--alpha-orange.svg)](https://github.com/mgaebler/drizzle-rest-adapter)
 
 > A dynamic REST API adapter for Drizzle ORM with JSON-Server compatible query syntax
+
+⚠️ **Alpha Version**: This project is in active development. APIs may change and features are still being finalized. Use in production at your own risk.
 
 Transform your Drizzle schema into a fully functional REST API with a single function call. Perfect for rapid prototyping, admin panels, and seamless migration from JSON-Server.
 
@@ -22,12 +25,24 @@ Transform your Drizzle schema into a fully functional REST API with a single fun
 
 ## 📦 Installation
 
+> **Alpha Release**: This package is currently in alpha development and not yet published to npm. APIs may change between versions.
+
+For now, you can install it directly from the GitHub repository:
+
+```bash
+# Install from GitHub (latest alpha)
+npm install git+https://github.com/mgaebler/drizzle-rest-adapter.git
+
+# Or clone and install locally for development
+git clone https://github.com/mgaebler/drizzle-rest-adapter.git
+cd drizzle-rest-adapter
+npm install
+npm run build
+```
+
+Once stable, it will be published to npm as:
 ```bash
 npm install drizzle-rest-adapter
-# or
-yarn add drizzle-rest-adapter
-# or
-pnpm add drizzle-rest-adapter
 ```
 
 ## 🚀 Quick Start
@@ -337,6 +352,8 @@ For complete logging documentation, see [docs/logging.md](docs/logging.md).
 
 ## 🛣️ Roadmap
 
+- [ ] **v0.1.0-alpha**: Current alpha release with core functionality
+- [ ] **v0.1.0**: First stable npm release
 - [ ] **v0.2.0**: Hook system for authentication & custom logic
 - [ ] **v0.3.0**: MySQL and SQLite database support
 - [ ] **v0.4.0**: Advanced relationship queries & deep embedding
@@ -346,7 +363,11 @@ For complete logging documentation, see [docs/logging.md](docs/logging.md).
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+We welcome contributions! This is an alpha project, so expect rapid changes and improvements.
+
+> **Alpha Contributors Welcome**: Since this is an alpha release, your feedback and contributions are especially valuable in shaping the final API.
+
+Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ### Development Setup
 
