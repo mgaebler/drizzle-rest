@@ -307,9 +307,9 @@ The adapter includes comprehensive logging capabilities powered by [Pino](https:
 ```typescript
 import { createDrizzleRestAdapter, createLogger } from 'drizzle-rest-adapter';
 
-// Create logger with verbose mode for development
+// Create logger with debug level for development
 const logger = createLogger({
-    verbose: process.env.NODE_ENV === 'development',
+    level: process.env.NODE_ENV === 'development' ? 'debug' : 'info',
     pretty: true,
     base: { service: 'my-api' }
 });

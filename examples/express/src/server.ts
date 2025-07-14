@@ -9,10 +9,10 @@ import { seedDatabase } from '@/db/seed';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Create a logger instance with verbose mode for development
-const verbose = process.env.NODE_ENV === 'development' || process.env.LOG_LEVEL === 'debug';
+// Create a logger instance for development
+const useDebugLogging = false; // Set to true for detailed logging
 const logger = createLogger({
-    verbose,
+    level: useDebugLogging ? 'debug' : 'info',
     pretty: true,
     base: {
         environment: process.env.NODE_ENV || 'development'
@@ -73,9 +73,9 @@ async function startServer() {
                 requestLogging: {
                     enabled: true,
                     logQuery: true,
-                    logBody: verbose, // Only log request bodies in verbose mode
+                    logBody: useDebugLogging, // Only log request bodies when debug logging is enabled
                     logResponseBody: false, // Keep response logging disabled for performance
-                    logHeaders: verbose
+                    logHeaders: useDebugLogging
                 }
             },
             // Enable OpenAPI documentation generation
@@ -95,7 +95,7 @@ async function startServer() {
             logger.info({
                 port: PORT,
                 environment: process.env.NODE_ENV || 'development',
-                verbose,
+                debugLogging: useDebugLogging,
                 openApiUrl: `http://0.0.0.0:${PORT}/api/v1/openapi.json`
             }, '🎉 Server started successfully!');
 
@@ -110,8 +110,8 @@ async function startServer() {
             logger.info('');
             logger.info('📖 Full documentation available at the root endpoint: http://0.0.0.0:' + PORT);
 
-            if (verbose) {
-                logger.debug('🐛 Verbose logging enabled - you will see detailed request/response logs');
+            if (useDebugLogging) {
+                logger.debug('🐛 Debug logging enabled - you will see detailed request/response logs');
             }
         });
 

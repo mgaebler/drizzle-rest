@@ -9,7 +9,7 @@ The Drizzle REST Adapter includes comprehensive logging capabilities using [Pino
 ## Features
 
 - 🚀 **High Performance**: Pino-based structured logging
-- 🐛 **Verbose Mode**: Detailed debugging information
+- 🐛 **Debug Mode**: Detailed debugging information
 - 📝 **Request/Response Logging**: Comprehensive HTTP request tracking
 - 🎯 **Structured Data**: Machine-readable JSON logs with context
 - 🎨 **Pretty Printing**: Human-readable output for development
@@ -23,10 +23,10 @@ The Drizzle REST Adapter includes comprehensive logging capabilities using [Pino
 ```typescript
 import { createDrizzleRestAdapter, createLogger } from 'drizzle-rest-adapter';
 
-// Create a logger with verbose mode for development
+// Create a logger with debug level for development
 const logger = createLogger({
-    verbose: true,  // Enable debug-level logging
-    pretty: true,   // Pretty print for development
+    level: 'debug',  // Enable debug-level logging
+    pretty: true,    // Pretty print for development
 });
 
 const apiRouter = createDrizzleRestAdapter({
@@ -47,12 +47,9 @@ const apiRouter = createDrizzleRestAdapter({
 ### Environment-Based Configuration
 
 ```typescript
-const verbose = process.env.NODE_ENV === 'development' || process.env.LOG_LEVEL === 'debug';
-
 const logger = createLogger({
-    verbose,
+    level: process.env.LOG_LEVEL || (process.env.NODE_ENV === 'development' ? 'debug' : 'info'),
     pretty: process.env.NODE_ENV === 'development',
-    level: process.env.LOG_LEVEL || (verbose ? 'debug' : 'info'),
     base: {
         service: 'my-api',
         environment: process.env.NODE_ENV || 'development'
@@ -66,9 +63,7 @@ const logger = createLogger({
 
 ```typescript
 interface LoggerOptions {
-    /** Enable verbose/debug logging */
-    verbose?: boolean;
-    /** Log level (default: 'info', 'debug' in verbose mode) */
+    /** Log level (default: 'info') */
     level?: 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace';
     /** Enable pretty printing for development */
     pretty?: boolean;
@@ -106,7 +101,7 @@ interface RequestLogOptions {
 
 #### Request Lifecycle
 - **Incoming Request**: Method, URL, query parameters, headers (optional)
-- **Request Body**: Validated request data (in verbose mode)
+- **Request Body**: Validated request data (in debug mode)
 - **Query Execution**: Database operations and performance metrics
 - **Response**: Status code, duration, record counts
 - **Errors**: Detailed error information with context
@@ -124,7 +119,7 @@ interface RequestLogOptions {
 
 ### Sample Log Output
 
-#### Verbose Mode (Development)
+#### Debug Mode (Development)
 ```json
 {
   "level": 30,
@@ -183,9 +178,8 @@ interface RequestLogOptions {
 ### Example Production Configuration
 ```typescript
 const logger = createLogger({
-    verbose: false,
-    pretty: false,
-    level: 'info'
+    level: 'info',
+    pretty: false
 });
 
 const apiRouter = createDrizzleRestAdapter({
@@ -214,7 +208,7 @@ chmod +x test-logging.sh
 ./test-logging.sh
 ```
 
-This will start the server with verbose logging and make various API calls to demonstrate different log types.
+This will start the server with debug logging and make various API calls to demonstrate different log types.
 
 ## Integration Examples
 
@@ -224,7 +218,7 @@ import express from 'express';
 import { createDrizzleRestAdapter, createLogger, requestLoggingMiddleware } from 'drizzle-rest-adapter';
 
 const app = express();
-const logger = createLogger({ verbose: true });
+const logger = createLogger({ level: 'debug' });
 
 // Add global request logging
 app.use(requestLoggingMiddleware(logger, {
@@ -273,7 +267,7 @@ const apiRouter = createDrizzleRestAdapter({
 
 ## Best Practices
 
-1. **Development**: Use verbose mode with pretty printing
+1. **Development**: Use debug mode with pretty printing
 2. **Production**: Use info level with JSON output
 3. **Staging**: Use debug level for troubleshooting
 4. **Monitoring**: Parse JSON logs with your log aggregation system
@@ -298,7 +292,7 @@ Our Pino logging implementation has been successfully integrated into the Drizzl
 - **Query Parameter Analysis**: Detailed logging of filters, sorting, pagination, and embedding
 - **Error Context**: Rich error information with stack traces and validation details
 
-#### 🔍 Verbose Debug Mode
+#### 🔍 Debug Mode
 - **Detailed Operation Logging**: Step-by-step operation breakdown in debug mode
 - **Schema Inspection**: Table discovery and route setup information
 - **Query Building**: Filter parsing, sort operations, and pagination details
@@ -324,7 +318,7 @@ Standard Request (INFO level):
 - Response completion: 1 log entry
 Total: 3 log entries per request
 
-Verbose Request (DEBUG level):
+Debug Request (DEBUG level):
 - Incoming request: 1 log entry
 - Request processing: 1 log entry
 - Parameter parsing: 1 log entry
@@ -389,9 +383,8 @@ All existing tests continue to pass with logging enabled:
 #### Development Configuration
 ```typescript
 const logger = createLogger({
-    verbose: true,          // Enable debug logging
-    pretty: true,           // Human-readable output
-    level: 'debug'          // Show all log levels
+    level: 'debug',         // Enable debug logging
+    pretty: true            // Human-readable output
 });
 
 // Result: Detailed request/response logs with timing and context
@@ -400,9 +393,8 @@ const logger = createLogger({
 #### Production Configuration
 ```typescript
 const logger = createLogger({
-    verbose: false,         // Disable debug logging
-    pretty: false,          // JSON output for log aggregation
-    level: 'info'           // Essential information only
+    level: 'info',          // Essential information only
+    pretty: false           // JSON output for log aggregation
 });
 
 // Result: Efficient structured logs suitable for monitoring systems
@@ -479,7 +471,7 @@ The logging infrastructure provides a foundation for:
 #### Complete Example Implementation
 The `/examples/express/src/server.ts` demonstrates:
 - Environment-based configuration
-- Verbose vs production logging modes
+- Debug vs production logging modes
 - Error handling integration
 - Graceful shutdown logging
 - Startup configuration logging

@@ -1,9 +1,7 @@
 import pino from 'pino';
 
 export interface LoggerOptions {
-    /** Enable verbose/debug logging */
-    verbose?: boolean;
-    /** Log level (default: 'info', 'debug' in verbose mode) */
+    /** Log level (default: 'info') */
     level?: 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace';
     /** Enable pretty printing for development */
     pretty?: boolean;
@@ -18,8 +16,7 @@ export interface LoggerOptions {
  */
 export function createLogger(options: LoggerOptions = {}): pino.Logger {
     const {
-        verbose = false,
-        level = verbose ? 'debug' : 'info',
+        level = 'info',
         pretty = process.env.NODE_ENV === 'development',
         base = {},
         pinoOptions = {}
