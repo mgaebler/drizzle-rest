@@ -19,12 +19,24 @@ async function startServer() {
     const drizzleApiRouter = createDrizzleRestAdapter({
         db: db,
         schema: schema,
+        // Enable OpenAPI documentation generation
+        openapi: {
+            info: {
+                title: 'Drizzle REST API Demo',
+                version: '1.0.0',
+                description: 'Auto-generated REST API from Drizzle schema with JSON-Server compatibility'
+            }
+        }
     });
 
     app.use('/api/v1', drizzleApiRouter);
 
     app.listen(3000, () => {
         console.log('Server with Drizzle REST Adapter is running on port 3000');
+        console.log('API Documentation: http://localhost:3000/api/v1/openapi.json');
+        console.log('Example requests:');
+        console.log('  GET http://localhost:3000/api/v1/users?_page=1&_per_page=5');
+        console.log('  GET http://localhost:3000/api/v1/posts?_embed=user&_sort=-createdAt');
     });
 }
 

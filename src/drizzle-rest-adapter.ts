@@ -5,6 +5,7 @@ import { createInsertSchema } from 'drizzle-zod';
 import express from 'express';
 
 import { ErrorHandler } from './utils/error-handler';
+import { OpenAPIGenerator } from './utils/openapi-generator';
 import { QueryBuilder } from './utils/query-builder';
 import { QueryParser } from './utils/query-parser';
 import { SchemaInspector } from './utils/schema-inspector';
@@ -26,11 +27,21 @@ export interface DrizzleRestAdapterOptions {
             disabledEndpoints?: Array<'GET_MANY' | 'GET_ONE' | 'CREATE' | 'UPDATE' | 'REPLACE' | 'DELETE'>;
         }
     };
+
+    /** OpenAPI documentation generation (auto-inferred from schema) */
+    openapi?: {
+        info?: {
+            title?: string; // defaults to 'REST API'
+            version?: string; // defaults to '1.0.0'
+            description?: string;
+        };
+        // All paths, schemas, parameters automatically inferred from Drizzle schema
+    };
 }
 
 export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => {
     const router = express.Router();
-    const { db, schema, tableOptions } = options;
+    const { db, schema, tableOptions, openapi } = options;
 
     // Use schema introspection instead of simple iteration
     const inspector = new SchemaInspector(schema);
@@ -39,6 +50,30 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
     // Create a map for quick table metadata lookup
     const tablesMetadataMap = new Map();
     tables.forEach(table => tablesMetadataMap.set(table.name, table));
+
+    // Set up OpenAPI documentation if enabled
+    if (openapi) {
+        const disabledEndpointsMap = new Map();
+        if (tableOptions) {
+            Object.entries(tableOptions).forEach(([tableName, config]) => {
+                if (config.disabledEndpoints) {
+                    disabledEndpointsMap.set(tableName, config.disabledEndpoints);
+                }
+            });
+        }
+
+        const openApiGenerator = new OpenAPIGenerator(tablesMetadataMap, disabledEndpointsMap);
+        const openApiSpec = openApiGenerator.generateSpec(openapi.info);
+
+        // Serve OpenAPI JSON specification
+        router.get('/openapi.json', (req, res) => {
+            res.json(openApiSpec);
+        });
+
+        // TODO: Add Swagger UI support in future iteration
+        // This would require adding swagger-ui-express dependency
+        console.log('OpenAPI documentation available at /openapi.json');
+    }
 
     tables.forEach(tableMetadata => {
         const table = schema[tableMetadata.name];

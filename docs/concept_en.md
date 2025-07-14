@@ -28,11 +28,22 @@ const drizzleApiRouter = createDrizzleRestAdapter({
       // Disable deleting users
       disabledEndpoints: ['DELETE']
     }
+  },
+  // Optional: Customize auto-generated OpenAPI docs (Phase 5 feature)
+  openapi: {
+    info: {
+      title: 'My API', // defaults to 'REST API'
+      version: '1.0.0', // defaults to '1.0.0'
+      description: 'Auto-generated REST API from Drizzle schema'
+    }
+    // All paths, schemas, and parameters automatically inferred!
   }
 });
 
 // Mount the generated API under a prefix
 // A client could now query, for example, /api/v1/users?status=active&_sort=created_at&_order=desc
+// With OpenAPI enabled, documentation is available at /api/v1/docs (Swagger UI)
+// And OpenAPI spec at /api/v1/openapi.json
 app.use('/api/v1', drizzleApiRouter);
 
 app.listen(3000, () => {
@@ -200,6 +211,20 @@ interface DrizzleRestAdapterOptions {
       }
     }
   };
+
+  /**
+   * OpenAPI documentation generation (Phase 5 feature)
+   * Automatically infers complete Swagger docs from schema and generated endpoints
+   */
+  openapi?: {
+    info?: {
+      title?: string; // defaults to 'REST API'
+      version?: string; // defaults to '1.0.0'
+      description?: string;
+    };
+    // All paths, schemas, parameters, and responses automatically inferred!
+    // No manual configuration needed - everything derived from Drizzle schema
+  };
 }
 ```
 
@@ -213,33 +238,6 @@ The implementation is carried out in several sequential phases to ensure a stabl
 
 **Goal**: Analyze Drizzle schema and extract metadata
 
-```typescript
-// Core module: schema-inspector.ts
-export class SchemaInspector {
-  constructor(private schema: Record<string, any>) {}
-
-  /**
-   * Extracts all tables from the schema
-   */
-  extractTables(): TableMetadata[] {
-    return Object.entries(this.schema)
-      .filter(([_, value]) => this.isTable(value))
-      .map(([name, table]) => ({
-        name,
-        tableName: table[Table.Symbol.Name],
-        columns: this.extractColumns(table),
-        primaryKey: this.extractPrimaryKey(table),
-        relations: [] // Will be populated later
-      }));
-  }
-
-  private extractColumns(table: DrizzleTable): ColumnMetadata[] {
-    // Access Drizzle internal metadata
-    // table[Table.Symbol.Columns] or similar
-  }
-}
-```
-
 **Deliverables Phase 1**:
 - Schema introspection works for all Drizzle table types
 - Metadata extraction for columns, primary keys, data types
@@ -249,142 +247,15 @@ export class SchemaInspector {
 
 **Goal**: Translate JSON-Server compatible query parameters into Drizzle queries
 
-```typescript
-// Core module: query-builder.ts
-export class QueryBuilder {
-  constructor(private table: DrizzleTable) {}
-
-  /**
-   * Builds a Drizzle query from JSON-Server query parameters
-   */
-  buildSelectQuery(params: QueryParams): SelectQueryBuilder {
-    let query = this.db.select().from(this.table);
-
-    // Apply filters
-    if (params.filters) {
-      query = this.applyFilters(query, params.filters);
-    }
-
-    // Apply sorting
-    if (params._sort) {
-      query = this.applySort(query, params._sort, params._order);
-    }
-
-    // Apply pagination
-    if (params._page || params._limit) {
-      query = this.applyPagination(query, params._page, params._limit);
-    }
-
-    return query;
-  }
-
-  private applyFilters(query: SelectQueryBuilder, filters: Record<string, any>): SelectQueryBuilder {
-    return Object.entries(filters).reduce((q, [key, value]) => {
-      // Parse JSON-Server filter syntax
-      if (key.endsWith('_gte')) {
-        const column = key.replace('_gte', '');
-        return q.where(gte(this.table[column], value));
-      }
-
-      if (key.endsWith('_lte')) {
-        const column = key.replace('_lte', '');
-        return q.where(lte(this.table[column], value));
-      }
-
-      if (key.endsWith('_like')) {
-        const column = key.replace('_like', '');
-        return q.where(like(this.table[column], `%${value}%`));
-      }
-
-      if (key.endsWith('_ne')) {
-        const column = key.replace('_ne', '');
-        return q.where(ne(this.table[column], value));
-      }
-
-      // Direct equality (Standard JSON-Server)
-      if (!key.startsWith('_')) {
-        if (Array.isArray(value)) {
-          return q.where(inArray(this.table[key], value));
-        }
-        return q.where(eq(this.table[key], value));
-      }
-
-      return q;
-    }, query);
-  }
-
-  private applySort(query: SelectQueryBuilder, sortField: string, order: 'asc' | 'desc' = 'asc'): SelectQueryBuilder {
-    if (order === 'desc') {
-      return query.orderBy(desc(this.table[sortField]));
-    }
-    return query.orderBy(asc(this.table[sortField]));
-  }
-
-  private applyPagination(query: SelectQueryBuilder, page: number = 1, limit: number = 10): SelectQueryBuilder {
-    const offset = (page - 1) * limit;
-    return query.limit(limit).offset(offset);
-  }
-}
-```
-
 **Deliverables Phase 2**:
 - Complete implementation of all JSON-Server filter operators
 - Robust query parameter parsing for JSON-Server syntax
 - Comprehensive tests for all filter combinations
-- Performance-optimized query generation
-- Support for `_embed` and `_expand` parameters
+- Support for `_embed` parameters
 
 ### Phase 3: HTTP Handlers and Middleware
 
 **Goal**: Request/Response handling for all CRUD operations
-
-```typescript
-// Core module: handlers.ts
-export class CrudHandlers {
-  constructor(
-    private db: DrizzleClient,
-    private table: DrizzleTable,
-    private validator: ZodValidator
-  ) {}
-
-  /**
-   * GET /table - List with filtering, sorting, pagination
-   */
-  async getMany(req: Request, res: Response): Promise<void> {
-    try {
-      const params = this.parseQueryParams(req.query);
-      const queryBuilder = new QueryBuilder(this.table);
-      const query = queryBuilder.buildSelectQuery(params);
-
-      const [results, totalCount] = await Promise.all([
-        query.execute(),
-        this.getTotalCount(params.filters)
-      ]);
-
-      res.set('X-Total-Count', String(totalCount));
-      res.json(results);
-    } catch (error) {
-      this.handleError(res, error);
-    }
-  }
-
-  /**
-   * POST /table - Create a new record
-   */
-  async createOne(req: Request, res: Response): Promise<void> {
-    try {
-      const validatedData = this.validator.validateInsert(req.body);
-      const result = await this.db.insert(this.table).values(validatedData).returning();
-
-      res.status(201).json(result[0]);
-    } catch (error) {
-      this.handleError(res, error);
-    }
-  }
-
-  // ... other handlers for getOne, updateOne, deleteOne
-}
-```
 
 **Deliverables Phase 3**:
 - Complete CRUD handler implementation
@@ -396,53 +267,6 @@ export class CrudHandlers {
 
 **Goal**: Dynamic router creation and framework integration
 
-```typescript
-// Main module: adapter.ts
-export function createDrizzleRestAdapter(options: DrizzleRestAdapterOptions): Router {
-  const inspector = new SchemaInspector(options.schema);
-  const tables = inspector.extractTables();
-  const router = express.Router();
-
-  // Create and route handlers for each table
-  tables.forEach(tableMetadata => {
-    const handlers = new CrudHandlers(
-      options.db,
-      options.schema[tableMetadata.name],
-      new ZodValidator(tableMetadata)
-    );
-
-    const tablePath = `/${tableMetadata.name}`;
-    const tableOptions = options.tableOptions?.[tableMetadata.name];
-
-    // Register CRUD routes (if not disabled)
-    if (!tableOptions?.disabledEndpoints?.includes('GET_MANY')) {
-      router.get(tablePath, handlers.getMany.bind(handlers));
-    }
-
-    if (!tableOptions?.disabledEndpoints?.includes('CREATE')) {
-      router.post(tablePath, handlers.createOne.bind(handlers));
-    }
-
-    if (!tableOptions?.disabledEndpoints?.includes('GET_ONE')) {
-      router.get(`${tablePath}/:id`, handlers.getOne.bind(handlers));
-    }
-
-    if (!tableOptions?.disabledEndpoints?.includes('UPDATE')) {
-      router.patch(`${tablePath}/:id`, handlers.updateOne.bind(handlers));
-    }
-
-    if (!tableOptions?.disabledEndpoints?.includes('DELETE')) {
-      router.delete(`${tablePath}/:id`, handlers.deleteOne.bind(handlers));
-    }
-
-    // Relation routes for nested resources
-    this.registerRelationRoutes(router, tableMetadata, handlers);
-  });
-
-  return router;
-}
-```
-
 **Deliverables Phase 4**:
 - Complete adapter main function
 - Framework-agnostic router creation
@@ -453,101 +277,16 @@ export function createDrizzleRestAdapter(options: DrizzleRestAdapterOptions): Ro
 
 **Goal**: Hooks, performance optimizations, and advanced functionalities
 
-```typescript
-// Advanced Features
-export class AdvancedHandlers extends CrudHandlers {
-  async getMany(req: Request, res: Response): Promise<void> {
-    const tableConfig = this.options.tableOptions?.[this.tableName];
-
-    // Execute before-hook
-    if (tableConfig?.hooks?.beforeOperation) {
-      await tableConfig.hooks.beforeOperation({
-        operation: 'GET_MANY',
-        table: this.tableName,
-        params: req.query,
-        user: req.user // if authentication middleware is present
-      });
-    }
-
-    // Execute standard operation
-    const result = await super.getMany(req, res);
-
-    // Execute after-hook
-    if (tableConfig?.hooks?.afterOperation) {
-      const modifiedResult = await tableConfig.hooks.afterOperation({
-        operation: 'GET_MANY',
-        table: this.tableName,
-        result: result
-      }, result);
-
-      return modifiedResult;
-    }
-
-    return result;
-  }
-}
-```
-
 **Deliverables Phase 5**:
 - Hook system for custom logic
 - Performance optimizations (query caching, connection pooling)
 - Advanced relation support (deep nesting)
+- **OpenAPI documentation generation** (auto-generated Swagger docs)
 - Comprehensive documentation and examples
 
 ### Phase 6: Testing and Production Readiness
 
 **Goal**: Comprehensive tests and production optimizations
-
-```typescript
-// Test suite example
-describe('DrizzleRestAdapter', () => {
-  let adapter: Router;
-  let testDb: DrizzleClient;
-
-  beforeAll(async () => {
-    testDb = await setupTestDatabase();
-    adapter = createDrizzleRestAdapter({
-      db: testDb,
-      schema: testSchema
-    });
-  });
-
-  describe('GET /users', () => {
-    it('should return all users without filters', async () => {
-      const response = await request(adapter).get('/users');
-      expect(response.status).toBe(200);
-      expect(response.body).toHaveLength(3);
-    });
-
-    it('should filter users by status', async () => {
-      const response = await request(adapter).get('/users?status=active');
-      expect(response.status).toBe(200);
-      expect(response.body.every(user => user.status === 'active')).toBe(true);
-    });
-
-    it('should sort users by created_at descending', async () => {
-      const response = await request(adapter).get('/users?_sort=created_at&_order=desc');
-      expect(response.status).toBe(200);
-      expect(response.body[0].created_at).toBeGreaterThan(response.body[1].created_at);
-    });
-
-    it('should paginate users correctly', async () => {
-      const response = await request(adapter).get('/users?_page=2&_limit=5');
-      expect(response.status).toBe(200);
-      expect(response.body).toHaveLength(5);
-      expect(response.headers['x-total-count']).toBeDefined();
-    });
-
-    it('should filter with range operators', async () => {
-      const response = await request(adapter).get('/users?age_gte=18&age_lte=65');
-      expect(response.status).toBe(200);
-      expect(response.body.every(user => user.age >= 18 && user.age <= 65)).toBe(true);
-    });
-  });
-
-  // ... more tests for all CRUD operations and edge cases
-});
-```
 
 **Deliverables Phase 6**:
 - Complete test suite with >90% coverage
