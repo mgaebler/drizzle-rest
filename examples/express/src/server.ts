@@ -33,17 +33,10 @@ app.get('/', (req, res) => {
         version: '1.0.0',
         documentation: {
             openapi: `${baseUrl}/api/v1/openapi.json`,
+            swaggerUI: `${baseUrl}/api/v1/api-docs`,
+            discovery: `${baseUrl}/api/v1/discovery`,
             endpoints: `${baseUrl}/api/v1`,
         },
-        features: [
-            '✅ Full CRUD operations',
-            '✅ JSON-Server compatible query syntax',
-            '✅ Filtering, sorting, and pagination',
-            '✅ Relationship embedding',
-            '✅ Type-safe with Zod validation',
-            '✅ OpenAPI documentation',
-            '✅ Multi-table support'
-        ],
         resources: {
             users: `${baseUrl}/api/v1/users`,
             posts: `${baseUrl}/api/v1/posts`,
@@ -78,12 +71,28 @@ async function startServer() {
                     logHeaders: useDebugLogging
                 }
             },
-            // Enable OpenAPI documentation generation
+            // Enable OpenAPI documentation generation with API explorer features
             openapi: {
                 info: {
                     title: 'Drizzle REST Adapter Demo API',
                     version: '1.0.0',
-                    description: 'A demonstration of the drizzle-rest-adapter with comprehensive logging'
+                    description: 'A demonstration of the drizzle-rest-adapter with comprehensive logging and API exploration features'
+                },
+                // Enable Swagger UI for interactive API testing
+                ui: {
+                    enabled: true,
+                    path: '/api-docs',
+                    title: 'Drizzle REST API Explorer',
+                    customCss: `
+                        .swagger-ui .topbar { background-color: #1a1a1a; }
+                        .swagger-ui .topbar .download-url-wrapper { display: none; }
+                        .swagger-ui .info .title { color: #2563eb; }
+                    `
+                },
+                // Enable API discovery endpoint for programmatic exploration
+                discovery: {
+                    enabled: true,
+                    path: '/discovery'
                 }
             }
         });
@@ -100,7 +109,10 @@ async function startServer() {
             }, '🎉 Server started successfully!');
 
             logger.info('🌐 Server running on http://0.0.0.0:' + PORT);
-            logger.info('📚 API Documentation: http://0.0.0.0:' + PORT + '/api/v1/openapi.json');
+            logger.info('📚 API Documentation:');
+            logger.info(`   OpenAPI Spec: http://0.0.0.0:${PORT}/api/v1/openapi.json`);
+            logger.info(`   Swagger UI: http://0.0.0.0:${PORT}/api/v1/api-docs`);
+            logger.info(`   API Discovery: http://0.0.0.0:${PORT}/api/v1/discovery`);
             logger.info('🔍 Health Check: http://0.0.0.0:' + PORT + '/health');
             logger.info('');
             logger.info('🚀 Try these example requests:');

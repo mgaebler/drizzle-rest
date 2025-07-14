@@ -13,6 +13,10 @@ export interface OpenAPIObject {
         version: string;
         description?: string;
     };
+    servers?: {
+        url: string;
+        description?: string;
+    }[];
     paths: PathsObject;
     components: {
         schemas: SchemasObject;
@@ -96,10 +100,10 @@ export class OpenAPIGenerator {
         private disabledEndpoints: Map<string, string[]> = new Map()
     ) { }
 
-    generateSpec(info?: OpenAPIInfo): OpenAPIObject {
+    generateSpec(info?: OpenAPIInfo, serverUrl?: string): OpenAPIObject {
         const tables = Array.from(this.tablesMetadata.values());
 
-        return {
+        const spec: OpenAPIObject = {
             openapi: '3.0.0',
             info: {
                 title: info?.title || 'REST API',
@@ -111,6 +115,15 @@ export class OpenAPIGenerator {
                 schemas: this.generateSchemas(tables)
             }
         };
+
+        if (serverUrl) {
+            spec.servers = [{
+                url: serverUrl,
+                description: 'API Server'
+            }];
+        }
+
+        return spec;
     }
 
     private generatePaths(tables: TableMetadata[]): PathsObject {

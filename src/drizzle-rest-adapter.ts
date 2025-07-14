@@ -4,6 +4,7 @@ import { PgliteDatabase } from 'drizzle-orm/pglite';
 import { createInsertSchema } from 'drizzle-zod';
 import express from 'express';
 
+import { APIExplorer, APIExplorerOptions } from './utils/api-explorer';
 import { ErrorHandler } from './utils/error-handler';
 import { createLogger, Logger, LoggerOptions } from './utils/logger';
 import { OpenAPIGenerator } from './utils/openapi-generator';
@@ -38,7 +39,7 @@ export interface DrizzleRestAdapterOptions {
             description?: string;
         };
         // All paths, schemas, parameters automatically inferred from Drizzle schema
-    };
+    } & APIExplorerOptions;
 
     /** Logging configuration */
     logging?: {
@@ -109,12 +110,23 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
         }
 
         const openApiGenerator = new OpenAPIGenerator(tablesMetadataMap, disabledEndpointsMap);
-        const openApiSpec = openApiGenerator.generateSpec(openapi.info);
 
-        // Serve OpenAPI JSON specification
+        // Serve OpenAPI JSON specification with dynamic server URL
         router.get('/openapi.json', (req, res) => {
             logger.debug({ requestId: (req as any).requestId }, 'Serving OpenAPI specification');
+            const serverUrl = `${req.protocol}://${req.get('host')}${req.baseUrl}`;
+            const openApiSpec = openApiGenerator.generateSpec(openapi.info, serverUrl);
             res.json(openApiSpec);
+        });
+
+        // Generate a spec for the API explorer (without server URL since it's handled dynamically)
+        const staticOpenApiSpec = openApiGenerator.generateSpec(openapi.info);
+
+        // Set up API explorer features (Swagger UI, discovery endpoint)
+        const apiExplorer = new APIExplorer(tablesMetadataMap, disabledEndpointsMap, logger);
+        apiExplorer.setupRoutes(router, staticOpenApiSpec, {
+            ui: openapi.ui,
+            discovery: openapi.discovery
         });
 
         logger.info('OpenAPI documentation available at /openapi.json');
