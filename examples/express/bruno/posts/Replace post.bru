@@ -1,0 +1,26 @@
+meta {
+  name: Replace post
+  type: http
+  seq: 5
+}
+
+put {
+  url: {{baseUrl}}/posts/:id
+  body: json
+  auth: none
+}
+
+params:path {
+  id: 
+}
+
+body:json {
+  {
+    "title": "",
+    "content": "",
+    "excerpt": "",
+    "slug": "",
+    "published": "",
+    "authorId": ""
+  }
+}

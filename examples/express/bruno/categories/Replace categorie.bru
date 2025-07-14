@@ -1,0 +1,24 @@
+meta {
+  name: Replace categorie
+  type: http
+  seq: 5
+}
+
+put {
+  url: {{baseUrl}}/categories/:id
+  body: json
+  auth: none
+}
+
+params:path {
+  id: 
+}
+
+body:json {
+  {
+    "name": "",
+    "description": "",
+    "slug": "",
+    "color": ""
+  }
+}

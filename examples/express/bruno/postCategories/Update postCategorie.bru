@@ -1,0 +1,22 @@
+meta {
+  name: Update postCategorie
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{baseUrl}}/postCategories/:id
+  body: json
+  auth: none
+}
+
+params:path {
+  id: 
+}
+
+body:json {
+  {
+    "postId": "",
+    "categoryId": ""
+  }
+}

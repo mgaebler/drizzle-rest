@@ -1,0 +1,36 @@
+meta {
+  name: List categories
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/categories
+  body: none
+  auth: none
+}
+
+params:query {
+  ~_page: 
+  ~_per_page: 
+  ~_start: 
+  ~_end: 
+  ~_limit: 
+  ~_sort: 
+  ~name: 
+  ~name_like: 
+  ~name_ne: 
+  ~description: 
+  ~description_like: 
+  ~description_ne: 
+  ~slug: 
+  ~slug_like: 
+  ~slug_ne: 
+  ~color: 
+  ~color_like: 
+  ~color_ne: 
+  ~createdAt: 
+  ~createdAt_gte: 
+  ~createdAt_lte: 
+  ~createdAt_ne: 
+}

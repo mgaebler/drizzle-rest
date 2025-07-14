@@ -1,0 +1,24 @@
+meta {
+  name: Update comment
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{baseUrl}}/comments/:id
+  body: json
+  auth: none
+}
+
+params:path {
+  id: 
+}
+
+body:json {
+  {
+    "content": "",
+    "postId": "",
+    "authorId": "",
+    "parentId": ""
+  }
+}

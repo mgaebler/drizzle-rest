@@ -1,0 +1,49 @@
+meta {
+  name: List posts
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/posts
+  body: none
+  auth: none
+}
+
+params:query {
+  ~_page: 
+  ~_per_page: 
+  ~_start: 
+  ~_end: 
+  ~_limit: 
+  ~_sort: 
+  ~_embed: 
+  ~title: 
+  ~title_like: 
+  ~title_ne: 
+  ~content: 
+  ~content_like: 
+  ~content_ne: 
+  ~excerpt: 
+  ~excerpt_like: 
+  ~excerpt_ne: 
+  ~slug: 
+  ~slug_like: 
+  ~slug_ne: 
+  ~published: 
+  ~published_gte: 
+  ~published_lte: 
+  ~published_ne: 
+  ~authorId: 
+  ~authorId_gte: 
+  ~authorId_lte: 
+  ~authorId_ne: 
+  ~createdAt: 
+  ~createdAt_gte: 
+  ~createdAt_lte: 
+  ~createdAt_ne: 
+  ~updatedAt: 
+  ~updatedAt_gte: 
+  ~updatedAt_lte: 
+  ~updatedAt_ne: 
+}

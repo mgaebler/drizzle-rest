@@ -1,0 +1,22 @@
+meta {
+  name: Replace postTag
+  type: http
+  seq: 5
+}
+
+put {
+  url: {{baseUrl}}/postTags/:id
+  body: json
+  auth: none
+}
+
+params:path {
+  id: 
+}
+
+body:json {
+  {
+    "postId": "",
+    "tagId": ""
+  }
+}

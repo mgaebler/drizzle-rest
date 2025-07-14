@@ -1,0 +1,40 @@
+meta {
+  name: List users
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/users
+  body: none
+  auth: none
+}
+
+params:query {
+  ~_page: 
+  ~_per_page: 
+  ~_start: 
+  ~_end: 
+  ~_limit: 
+  ~_sort: 
+  ~name: 
+  ~name_like: 
+  ~name_ne: 
+  ~email: 
+  ~email_like: 
+  ~email_ne: 
+  ~bio: 
+  ~bio_like: 
+  ~bio_ne: 
+  ~avatar: 
+  ~avatar_like: 
+  ~avatar_ne: 
+  ~createdAt: 
+  ~createdAt_gte: 
+  ~createdAt_lte: 
+  ~createdAt_ne: 
+  ~updatedAt: 
+  ~updatedAt_gte: 
+  ~updatedAt_lte: 
+  ~updatedAt_ne: 
+}

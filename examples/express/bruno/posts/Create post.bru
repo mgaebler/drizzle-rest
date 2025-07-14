@@ -1,0 +1,22 @@
+meta {
+  name: Create post
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/posts
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "title": "",
+    "content": "",
+    "excerpt": "",
+    "slug": "",
+    "published": "",
+    "authorId": ""
+  }
+}

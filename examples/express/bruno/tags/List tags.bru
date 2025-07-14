@@ -1,0 +1,31 @@
+meta {
+  name: List tags
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/tags
+  body: none
+  auth: none
+}
+
+params:query {
+  ~_page: 
+  ~_per_page: 
+  ~_start: 
+  ~_end: 
+  ~_limit: 
+  ~_sort: 
+  ~_embed: 
+  ~name: 
+  ~name_like: 
+  ~name_ne: 
+  ~slug: 
+  ~slug_like: 
+  ~slug_ne: 
+  ~createdAt: 
+  ~createdAt_gte: 
+  ~createdAt_lte: 
+  ~createdAt_ne: 
+}

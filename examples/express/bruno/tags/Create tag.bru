@@ -1,0 +1,18 @@
+meta {
+  name: Create tag
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/tags
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "",
+    "slug": ""
+  }
+}

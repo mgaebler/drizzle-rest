@@ -1,0 +1,22 @@
+meta {
+  name: Replace tag
+  type: http
+  seq: 5
+}
+
+put {
+  url: {{baseUrl}}/tags/:id
+  body: json
+  auth: none
+}
+
+params:path {
+  id: 
+}
+
+body:json {
+  {
+    "name": "",
+    "slug": ""
+  }
+}

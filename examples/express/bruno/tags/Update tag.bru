@@ -1,0 +1,22 @@
+meta {
+  name: Update tag
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{baseUrl}}/tags/:id
+  body: json
+  auth: none
+}
+
+params:path {
+  id: 
+}
+
+body:json {
+  {
+    "name": "",
+    "slug": ""
+  }
+}

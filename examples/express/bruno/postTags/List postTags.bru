@@ -1,0 +1,29 @@
+meta {
+  name: List postTags
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/postTags
+  body: none
+  auth: none
+}
+
+params:query {
+  ~_page: 
+  ~_per_page: 
+  ~_start: 
+  ~_end: 
+  ~_limit: 
+  ~_sort: 
+  ~_embed: 
+  ~postId: 
+  ~postId_gte: 
+  ~postId_lte: 
+  ~postId_ne: 
+  ~tagId: 
+  ~tagId_gte: 
+  ~tagId_lte: 
+  ~tagId_ne: 
+}

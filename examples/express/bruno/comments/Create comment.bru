@@ -1,0 +1,20 @@
+meta {
+  name: Create comment
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/comments
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "content": "",
+    "postId": "",
+    "authorId": "",
+    "parentId": ""
+  }
+}

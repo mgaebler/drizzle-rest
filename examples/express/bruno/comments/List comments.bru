@@ -1,0 +1,44 @@
+meta {
+  name: List comments
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/comments
+  body: none
+  auth: none
+}
+
+params:query {
+  ~_page: 
+  ~_per_page: 
+  ~_start: 
+  ~_end: 
+  ~_limit: 
+  ~_sort: 
+  ~_embed: 
+  ~content: 
+  ~content_like: 
+  ~content_ne: 
+  ~postId: 
+  ~postId_gte: 
+  ~postId_lte: 
+  ~postId_ne: 
+  ~authorId: 
+  ~authorId_gte: 
+  ~authorId_lte: 
+  ~authorId_ne: 
+  ~parentId: 
+  ~parentId_gte: 
+  ~parentId_lte: 
+  ~parentId_ne: 
+  ~createdAt: 
+  ~createdAt_gte: 
+  ~createdAt_lte: 
+  ~createdAt_ne: 
+  ~updatedAt: 
+  ~updatedAt_gte: 
+  ~updatedAt_lte: 
+  ~updatedAt_ne: 
+}

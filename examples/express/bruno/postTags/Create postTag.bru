@@ -1,0 +1,18 @@
+meta {
+  name: Create postTag
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/postTags
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "postId": "",
+    "tagId": ""
+  }
+}

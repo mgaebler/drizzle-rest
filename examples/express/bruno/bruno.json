@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "Drizzle REST Adapter Demo API",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

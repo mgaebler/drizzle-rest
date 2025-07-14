@@ -1,0 +1,15 @@
+meta {
+  name: Get postTag by ID
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/postTags/:id
+  body: none
+  auth: none
+}
+
+params:path {
+  id: 
+}

@@ -1,0 +1,24 @@
+meta {
+  name: Replace comment
+  type: http
+  seq: 5
+}
+
+put {
+  url: {{baseUrl}}/comments/:id
+  body: json
+  auth: none
+}
+
+params:path {
+  id: 
+}
+
+body:json {
+  {
+    "content": "",
+    "postId": "",
+    "authorId": "",
+    "parentId": ""
+  }
+}

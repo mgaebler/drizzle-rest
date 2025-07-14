@@ -1,0 +1,29 @@
+meta {
+  name: List postCategories
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/postCategories
+  body: none
+  auth: none
+}
+
+params:query {
+  ~_page: 
+  ~_per_page: 
+  ~_start: 
+  ~_end: 
+  ~_limit: 
+  ~_sort: 
+  ~_embed: 
+  ~postId: 
+  ~postId_gte: 
+  ~postId_lte: 
+  ~postId_ne: 
+  ~categoryId: 
+  ~categoryId_gte: 
+  ~categoryId_lte: 
+  ~categoryId_ne: 
+}
