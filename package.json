@@ -1,20 +1,57 @@
 {
-    "name": "drizzle-rest",
-    "version": "1.0.0",
-    "description": "",
-    "main": "index.js",
+    "name": "drizzle-rest-adapter",
+    "version": "0.1.0",
+    "description": "A dynamic REST API adapter for Drizzle ORM with JSON-Server compatible query syntax",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
     "type": "module",
+    "exports": {
+        ".": {
+            "import": "./dist/index.js",
+            "types": "./dist/index.d.ts"
+        }
+    },
+    "files": [
+        "dist",
+        "README.md",
+        "LICENSE"
+    ],
     "scripts": {
         "start": "node dist/index.js",
         "dev": "tsx --require tsconfig-paths/register --watch src/",
-        "build": "tsc --project tsconfig.json && tsc-alias -p tsconfig.json",
-        "db:migrate": "tsx --require tsconfig-paths/register src/migrate.ts",
+        "build": "tsc --project tsconfig.build.json && tsc-alias -p tsconfig.build.json",
+        "build:watch": "npm run build -- --watch",
+        "prepublishOnly": "npm run build && npm test",
+        "db:migrate": "drizzle-kit migrate",
         "db:generate": "drizzle-kit generate",
-        "test": "vitest --run"
+        "test": "vitest --run",
+        "test:watch": "vitest",
+        "lint": "eslint src --ext .ts,.tsx",
+        "lint:fix": "eslint src --ext .ts,.tsx --fix"
     },
-    "keywords": [],
-    "author": "",
-    "license": "ISC",
+    "keywords": [
+        "drizzle",
+        "drizzle-orm",
+        "rest",
+        "api",
+        "json-server",
+        "typescript",
+        "express",
+        "crud",
+        "adapter",
+        "database",
+        "postgresql"
+    ],
+    "author": "Marian Gaebler <marian.gaebler@gmail.com>",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/mgaebler/drizzle-rest-adapter.git"
+    },
+    "bugs": {
+        "url": "https://github.com/mgaebler/drizzle-rest-adapter/issues"
+    },
+    "homepage": "https://github.com/mgaebler/drizzle-rest-adapter#readme",
     "dependencies": {
         "@electric-sql/pglite": "^0.3.4",
         "drizzle-orm": "^0.44.2",
