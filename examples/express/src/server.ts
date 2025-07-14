@@ -32,9 +32,6 @@ app.get('/', (req, res) => {
         description: 'A blog API demonstrating drizzle-rest-adapter capabilities',
         version: '1.0.0',
         documentation: {
-            openapi: `${baseUrl}/api/v1/openapi.json`,
-            swaggerUI: `${baseUrl}/api/v1/api-docs`,
-            discovery: `${baseUrl}/api/v1/discovery`,
             endpoints: `${baseUrl}/api/v1`,
         },
         resources: {
@@ -70,30 +67,6 @@ async function startServer() {
                     logResponseBody: false, // Keep response logging disabled for performance
                     logHeaders: useDebugLogging
                 }
-            },
-            // Enable OpenAPI documentation generation with API explorer features
-            openapi: {
-                info: {
-                    title: 'Drizzle REST Adapter Demo API',
-                    version: '1.0.0',
-                    description: 'A demonstration of the drizzle-rest-adapter with comprehensive logging and API exploration features'
-                },
-                // Enable Swagger UI for interactive API testing
-                ui: {
-                    enabled: true,
-                    path: '/api-docs',
-                    title: 'Drizzle REST API Explorer',
-                    customCss: `
-                        .swagger-ui .topbar { background-color: #1a1a1a; }
-                        .swagger-ui .topbar .download-url-wrapper { display: none; }
-                        .swagger-ui .info .title { color: #2563eb; }
-                    `
-                },
-                // Enable API discovery endpoint for programmatic exploration
-                discovery: {
-                    enabled: true,
-                    path: '/discovery'
-                }
             }
         });
 
@@ -104,15 +77,10 @@ async function startServer() {
             logger.info({
                 port: PORT,
                 environment: process.env.NODE_ENV || 'development',
-                debugLogging: useDebugLogging,
-                openApiUrl: `http://0.0.0.0:${PORT}/api/v1/openapi.json`
+                debugLogging: useDebugLogging
             }, '🎉 Server started successfully!');
 
             logger.info('🌐 Server running on http://0.0.0.0:' + PORT);
-            logger.info('📚 API Documentation:');
-            logger.info(`   OpenAPI Spec: http://0.0.0.0:${PORT}/api/v1/openapi.json`);
-            logger.info(`   Swagger UI: http://0.0.0.0:${PORT}/api/v1/api-docs`);
-            logger.info(`   API Discovery: http://0.0.0.0:${PORT}/api/v1/discovery`);
             logger.info('🔍 Health Check: http://0.0.0.0:' + PORT + '/health');
             logger.info('');
             logger.info('🚀 Try these example requests:');
@@ -120,7 +88,7 @@ async function startServer() {
             logger.info(`   curl http://0.0.0.0:${PORT}/api/v1/users/1?_embed=posts`);
             logger.info(`   curl http://0.0.0.0:${PORT}/api/v1/posts?title_like=Drizzle`);
             logger.info('');
-            logger.info('📖 Full documentation available at the root endpoint: http://0.0.0.0:' + PORT);
+            logger.info('📖 API endpoints available at: http://0.0.0.0:' + PORT + '/api/v1');
 
             if (useDebugLogging) {
                 logger.debug('🐛 Debug logging enabled - you will see detailed request/response logs');

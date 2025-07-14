@@ -114,7 +114,7 @@ interface RequestLogOptions {
 
 #### System Events
 - **Adapter Initialization**: Table discovery and route setup
-- **OpenAPI**: Documentation generation status
+- **Configuration**: Request logging and table setup status
 - **Middleware**: Request logging configuration
 
 ### Sample Log Output
@@ -426,7 +426,6 @@ const logger = createLogger({
 [2025-07-14 14:54:54] INFO: Drizzle REST Adapter initialization completed
     tablesProcessed: 7
     routesRegistered: 35
-    hasOpenApi: true
     hasRequestLogging: true
 ```
 

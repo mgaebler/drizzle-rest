@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+- OpenAPI documentation generation - moved out of core adapter to maintain single responsibility principle
+
 ### Added
 - Hook system for custom authentication and business logic
 - Query result caching for improved performance

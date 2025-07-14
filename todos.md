@@ -21,12 +21,11 @@ This document tracks the implementation progress and **open source shipping chec
 ### 🧪 **Quality Assurance**
 - [x] **Core Functionality**: JSON-Server dialect 100% complete
 - [x] **Integration Tests**: Comprehensive test suite (56+ tests across 8 files)
-- [x] **Unit Test Coverage**: Individual module testing (schema-inspector, openapi-generator)
+- [x] **Unit Test Coverage**: Individual module testing (schema-inspector, query-builder)
 - [ ] **Performance Benchmarks**: Basic performance testing
 - [ ] **Cross-Platform Testing**: Test on different Node.js versions
 - [ ] **Database Compatibility**: Test with PostgreSQL, MySQL, SQLite
 - [ ] **Memory Leak Testing**: Ensure no memory leaks in long-running servers
-- [x] **OpenAPI Documentation**: Auto-generated API documentation
 - [ ] **Dependency Vulnerabilities**: Run `npm audit` and fix issues (7 moderate vulnerabilities found)
 
 ### 📖 **Documentation**
@@ -44,7 +43,7 @@ This document tracks the implementation progress and **open source shipping chec
 - [x] **IDE Support**: Test autocomplete and IntelliSense
 - [x] **Error Messages**: Improve error message clarity
 - [ ] **Debug Logging**: Add optional debug logging
-- [x] **Development Tools**: Consider CLI tool for schema inspection (OpenAPI generator implemented)
+- [x] **Development Tools**: Schema inspection and query building utilities
 
 ### 🌟 **Community & Marketing**
 - [x] **GitHub Repository**: Create public repo with proper description
@@ -321,14 +320,13 @@ The JSON-Server dialect specification from the technical concept is **FULLY IMPL
 - [x] All JSON-Server filter operator tests (`_like`, `_ne`, `_gte`, `_lte`)
 - [x] Pagination tests (both page-based and range-based)
 - [x] Error scenario testing (404, validation errors)
-- [x] Unit tests for individual modules (schema-inspector, openapi-generator)
+- [x] Unit tests for individual modules (schema-inspector, query-builder)
 - [ ] **TODO**: Performance benchmarks
 - [ ] **TODO**: Load testing
 
 #### 6.2 Documentation
 - [x] Technical concept documentation - **concept_en.md complete**
 - [x] Implementation task tracking - **tasks.md maintained**
-- [x] OpenAPI documentation - **Auto-generated via openapi-generator.ts**
 - [ ] **TODO**: API documentation
 - [ ] **TODO**: Migration guide from JSON-Server
 - [ ] **TODO**: Configuration examples
@@ -359,7 +357,7 @@ The JSON-Server dialect specification from the technical concept is **FULLY IMPL
 4. **Examples Directory** - Practical usage examples needed
 
 ### 🟢 **Low Priority - Documentation & Marketing**
-1. **API Reference Documentation** - Separate from OpenAPI
+1. **API Reference Documentation** - Comprehensive API documentation
 2. **Migration Guide** - JSON-Server to Drizzle REST adapter guide
 3. **Blog Post/Article** - Technical announcement content
 4. **Video Tutorial** - Demo content creation
@@ -415,7 +413,9 @@ src/
 │   ├── filter-builder.ts      ✅ Complete (all operators)
 │   ├── embed-builder.ts       ✅ Complete (relationship handling)
 │   ├── error-handler.ts       ✅ Complete (standardized errors)
-│   └── openapi-generator.ts   ✅ Complete (auto-generated API docs)
+│   ├── query-builder.ts       ✅ Complete (database query construction)
+│   ├── query-parser.ts        ✅ Complete (HTTP parameter parsing)
+│   └── schema-inspector.ts    ✅ Complete (schema introspection)
 ├── handlers/                  ✅ Integrated into main adapter
 ├── config/                    ✅ Integrated into main adapter interface
 ├── hooks/                     ❌ Missing (Phase 5)
@@ -453,7 +453,7 @@ src/
 ### 📊 **Key Changes in This Update:**
 - ✅ Marked `.npmignore` and GitHub repository as complete
 - ✅ Updated test count from "147+" to "56 tests across 8 files" (more accurate)
-- ✅ Added OpenAPI generator completion status
+- ✅ Removed OpenAPI functionality - adapter focuses on core HTTP-to-DB translation
 - ✅ Identified security vulnerabilities requiring fixes
 - ✅ Updated unit test coverage status
 - 🚨 Added urgent action items section for immediate focus

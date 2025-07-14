@@ -28,22 +28,11 @@ const drizzleApiRouter = createDrizzleRestAdapter({
       // Disable deleting users
       disabledEndpoints: ['DELETE']
     }
-  },
-  // Optional: Customize auto-generated OpenAPI docs (Phase 5 feature)
-  openapi: {
-    info: {
-      title: 'My API', // defaults to 'REST API'
-      version: '1.0.0', // defaults to '1.0.0'
-      description: 'Auto-generated REST API from Drizzle schema'
-    }
-    // All paths, schemas, and parameters automatically inferred!
   }
 });
 
 // Mount the generated API under a prefix
 // A client could now query, for example, /api/v1/users?status=active&_sort=created_at&_order=desc
-// With OpenAPI enabled, documentation is available at /api/v1/docs (Swagger UI)
-// And OpenAPI spec at /api/v1/openapi.json
 app.use('/api/v1', drizzleApiRouter);
 
 app.listen(3000, () => {
@@ -211,19 +200,6 @@ interface DrizzleRestAdapterOptions {
       }
     }
   };
-
-  /**
-   * OpenAPI documentation generation (Phase 5 feature)
-   * Automatically infers complete Swagger docs from schema and generated endpoints
-   */
-  openapi?: {
-    info?: {
-      title?: string; // defaults to 'REST API'
-      version?: string; // defaults to '1.0.0'
-      description?: string;
-    };
-    // All paths, schemas, parameters, and responses automatically inferred!
-    // No manual configuration needed - everything derived from Drizzle schema
   };
 }
 ```
@@ -281,7 +257,6 @@ The implementation is carried out in several sequential phases to ensure a stabl
 - Hook system for custom logic
 - Performance optimizations (query caching, connection pooling)
 - Advanced relation support (deep nesting)
-- **OpenAPI documentation generation** (auto-generated Swagger docs)
 - Comprehensive documentation and examples
 
 ### Phase 6: Testing and Production Readiness
