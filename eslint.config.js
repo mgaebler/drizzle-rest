@@ -28,6 +28,9 @@ export default defineConfig([
             // 'drizzle/enforce-update-with-where': 'error',
             '@stylistic/no-multiple-empty-lines': ['error', { max: 1, maxEOF: 1 }],
             '@typescript-eslint/no-explicit-any': 'off',
+            '@typescript-eslint/no-unused-vars': ['error', {
+                argsIgnorePattern: '^_',
+            }],
         },
     },
 ]);
