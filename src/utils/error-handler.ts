@@ -16,7 +16,8 @@ export class ErrorHandler {
             error: {
                 message: error.message,
                 code: error.code,
-                stack: error.stack,
+                // Only include stack trace in development
+                ...(process.env.NODE_ENV === 'development' && { stack: error.stack }),
                 ...(error.issues && { validationIssues: error.issues })
             }
         };
