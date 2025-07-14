@@ -1,4 +1,11 @@
 import { getTableColumns } from 'drizzle-orm';
+import type { PgColumn, PgTable } from 'drizzle-orm/pg-core';
+
+// Type for a Drizzle schema object
+type DrizzleSchema = Record<string, PgTable | unknown>;
+
+// Type for a Drizzle table column
+type DrizzleColumn = PgColumn<any, any, any>;
 
 export interface ColumnMetadata {
     name: string;
@@ -27,11 +34,11 @@ export interface TableMetadata {
 }
 
 export class SchemaInspector {
-    constructor(private schema: Record<string, any>) { }
+    constructor(private schema: DrizzleSchema) { }
 
     extractTables(): TableMetadata[] {
         const tables = Object.entries(this.schema)
-            .filter(([_, value]) => this.isTable(value))
+            .filter((entry): entry is [string, PgTable] => this.isTable(entry[1]))
             .map(([name, table]) => this.extractTableMetadata(name, table));
 
         // Build relations after all tables are extracted
@@ -41,13 +48,14 @@ export class SchemaInspector {
         }));
     }
 
-    private isTable(value: any): boolean {
+    private isTable(value: unknown): value is PgTable {
         // Check constructor name + additional validation for robust table detection
         if (value?.constructor?.name === 'PgTable') {
             // Additional validation to ensure it's really a PgTable, not just a mock
-            const hasTableSymbol = value[Symbol.for('drizzle:Name')] !== undefined;
-            const hasColumnsSymbol = value[Symbol.for('drizzle:Columns')] !== undefined;
-            const hasTableConfig = value[Symbol.for('drizzle:Table.Symbol.Config')] !== undefined;
+            const valueAsRecord = value as Record<symbol, unknown>;
+            const hasTableSymbol = valueAsRecord[Symbol.for('drizzle:Name')] !== undefined;
+            const hasColumnsSymbol = valueAsRecord[Symbol.for('drizzle:Columns')] !== undefined;
+            const hasTableConfig = valueAsRecord[Symbol.for('drizzle:Table.Symbol.Config')] !== undefined;
 
             if (hasTableSymbol && (hasColumnsSymbol || hasTableConfig)) {
                 return true;
@@ -57,23 +65,24 @@ export class SchemaInspector {
         return false;
     }
 
-    private extractTableMetadata(name: string, table: any): TableMetadata {
+    private extractTableMetadata(name: string, table: PgTable): TableMetadata {
         const columns = this.extractColumns(table);
         const primaryKey = this.extractPrimaryKey(table, columns);
+        const tableAsRecord = table as unknown as Record<symbol, unknown>;
 
         return {
             name,
-            tableName: table[Symbol.for('drizzle:Name')] || name,
+            tableName: (tableAsRecord[Symbol.for('drizzle:Name')] as string) || name,
             columns,
             primaryKey,
-            relations: [] // Will be populated later
+            relations: []
         };
     }
 
-    private extractColumns(table: any): ColumnMetadata[] {
+    private extractColumns(table: PgTable): ColumnMetadata[] {
         const drizzleColumns = getTableColumns(table);
 
-        return Object.entries(drizzleColumns).map(([columnName, col]: [string, any]) => ({
+        return Object.entries(drizzleColumns).map(([columnName, col]: [string, DrizzleColumn]) => ({
             name: columnName,
             type: this.getColumnType(col),
             nullable: !col.notNull,
@@ -82,7 +91,7 @@ export class SchemaInspector {
         }));
     }
 
-    private extractPrimaryKey(table: any, columns: ColumnMetadata[]): string[] {
+    private extractPrimaryKey(table: PgTable, columns: ColumnMetadata[]): string[] {
         // Find columns marked as primary
         const primaryColumns = columns
             .filter(col => col.isPrimaryKey)
@@ -91,17 +100,20 @@ export class SchemaInspector {
         // If no explicit primary key found, assume 'id' (with warning)
         if (primaryColumns.length === 0) {
             const hasIdColumn = columns.some(col => col.name === 'id');
+            const tableAsRecord = table as unknown as Record<symbol, unknown>;
+            const tableName = (tableAsRecord[Symbol.for('drizzle:Name')] as string) || 'unknown';
+
             if (hasIdColumn) {
-                console.warn(`No explicit primary key found for table ${table[Symbol.for('drizzle:Name')]}, assuming 'id' column`);
+                console.warn(`No explicit primary key found for table ${tableName}, assuming 'id' column`);
                 return ['id'];
             }
-            throw new Error(`No primary key found for table ${table[Symbol.for('drizzle:Name')]}`);
+            throw new Error(`No primary key found for table ${tableName}`);
         }
 
         return primaryColumns;
     }
 
-    private getColumnType(col: any): string {
+    private getColumnType(col: DrizzleColumn): string {
         // Extract SQL type from Drizzle column
         if (typeof col.getSQLType === 'function') {
             return col.getSQLType();
@@ -110,7 +122,7 @@ export class SchemaInspector {
         return col.dataType || 'unknown';
     }
 
-    private extractColumnReferences(col: any): { table: string; column: string } | undefined {
+    private extractColumnReferences(col: DrizzleColumn): { table: string; column: string } | undefined {
         // Simple approach: detect foreign keys by naming convention
         // Check both camelCase (userId) and snake_case (user_id) patterns
         const columnName = col.name;
