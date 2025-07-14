@@ -4,10 +4,8 @@ import { PgliteDatabase } from 'drizzle-orm/pglite';
 import { createInsertSchema } from 'drizzle-zod';
 import express from 'express';
 
-import { APIExplorer, APIExplorerOptions } from './utils/api-explorer';
 import { ErrorHandler } from './utils/error-handler';
 import { createLogger, Logger, LoggerOptions } from './utils/logger';
-import { OpenAPIGenerator } from './utils/openapi-generator';
 import { QueryBuilder } from './utils/query-builder';
 import { QueryParser } from './utils/query-parser';
 import { requestLoggingMiddleware, RequestLogOptions } from './utils/request-logger';
@@ -31,16 +29,6 @@ export interface DrizzleRestAdapterOptions {
         }
     };
 
-    /** OpenAPI documentation generation (auto-inferred from schema) */
-    openapi?: {
-        info?: {
-            title?: string; // defaults to 'REST API'
-            version?: string; // defaults to '1.0.0'
-            description?: string;
-        };
-        // All paths, schemas, parameters automatically inferred from Drizzle schema
-    } & APIExplorerOptions;
-
     /** Logging configuration */
     logging?: {
         /** Logger instance to use (if not provided, creates a default one) */
@@ -57,7 +45,7 @@ export interface DrizzleRestAdapterOptions {
 
 export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => {
     const router = express.Router();
-    const { db, schema, tableOptions, openapi, logging } = options;
+    const { db, schema, tableOptions, logging } = options;
 
     // Set up logging
     const logger = logging?.logger || createLogger(logging?.loggerOptions || {});
@@ -65,7 +53,6 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
 
     logger.info({
         tablesCount: Object.keys(schema).length,
-        hasOpenApi: !!openapi,
         hasRequestLogging: !!logging?.requestLogging?.enabled
     }, 'Initializing Drizzle REST Adapter');
 
@@ -91,46 +78,6 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
     // Create a map for quick table metadata lookup
     const tablesMetadataMap = new Map();
     tables.forEach(table => tablesMetadataMap.set(table.name, table));
-
-    // Set up OpenAPI documentation if enabled
-    if (openapi) {
-        logger.info('Setting up OpenAPI documentation');
-
-        const disabledEndpointsMap = new Map();
-        if (tableOptions) {
-            Object.entries(tableOptions).forEach(([tableName, config]) => {
-                if (config.disabledEndpoints) {
-                    disabledEndpointsMap.set(tableName, config.disabledEndpoints);
-                    logger.debug({
-                        table: tableName,
-                        disabledEndpoints: config.disabledEndpoints
-                    }, 'Table endpoints disabled');
-                }
-            });
-        }
-
-        const openApiGenerator = new OpenAPIGenerator(tablesMetadataMap, disabledEndpointsMap);
-
-        // Serve OpenAPI JSON specification with dynamic server URL
-        router.get('/openapi.json', (req, res) => {
-            logger.debug({ requestId: (req as any).requestId }, 'Serving OpenAPI specification');
-            const serverUrl = `${req.protocol}://${req.get('host')}${req.baseUrl}`;
-            const openApiSpec = openApiGenerator.generateSpec(openapi.info, serverUrl);
-            res.json(openApiSpec);
-        });
-
-        // Generate a spec for the API explorer (without server URL since it's handled dynamically)
-        const staticOpenApiSpec = openApiGenerator.generateSpec(openapi.info);
-
-        // Set up API explorer features (Swagger UI, discovery endpoint)
-        const apiExplorer = new APIExplorer(tablesMetadataMap, disabledEndpointsMap, logger);
-        apiExplorer.setupRoutes(router, staticOpenApiSpec, {
-            ui: openapi.ui,
-            discovery: openapi.discovery
-        });
-
-        logger.info('OpenAPI documentation available at /openapi.json');
-    }
 
     tables.forEach(tableMetadata => {
         const table = schema[tableMetadata.name];
