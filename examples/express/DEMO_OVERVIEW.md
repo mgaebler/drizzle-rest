@@ -52,9 +52,7 @@ This demo is designed for:
 ### 1. Installation & Setup
 
 ```bash
-cd demo
 npm install
-npm run db:generate
 npm run dev
 ```
 
