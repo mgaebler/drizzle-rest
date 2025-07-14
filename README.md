@@ -18,6 +18,7 @@ Transform your Drizzle schema into a fully functional REST API with a single fun
 - 🔗 **Relationship Support**: Basic embedding with `_embed` parameter
 - ⚙️ **Configurable**: Disable endpoints per table, add custom hooks
 - 🗄️ **Multi-Database**: PostgreSQL, MySQL, SQLite support via Drizzle
+- 📝 **Comprehensive Logging**: Built-in Pino logging with request tracing and debug modes
 
 ## 📦 Installation
 
@@ -298,6 +299,59 @@ The adapter is optimized for production use:
 - ✅ Minimal overhead over raw Drizzle queries
 - ✅ Connection pooling support
 - ✅ Proper database indexing recommendations
+
+## 📝 Logging and Monitoring
+
+The adapter includes comprehensive logging capabilities powered by [Pino](https://github.com/pinojs/pino):
+
+```typescript
+import { createDrizzleRestAdapter, createLogger } from 'drizzle-rest-adapter';
+
+// Create logger with verbose mode for development
+const logger = createLogger({
+    verbose: process.env.NODE_ENV === 'development',
+    pretty: true,
+    base: { service: 'my-api' }
+});
+
+const apiRouter = createDrizzleRestAdapter({
+    db,
+    schema,
+    logging: {
+        logger,
+        requestLogging: {
+            enabled: true,
+            logQuery: true,
+            logBody: true,      // In development
+            logHeaders: true    // In development
+        }
+    }
+});
+```
+
+### Features
+- 🔍 **Request Tracing**: Unique request IDs for correlation
+- 📊 **Performance Metrics**: Response times and record counts
+- 🐛 **Debug Mode**: Detailed query execution and parameter parsing
+- 🛡️ **Security**: Automatic sanitization of sensitive headers
+- 📈 **Production Ready**: Structured JSON logs for monitoring systems
+
+### Sample Output
+```json
+{
+  "level": 30,
+  "time": "2025-07-14T14:55:06.000Z",
+  "service": "drizzle-rest-adapter",
+  "requestId": "abc123",
+  "table": "users",
+  "recordsCount": 5,
+  "duration": 45,
+  "hasFilters": true,
+  "msg": "GET_MANY request completed successfully"
+}
+```
+
+For complete logging documentation, see [docs/logging.md](docs/logging.md).
 
 ## 🛣️ Roadmap
 
