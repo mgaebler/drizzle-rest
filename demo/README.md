@@ -47,16 +47,7 @@ The demo uses a realistic blog schema with:
 3. **Start the development server:**
    ```bash
    npm run dev
-   ```
-
 The API will be available at `http://localhost:3000`
-
-### Production Build
-
-```bash
-npm run build
-npm start
-```
 
 ## 📖 API Usage Examples
 
@@ -218,7 +209,6 @@ demo/
 ```bash
 # Development
 npm run dev              # Start with hot reload
-npm run build            # Build for production
 npm start               # Start production server
 
 # Database

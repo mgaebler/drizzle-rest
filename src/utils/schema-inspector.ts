@@ -1,5 +1,4 @@
 import { getTableColumns } from 'drizzle-orm';
-import { PgTable } from 'drizzle-orm/pg-core';
 
 export interface ColumnMetadata {
     name: string;
@@ -43,8 +42,19 @@ export class SchemaInspector {
     }
 
     private isTable(value: any): boolean {
-        // Check if it's a Drizzle table
-        return value instanceof PgTable;
+        // Check constructor name + additional validation for robust table detection
+        if (value?.constructor?.name === 'PgTable') {
+            // Additional validation to ensure it's really a PgTable, not just a mock
+            const hasTableSymbol = value[Symbol.for('drizzle:Name')] !== undefined;
+            const hasColumnsSymbol = value[Symbol.for('drizzle:Columns')] !== undefined;
+            const hasTableConfig = value[Symbol.for('drizzle:Table.Symbol.Config')] !== undefined;
+
+            if (hasTableSymbol && (hasColumnsSymbol || hasTableConfig)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private extractTableMetadata(name: string, table: any): TableMetadata {
