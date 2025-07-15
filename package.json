@@ -39,12 +39,12 @@
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "https://github.com/mgaebler/drizzle-rest-adapter.git"
+        "url": "https://github.com/mgaebler/drizzle-rest.git"
     },
     "bugs": {
-        "url": "https://github.com/mgaebler/drizzle-rest-adapter/issues"
+        "url": "https://github.com/mgaebler/drizzle-rest/issues"
     },
-    "homepage": "https://github.com/mgaebler/drizzle-rest-adapter#readme",
+    "homepage": "https://github.com/mgaebler/drizzle-rest#readme",
     "dependencies": {
         "@electric-sql/pglite": "^0.3.4",
         "drizzle-orm": "^0.44.2",
