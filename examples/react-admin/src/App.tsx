@@ -10,5 +10,10 @@ export const App = () => (
         <Resource name="users" list={ListGuesser} />
         <Resource name="posts" list={ListGuesser} />
         <Resource name="comments" list={ListGuesser} />
+        <Resource name="categories" list={ListGuesser} />
+        <Resource name="tags" list={ListGuesser} />
+
+        <Resource name="post_categories" list={ListGuesser} />
+        <Resource name="post_tags" list={ListGuesser} />
     </Admin>
 );
