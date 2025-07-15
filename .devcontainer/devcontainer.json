@@ -8,7 +8,8 @@
 		"vscode": {
 			"extensions": [
 				"EditorConfig.EditorConfig",
-				"bruno-api-client.bruno"
+				"bruno-api-client.bruno",
+				"streetsidesoftware.code-spell-checker"
 			]
 		}
 	}
