@@ -1,5 +1,5 @@
 {
-  "id": "15483f3c-c32f-4466-8891-e4a60ff6b422",
+  "id": "d7a12dc5-bf78-4498-94fe-85af9e44b4fa",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -92,8 +92,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "author_id": {
-          "name": "author_id",
+        "user_id": {
+          "name": "user_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": true
@@ -134,12 +134,12 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "comments_author_id_users_id_fk": {
-          "name": "comments_author_id_users_id_fk",
+        "comments_user_id_users_id_fk": {
+          "name": "comments_user_id_users_id_fk",
           "tableFrom": "comments",
           "tableTo": "users",
           "columnsFrom": [
-            "author_id"
+            "user_id"
           ],
           "columnsTo": [
             "id"
@@ -311,8 +311,8 @@
           "notNull": true,
           "default": 0
         },
-        "author_id": {
-          "name": "author_id",
+        "user_id": {
+          "name": "user_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": true
@@ -334,12 +334,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "posts_author_id_users_id_fk": {
-          "name": "posts_author_id_users_id_fk",
+        "posts_user_id_users_id_fk": {
+          "name": "posts_user_id_users_id_fk",
           "tableFrom": "posts",
           "tableTo": "users",
           "columnsFrom": [
-            "author_id"
+            "user_id"
           ],
           "columnsTo": [
             "id"
