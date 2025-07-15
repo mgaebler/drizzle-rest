@@ -19,8 +19,8 @@
         "db:generate": "drizzle-kit generate",
         "test": "vitest --run",
         "test:watch": "vitest",
-        "lint": "eslint src --ext .ts,.tsx",
-        "lint:fix": "eslint src --ext .ts,.tsx --fix"
+        "lint": "eslint .",
+        "lint:fix": "eslint . --fix"
     },
     "keywords": [
         "drizzle",
@@ -65,6 +65,7 @@
         "eslint-plugin-drizzle": "^0.2.3",
         "eslint-plugin-simple-import-sort": "^12.1.1",
         "globals": "^16.3.0",
+        "jiti": "^2.4.2",
         "pino-pretty": "^13.0.0",
         "supertest": "^6.3.4",
         "tsconfig-paths": "^4.2.0",

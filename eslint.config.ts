@@ -1,12 +1,13 @@
 import js from '@eslint/js';
 import stylistic from '@stylistic/eslint-plugin';
-import { defineConfig } from 'eslint/config';
 // import pluginDrizzle from 'eslint-plugin-drizzle';
 import pluginSimpleImportSort from 'eslint-plugin-simple-import-sort';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
-export default defineConfig([
+export default [
+    js.configs.recommended,
+    ...tseslint.configs.recommended,
     {
         files: ['**/*.{js,mjs,cjs,ts,mts,cts}'],
         plugins: {
@@ -14,10 +15,6 @@ export default defineConfig([
             // drizzle: pluginDrizzle,
             'simple-import-sort': pluginSimpleImportSort,
         },
-        extends: [
-            js.configs.recommended,
-            ...tseslint.configs.recommended,
-        ],
         languageOptions: {
             globals: { ...globals.node },
         },
@@ -33,4 +30,4 @@ export default defineConfig([
             }],
         },
     },
-]);
+];
