@@ -45,6 +45,10 @@
         "url": "https://github.com/mgaebler/drizzle-rest/issues"
     },
     "homepage": "https://github.com/mgaebler/drizzle-rest#readme",
+    "engines": {
+        "node": ">=20.0.0",
+        "npm": ">=10.0.0"
+    },
     "dependencies": {
         "@electric-sql/pglite": "^0.3.4",
         "drizzle-orm": "^0.44.2",
