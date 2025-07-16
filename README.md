@@ -2,6 +2,7 @@
 
 *Transform your database schema into a REST API in seconds.*
 
+[![CI](https://github.com/mgaebler/drizzle-rest/actions/workflows/ci.yml/badge.svg)](https://github.com/mgaebler/drizzle-rest/actions/workflows/ci.yml)
 [![TypeScript](https://img.shields.io/badge/%3C%2F%3E-TypeScript-%230074c1.svg)](http://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Status: Alpha](https://img.shields.io/badge/Status-Alpha-red.svg)](https://github.com/mgaebler/drizzle-rest-adapter)
