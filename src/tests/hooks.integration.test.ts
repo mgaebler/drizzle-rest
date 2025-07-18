@@ -4,8 +4,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { db } from '@/db/connection';
 import * as schema from '@/db/schema.js';
+import { HookContext } from '@/utils/hook-context';
 
-import { createDrizzleRestAdapter, HookContext } from '../drizzle-rest-adapter';
+import { createDrizzleRestAdapter } from '../drizzle-rest-adapter';
 import { setupTestDatabase, TEST_USERS } from './test-helpers';
 
 // Mock user for testing authorization
