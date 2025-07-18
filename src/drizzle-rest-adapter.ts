@@ -1,14 +1,20 @@
-import { eq, getTableColumns } from 'drizzle-orm';
+import { getTableColumns } from 'drizzle-orm';
 import { PgTable } from 'drizzle-orm/pg-core';
 import { PgliteDatabase } from 'drizzle-orm/pglite';
-import { createInsertSchema } from 'drizzle-zod';
 import express from 'express';
 
+import {
+    ActionContext,
+    createAction,
+    deleteAction,
+    getManyAction,
+    getOneAction,
+    replaceAction,
+    updateAction
+} from './actions';
 import { ErrorHandler } from './utils/error-handler';
-import { createHookContext, HookContext, OperationType } from './utils/hook-context';
+import { HookContext, OperationType } from './utils/hook-context';
 import { createLogger, Logger, LoggerOptions } from './utils/logger';
-import { QueryBuilder } from './utils/query-builder';
-import { QueryParser } from './utils/query-parser';
 import { requestLoggingMiddleware, RequestLogOptions } from './utils/request-logger';
 import { SchemaInspector } from './utils/schema-inspector';
 
@@ -16,7 +22,7 @@ import { SchemaInspector } from './utils/schema-inspector';
 // Using `any` for the schema makes the adapter more generic.
 type DrizzleDb = PgliteDatabase<any>;
 
-export interface TableHooks {
+interface TableHooks {
     beforeOperation?: (context: HookContext) => Promise<void>;
     afterOperation?: (context: HookContext, result: any) => Promise<any>;
 }
@@ -127,635 +133,114 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
         // GET /<table-name>
         if (!tableConfig?.disabledEndpoints?.includes('GET_MANY')) {
             router.get(resourcePath, async (req, res) => {
-                const requestId = (req as any).requestId;
-                const startTime = Date.now();
+                const actionContext: ActionContext = {
+                    db,
+                    table,
+                    tableMetadata,
+                    primaryKeyColumn,
+                    columns,
+                    schema,
+                    tablesMetadataMap,
+                    tableConfig,
+                    logger
+                };
 
-                try {
-                    logger.debug({
-                        requestId,
-                        table: tableMetadata.name,
-                        query: req.query
-                    }, 'Processing GET_MANY request');
-
-                    const params = QueryParser.parseQueryParams(req);
-
-                    // Execute beforeOperation hook
-                    const hookContext = createHookContext(
-                        req,
-                        res,
-                        'GET_MANY',
-                        tableMetadata,
-                        primaryKeyColumn,
-                        columns,
-                        { filters: params.filters }
-                    );
-
-                    if (tableConfig?.hooks?.beforeOperation) {
-                        await tableConfig.hooks.beforeOperation(hookContext);
-                    }
-
-                    const queryBuilder = new QueryBuilder(db, table, columns, schema, tablesMetadataMap, tableMetadata.name);
-
-                    logger.debug({
-                        requestId,
-                        table: tableMetadata.name,
-                        parsedParams: {
-                            filters: params.filters,
-                            sort: params.sort,
-                            pagination: params.pagination,
-                            embed: params.embed
-                        }
-                    }, 'Parsed query parameters');
-
-                    const { query, embedKeys } = queryBuilder.buildSelectQuery(params);
-                    let data = await query;
-
-                    logger.debug({
-                        requestId,
-                        table: tableMetadata.name,
-                        recordsCount: data.length,
-                        hasEmbeds: embedKeys && embedKeys.length > 0
-                    }, 'Query executed');
-
-                    // Apply embeds if requested
-                    if (embedKeys && embedKeys.length > 0) {
-                        logger.debug({
-                            requestId,
-                            table: tableMetadata.name,
-                            embedKeys
-                        }, 'Applying embeds');
-
-                        data = await queryBuilder.applyEmbeds(data, embedKeys);
-                    }
-
-                    // Execute afterOperation hook
-                    if (tableConfig?.hooks?.afterOperation) {
-                        data = await tableConfig.hooks.afterOperation(hookContext, data);
-                    }
-
-                    const totalCount = await queryBuilder.getTotalCount(params.filters);
-                    const duration = Date.now() - startTime;
-
-                    logger.info({
-                        requestId,
-                        table: tableMetadata.name,
-                        recordsCount: data.length,
-                        totalCount,
-                        duration,
-                        hasFilters: Object.keys(params.filters).length > 0,
-                        hasSort: !!params.sort,
-                        hasPagination: !!params.pagination,
-                        hasEmbeds: embedKeys && embedKeys.length > 0
-                    }, 'GET_MANY request completed successfully');
-
-                    // Set X-Total-Count header
-                    res.set('X-Total-Count', totalCount.toString());
-                    res.json(data);
-                } catch (error: any) {
-                    const duration = Date.now() - startTime;
-                    logger.error({
-                        requestId,
-                        table: tableMetadata.name,
-                        duration,
-                        error: error.message
-                    }, 'GET_MANY request failed');
-
-                    // Check if error is from beforeOperation hook
-                    if (error.message && typeof error.message === 'string') {
-                        ErrorHandler.handleError(res, error, 'beforeOperation', requestId);
-                    } else {
-                        ErrorHandler.handleError(res, error, 'getMany', requestId);
-                    }
-                }
+                await getManyAction(req, res, actionContext);
             });
         }
 
         // POST /<table-name>
         if (!tableConfig?.disabledEndpoints?.includes('CREATE')) {
             router.post(resourcePath, async (req, res) => {
-                const requestId = (req as any).requestId;
-                const startTime = Date.now();
+                const actionContext: ActionContext = {
+                    db,
+                    table,
+                    tableMetadata,
+                    primaryKeyColumn,
+                    columns,
+                    schema,
+                    tablesMetadataMap,
+                    tableConfig,
+                    logger
+                };
 
-                try {
-                    logger.debug({
-                        requestId,
-                        table: tableMetadata.name,
-                        bodyKeys: Object.keys(req.body || {})
-                    }, 'Processing CREATE request');
-
-                    const insertSchema = createInsertSchema(table);
-                    const validatedBody = insertSchema.parse(req.body);
-
-                    logger.debug({
-                        requestId,
-                        table: tableMetadata.name,
-                        validatedFields: Object.keys(validatedBody)
-                    }, 'Request body validated');
-
-                    // Execute beforeOperation hook
-                    const hookContext = createHookContext(
-                        req,
-                        res,
-                        'CREATE',
-                        tableMetadata,
-                        primaryKeyColumn,
-                        columns,
-                        { record: validatedBody }
-                    );
-
-                    if (tableConfig?.hooks?.beforeOperation) {
-                        try {
-                            await tableConfig.hooks.beforeOperation(hookContext);
-                        } catch (hookError) {
-                            logger.error({
-                                requestId,
-                                table: tableMetadata.name,
-                                duration: Date.now() - startTime,
-                                error: hookError
-                            }, 'CREATE request failed in beforeOperation hook');
-
-                            return ErrorHandler.handleError(res, hookError, 'beforeOperation', requestId);
-                        }
-                    }
-
-                    const result = await db.insert(table).values(validatedBody).returning();
-                    let createdRecord = (result as any[])[0];
-
-                    // Execute afterOperation hook
-                    if (tableConfig?.hooks?.afterOperation) {
-                        try {
-                            createdRecord = await tableConfig.hooks.afterOperation(hookContext, createdRecord);
-                        } catch (hookError) {
-                            logger.error({
-                                requestId,
-                                table: tableMetadata.name,
-                                duration: Date.now() - startTime,
-                                error: hookError
-                            }, 'CREATE request failed in afterOperation hook');
-
-                            return ErrorHandler.handleError(res, hookError, 'afterOperation', requestId);
-                        }
-                    }
-
-                    const duration = Date.now() - startTime;
-
-                    logger.info({
-                        requestId,
-                        table: tableMetadata.name,
-                        recordId: createdRecord[primaryKeyColumn],
-                        duration
-                    }, 'CREATE request completed successfully');
-
-                    res.status(201).json(createdRecord);
-                } catch (error: any) {
-                    const duration = Date.now() - startTime;
-                    logger.error({
-                        requestId,
-                        table: tableMetadata.name,
-                        duration,
-                        error: error.message
-                    }, 'CREATE request failed');
-
-                    ErrorHandler.handleError(res, error, 'createOne', requestId);
-                }
+                await createAction(req, res, actionContext);
             });
         }
 
         // GET /<table-name>/:id
         if (!tableConfig?.disabledEndpoints?.includes('GET_ONE')) {
             router.get(itemPath, async (req, res) => {
-                const requestId = (req as any).requestId;
-                const startTime = Date.now();
+                const actionContext: ActionContext = {
+                    db,
+                    table,
+                    tableMetadata,
+                    primaryKeyColumn,
+                    columns,
+                    schema,
+                    tablesMetadataMap,
+                    tableConfig,
+                    logger
+                };
 
-                try {
-                    const { id } = req.params;
-
-                    logger.debug({
-                        requestId,
-                        table: tableMetadata.name,
-                        id,
-                        primaryKeyColumn
-                    }, 'Processing GET_ONE request');
-
-                    // Execute beforeOperation hook
-                    const hookContext = createHookContext(
-                        req,
-                        res,
-                        'GET_ONE',
-                        tableMetadata,
-                        primaryKeyColumn,
-                        columns,
-                        { recordId: id }
-                    );
-
-                    if (tableConfig?.hooks?.beforeOperation) {
-                        try {
-                            await tableConfig.hooks.beforeOperation(hookContext);
-                        } catch (hookError) {
-                            logger.error({
-                                requestId,
-                                table: tableMetadata.name,
-                                duration: Date.now() - startTime,
-                                error: hookError
-                            }, 'GET_ONE request failed in beforeOperation hook');
-
-                            return ErrorHandler.handleError(res, hookError, 'beforeOperation', requestId);
-                        }
-                    }
-
-                    // Use dynamic primary key instead of hardcoded 'id'
-                    if (!columns[primaryKeyColumn]) {
-                        logger.error({
-                            requestId,
-                            table: tableMetadata.name,
-                            primaryKeyColumn,
-                            availableColumns: Object.keys(columns)
-                        }, 'Primary key column not found');
-
-                        return res.status(500).json({
-                            error: `Primary key column '${primaryKeyColumn}' not found in table '${tableMetadata.name}'`,
-                            requestId
-                        });
-                    }
-
-                    const query = db.select().from(table).where(eq(columns[primaryKeyColumn], id));
-                    const data = await query;
-                    const duration = Date.now() - startTime;
-
-                    if (data.length === 0) {
-                        logger.info({
-                            requestId,
-                            table: tableMetadata.name,
-                            id,
-                            duration
-                        }, 'GET_ONE request - record not found');
-
-                        return ErrorHandler.handleNotFound(res, undefined, requestId);
-                    }
-
-                    let result = data[0];
-
-                    // Execute afterOperation hook
-                    if (tableConfig?.hooks?.afterOperation) {
-                        try {
-                            result = await tableConfig.hooks.afterOperation(hookContext, result);
-                        } catch (hookError) {
-                            logger.error({
-                                requestId,
-                                table: tableMetadata.name,
-                                duration: Date.now() - startTime,
-                                error: hookError
-                            }, 'GET_ONE request failed in afterOperation hook');
-
-                            return ErrorHandler.handleError(res, hookError, 'afterOperation', requestId);
-                        }
-                    }
-
-                    logger.info({
-                        requestId,
-                        table: tableMetadata.name,
-                        id,
-                        duration
-                    }, 'GET_ONE request completed successfully');
-
-                    res.json(result);
-                } catch (error: any) {
-                    const duration = Date.now() - startTime;
-                    logger.error({
-                        requestId,
-                        table: tableMetadata.name,
-                        id: req.params.id,
-                        duration,
-                        error: error.message
-                    }, 'GET_ONE request failed');
-
-                    ErrorHandler.handleError(res, error, 'getOne', requestId);
-                }
+                await getOneAction(req, res, actionContext);
             });
         }
 
         // PATCH /<table-name>/:id
         if (!tableConfig?.disabledEndpoints?.includes('UPDATE')) {
             router.patch(itemPath, async (req, res) => {
-                const requestId = (req as any).requestId;
-                const startTime = Date.now();
+                const actionContext: ActionContext = {
+                    db,
+                    table,
+                    tableMetadata,
+                    primaryKeyColumn,
+                    columns,
+                    schema,
+                    tablesMetadataMap,
+                    tableConfig,
+                    logger
+                };
 
-                try {
-                    const { id } = req.params;
-
-                    logger.debug({
-                        requestId,
-                        table: tableMetadata.name,
-                        id,
-                        updateFields: Object.keys(req.body || {})
-                    }, 'Processing UPDATE request');
-
-                    const insertSchema = createInsertSchema(table);
-                    const validatedBody = insertSchema.partial().parse(req.body);
-
-                    logger.debug({
-                        requestId,
-                        table: tableMetadata.name,
-                        id,
-                        validatedFields: Object.keys(validatedBody)
-                    }, 'Update body validated');
-
-                    // Execute beforeOperation hook
-                    const hookContext = createHookContext(
-                        req,
-                        res,
-                        'UPDATE',
-                        tableMetadata,
-                        primaryKeyColumn,
-                        columns,
-                        { record: validatedBody, recordId: id }
-                    );
-
-                    if (tableConfig?.hooks?.beforeOperation) {
-                        try {
-                            await tableConfig.hooks.beforeOperation(hookContext);
-                        } catch (hookError) {
-                            logger.error({
-                                requestId,
-                                table: tableMetadata.name,
-                                duration: Date.now() - startTime,
-                                error: hookError
-                            }, 'UPDATE request failed in beforeOperation hook');
-
-                            return ErrorHandler.handleError(res, hookError, 'beforeOperation', requestId);
-                        }
-                    }
-
-                    // Use dynamic primary key
-                    await db.update(table).set(validatedBody).where(eq(columns[primaryKeyColumn], id));
-
-                    const updatedRecord = await db.select().from(table).where(eq(columns[primaryKeyColumn], id));
-                    const duration = Date.now() - startTime;
-
-                    if (updatedRecord.length === 0) {
-                        logger.info({
-                            requestId,
-                            table: tableMetadata.name,
-                            id,
-                            duration
-                        }, 'UPDATE request - record not found after update');
-
-                        return ErrorHandler.handleNotFound(res, undefined, requestId);
-                    }
-
-                    let result = updatedRecord[0];
-
-                    // Execute afterOperation hook
-                    if (tableConfig?.hooks?.afterOperation) {
-                        try {
-                            result = await tableConfig.hooks.afterOperation(hookContext, result);
-                        } catch (hookError) {
-                            logger.error({
-                                requestId,
-                                table: tableMetadata.name,
-                                duration: Date.now() - startTime,
-                                error: hookError
-                            }, 'UPDATE request failed in afterOperation hook');
-
-                            return ErrorHandler.handleError(res, hookError, 'afterOperation', requestId);
-                        }
-                    }
-
-                    logger.info({
-                        requestId,
-                        table: tableMetadata.name,
-                        id,
-                        updatedFields: Object.keys(validatedBody),
-                        duration
-                    }, 'UPDATE request completed successfully');
-
-                    res.json(result);
-                } catch (error: any) {
-                    const duration = Date.now() - startTime;
-                    logger.error({
-                        requestId,
-                        table: tableMetadata.name,
-                        id: req.params.id,
-                        duration,
-                        error: error.message
-                    }, 'UPDATE request failed');
-
-                    ErrorHandler.handleError(res, error, 'updateOne', requestId);
-                }
+                await updateAction(req, res, actionContext);
             });
         }
 
         // PUT /<table-name>/:id
         if (!tableConfig?.disabledEndpoints?.includes('REPLACE')) {
             router.put(itemPath, async (req, res) => {
-                const requestId = (req as any).requestId;
-                const startTime = Date.now();
+                const actionContext: ActionContext = {
+                    db,
+                    table,
+                    tableMetadata,
+                    primaryKeyColumn,
+                    columns,
+                    schema,
+                    tablesMetadataMap,
+                    tableConfig,
+                    logger
+                };
 
-                try {
-                    const { id } = req.params;
-
-                    logger.debug({
-                        requestId,
-                        table: tableMetadata.name,
-                        id,
-                        replaceFields: Object.keys(req.body || {})
-                    }, 'Processing REPLACE request');
-
-                    const insertSchema = createInsertSchema(table);
-
-                    // For PUT, we need the full object (not partial)
-                    const validatedBody = insertSchema.parse(req.body);
-
-                    logger.debug({
-                        requestId,
-                        table: tableMetadata.name,
-                        id,
-                        validatedFields: Object.keys(validatedBody)
-                    }, 'Replace body validated');
-
-                    // Execute beforeOperation hook
-                    const hookContext = createHookContext(
-                        req,
-                        res,
-                        'REPLACE',
-                        tableMetadata,
-                        primaryKeyColumn,
-                        columns,
-                        { record: validatedBody, recordId: id }
-                    );
-
-                    if (tableConfig?.hooks?.beforeOperation) {
-                        try {
-                            await tableConfig.hooks.beforeOperation(hookContext);
-                        } catch (hookError) {
-                            logger.error({
-                                requestId,
-                                table: tableMetadata.name,
-                                duration: Date.now() - startTime,
-                                error: hookError
-                            }, 'REPLACE request failed in beforeOperation hook');
-
-                            return ErrorHandler.handleError(res, hookError, 'beforeOperation', requestId);
-                        }
-                    }
-
-                    // Use dynamic primary key
-                    await db.update(table).set(validatedBody).where(eq(columns[primaryKeyColumn], id));
-
-                    const updatedRecord = await db.select().from(table).where(eq(columns[primaryKeyColumn], id));
-                    const duration = Date.now() - startTime;
-
-                    if (updatedRecord.length === 0) {
-                        logger.info({
-                            requestId,
-                            table: tableMetadata.name,
-                            id,
-                            duration
-                        }, 'REPLACE request - record not found after replace');
-
-                        return ErrorHandler.handleNotFound(res, undefined, requestId);
-                    }
-
-                    let result = updatedRecord[0];
-
-                    // Execute afterOperation hook
-                    if (tableConfig?.hooks?.afterOperation) {
-                        try {
-                            result = await tableConfig.hooks.afterOperation(hookContext, result);
-                        } catch (hookError) {
-                            logger.error({
-                                requestId,
-                                table: tableMetadata.name,
-                                duration: Date.now() - startTime,
-                                error: hookError
-                            }, 'REPLACE request failed in afterOperation hook');
-
-                            return ErrorHandler.handleError(res, hookError, 'afterOperation', requestId);
-                        }
-                    }
-
-                    logger.info({
-                        requestId,
-                        table: tableMetadata.name,
-                        id,
-                        replacedFields: Object.keys(validatedBody),
-                        duration
-                    }, 'REPLACE request completed successfully');
-
-                    res.json(result);
-                } catch (error: any) {
-                    const duration = Date.now() - startTime;
-                    logger.error({
-                        requestId,
-                        table: tableMetadata.name,
-                        id: req.params.id,
-                        duration,
-                        error: error.message
-                    }, 'REPLACE request failed');
-
-                    ErrorHandler.handleError(res, error, 'replaceOne', requestId);
-                }
+                await replaceAction(req, res, actionContext);
             });
         }
 
         // DELETE /<table-name>/:id
         if (!tableConfig?.disabledEndpoints?.includes('DELETE')) {
             router.delete(itemPath, async (req, res) => {
-                const requestId = (req as any).requestId;
-                const startTime = Date.now();
+                const actionContext: ActionContext = {
+                    db,
+                    table,
+                    tableMetadata,
+                    primaryKeyColumn,
+                    columns,
+                    schema,
+                    tablesMetadataMap,
+                    tableConfig,
+                    logger
+                };
 
-                try {
-                    const { id } = req.params;
-
-                    logger.debug({
-                        requestId,
-                        table: tableMetadata.name,
-                        id
-                    }, 'Processing DELETE request');
-
-                    // Execute beforeOperation hook
-                    const hookContext = createHookContext(
-                        req,
-                        res,
-                        'DELETE',
-                        tableMetadata,
-                        primaryKeyColumn,
-                        columns,
-                        { recordId: id }
-                    );
-
-                    if (tableConfig?.hooks?.beforeOperation) {
-                        try {
-                            await tableConfig.hooks.beforeOperation(hookContext);
-                        } catch (hookError) {
-                            logger.error({
-                                requestId,
-                                table: tableMetadata.name,
-                                duration: Date.now() - startTime,
-                                error: hookError
-                            }, 'DELETE request failed in beforeOperation hook');
-
-                            return ErrorHandler.handleError(res, hookError, 'beforeOperation', requestId);
-                        }
-                    }
-
-                    // First check if the record exists using dynamic primary key
-                    const existingRecord = await db.select().from(table).where(eq(columns[primaryKeyColumn], id));
-                    if (existingRecord.length === 0) {
-                        const duration = Date.now() - startTime;
-
-                        logger.info({
-                            requestId,
-                            table: tableMetadata.name,
-                            id,
-                            duration
-                        }, 'DELETE request - record not found');
-
-                        return ErrorHandler.handleNotFound(res, undefined, requestId);
-                    }
-
-                    await db.delete(table).where(eq(columns[primaryKeyColumn], id));
-
-                    const result = { deleted: true };
-
-                    // Execute afterOperation hook
-                    if (tableConfig?.hooks?.afterOperation) {
-                        try {
-                            await tableConfig.hooks.afterOperation(hookContext, result);
-                        } catch (hookError) {
-                            logger.error({
-                                requestId,
-                                table: tableMetadata.name,
-                                duration: Date.now() - startTime,
-                                error: hookError
-                            }, 'DELETE request failed in afterOperation hook');
-
-                            return ErrorHandler.handleError(res, hookError, 'afterOperation', requestId);
-                        }
-                    }
-
-                    const duration = Date.now() - startTime;
-
-                    logger.info({
-                        requestId,
-                        table: tableMetadata.name,
-                        id,
-                        duration
-                    }, 'DELETE request completed successfully');
-
-                    res.status(204).send();
-                } catch (error: any) {
-                    const duration = Date.now() - startTime;
-                    logger.error({
-                        requestId,
-                        table: tableMetadata.name,
-                        id: req.params.id,
-                        duration,
-                        error: error.message
-                    }, 'DELETE request failed');
-
-                    return ErrorHandler.handleError(res, error, 'deleteOne', requestId);
-                }
+                await deleteAction(req, res, actionContext);
             });
         }
     });
