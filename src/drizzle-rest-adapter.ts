@@ -460,6 +460,32 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
                         validatedFields: Object.keys(validatedBody)
                     }, 'Update body validated');
 
+                    // Execute beforeOperation hook
+                    const hookContext = createHookContext(
+                        req,
+                        res,
+                        'UPDATE',
+                        tableMetadata,
+                        primaryKeyColumn,
+                        columns,
+                        { record: validatedBody, recordId: id }
+                    );
+
+                    if (tableConfig?.hooks?.beforeOperation) {
+                        try {
+                            await tableConfig.hooks.beforeOperation(hookContext);
+                        } catch (hookError) {
+                            logger.error({
+                                requestId,
+                                table: tableMetadata.name,
+                                duration: Date.now() - startTime,
+                                error: hookError
+                            }, 'UPDATE request failed in beforeOperation hook');
+
+                            return ErrorHandler.handleError(res, hookError, 'beforeOperation', requestId);
+                        }
+                    }
+
                     // Use dynamic primary key
                     await db.update(table).set(validatedBody).where(eq(columns[primaryKeyColumn], id));
 
@@ -477,6 +503,24 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
                         return ErrorHandler.handleNotFound(res, undefined, requestId);
                     }
 
+                    let result = updatedRecord[0];
+
+                    // Execute afterOperation hook
+                    if (tableConfig?.hooks?.afterOperation) {
+                        try {
+                            result = await tableConfig.hooks.afterOperation(hookContext, result);
+                        } catch (hookError) {
+                            logger.error({
+                                requestId,
+                                table: tableMetadata.name,
+                                duration: Date.now() - startTime,
+                                error: hookError
+                            }, 'UPDATE request failed in afterOperation hook');
+
+                            return ErrorHandler.handleError(res, hookError, 'afterOperation', requestId);
+                        }
+                    }
+
                     logger.info({
                         requestId,
                         table: tableMetadata.name,
@@ -485,7 +529,7 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
                         duration
                     }, 'UPDATE request completed successfully');
 
-                    res.json(updatedRecord[0]);
+                    res.json(result);
                 } catch (error: any) {
                     const duration = Date.now() - startTime;
                     logger.error({
@@ -529,6 +573,32 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
                         validatedFields: Object.keys(validatedBody)
                     }, 'Replace body validated');
 
+                    // Execute beforeOperation hook
+                    const hookContext = createHookContext(
+                        req,
+                        res,
+                        'REPLACE',
+                        tableMetadata,
+                        primaryKeyColumn,
+                        columns,
+                        { record: validatedBody, recordId: id }
+                    );
+
+                    if (tableConfig?.hooks?.beforeOperation) {
+                        try {
+                            await tableConfig.hooks.beforeOperation(hookContext);
+                        } catch (hookError) {
+                            logger.error({
+                                requestId,
+                                table: tableMetadata.name,
+                                duration: Date.now() - startTime,
+                                error: hookError
+                            }, 'REPLACE request failed in beforeOperation hook');
+
+                            return ErrorHandler.handleError(res, hookError, 'beforeOperation', requestId);
+                        }
+                    }
+
                     // Use dynamic primary key
                     await db.update(table).set(validatedBody).where(eq(columns[primaryKeyColumn], id));
 
@@ -546,6 +616,24 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
                         return ErrorHandler.handleNotFound(res, undefined, requestId);
                     }
 
+                    let result = updatedRecord[0];
+
+                    // Execute afterOperation hook
+                    if (tableConfig?.hooks?.afterOperation) {
+                        try {
+                            result = await tableConfig.hooks.afterOperation(hookContext, result);
+                        } catch (hookError) {
+                            logger.error({
+                                requestId,
+                                table: tableMetadata.name,
+                                duration: Date.now() - startTime,
+                                error: hookError
+                            }, 'REPLACE request failed in afterOperation hook');
+
+                            return ErrorHandler.handleError(res, hookError, 'afterOperation', requestId);
+                        }
+                    }
+
                     logger.info({
                         requestId,
                         table: tableMetadata.name,
@@ -554,7 +642,7 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
                         duration
                     }, 'REPLACE request completed successfully');
 
-                    res.json(updatedRecord[0]);
+                    res.json(result);
                 } catch (error: any) {
                     const duration = Date.now() - startTime;
                     logger.error({
