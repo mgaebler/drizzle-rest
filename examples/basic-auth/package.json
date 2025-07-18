@@ -1,0 +1,26 @@
+{
+    "name": "drizzle-rest-basic-auth-example",
+    "version": "1.0.0",
+    "description": "Basic authentication example with Drizzle REST Adapter",
+    "main": "dist/server.js",
+    "scripts": {
+        "build": "tsc",
+        "start": "npm run build && node dist/server.js",
+        "dev": "tsx --watch server.ts"
+    },
+    "dependencies": {
+        "express": "^4.18.2",
+        "jsonwebtoken": "^9.0.0",
+        "bcryptjs": "^2.4.3",
+        "drizzle-orm": "^0.44.2",
+        "drizzle-rest-adapter": "file:../.."
+    },
+    "devDependencies": {
+        "@types/express": "^4.17.21",
+        "@types/jsonwebtoken": "^9.0.0",
+        "@types/bcryptjs": "^2.4.6",
+        "@types/node": "^20.11.5",
+        "tsx": "^4.7.0",
+        "typescript": "^5.3.3"
+    }
+}
