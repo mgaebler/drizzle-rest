@@ -22,6 +22,19 @@ export class ErrorHandler {
             }
         };
 
+        // Handle hook-related authorization errors
+        if (operation === 'beforeOperation' || operation === 'afterOperation') {
+            const statusCode = operation === 'beforeOperation' ? 403 : 500;
+            const errorMessage = typeof error === 'string' ? error : error.message || 'Hook execution failed';
+
+            this.logger.warn(errorContext, `Hook error in ${operation}`);
+            res.status(statusCode).json({
+                error: errorMessage,
+                requestId
+            });
+            return;
+        }
+
         if (error.issues) {
             // Zod validation error
             this.logger.warn(errorContext, `Validation error in ${operation}`);

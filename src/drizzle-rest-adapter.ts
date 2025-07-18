@@ -2,7 +2,7 @@ import { eq, getTableColumns } from 'drizzle-orm';
 import { PgTable } from 'drizzle-orm/pg-core';
 import { PgliteDatabase } from 'drizzle-orm/pglite';
 import { createInsertSchema } from 'drizzle-zod';
-import express from 'express';
+import express, { Request, Response } from 'express';
 
 import { ErrorHandler } from './utils/error-handler';
 import { createLogger, Logger, LoggerOptions } from './utils/logger';
@@ -15,6 +15,28 @@ import { SchemaInspector } from './utils/schema-inspector';
 // Using `any` for the schema makes the adapter more generic.
 type DrizzleDb = PgliteDatabase<any>;
 
+export type OperationType = 'GET_MANY' | 'GET_ONE' | 'CREATE' | 'UPDATE' | 'REPLACE' | 'DELETE';
+
+export interface HookContext {
+    req: Request & { user?: any };           // Access to req.user from framework auth
+    res: Response;          // Access to response object
+    operation: OperationType;
+    table: string;          // Table name
+    record?: any;           // For CREATE/UPDATE operations
+    recordId?: string;      // For GET_ONE/UPDATE/DELETE operations
+    filters?: any;          // For GET_MANY operations
+    metadata: {
+        tableName: string;
+        primaryKey: string;
+        columns: string[];
+    };
+}
+
+export interface TableHooks {
+    beforeOperation?: (context: HookContext) => Promise<void>;
+    afterOperation?: (context: HookContext, result: any) => Promise<any>;
+}
+
 export interface DrizzleRestAdapterOptions {
     /** The Drizzle database instance. */
     db: DrizzleDb;
@@ -25,7 +47,8 @@ export interface DrizzleRestAdapterOptions {
     /** Detailed configuration per table. */
     tableOptions?: {
         [tableName: string]: {
-            disabledEndpoints?: Array<'GET_MANY' | 'GET_ONE' | 'CREATE' | 'UPDATE' | 'REPLACE' | 'DELETE'>;
+            disabledEndpoints?: Array<OperationType>;
+            hooks?: TableHooks;
         }
     };
 
@@ -131,6 +154,25 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
                     }, 'Processing GET_MANY request');
 
                     const params = QueryParser.parseQueryParams(req);
+
+                    // Execute beforeOperation hook
+                    const hookContext: HookContext = {
+                        req,
+                        res,
+                        operation: 'GET_MANY',
+                        table: tableMetadata.name,
+                        filters: params.filters,
+                        metadata: {
+                            tableName: tableMetadata.name,
+                            primaryKey: primaryKeyColumn,
+                            columns: Object.keys(columns)
+                        }
+                    };
+
+                    if (tableConfig?.hooks?.beforeOperation) {
+                        await tableConfig.hooks.beforeOperation(hookContext);
+                    }
+
                     const queryBuilder = new QueryBuilder(db, table, columns, schema, tablesMetadataMap, tableMetadata.name);
 
                     logger.debug({
@@ -165,6 +207,11 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
                         data = await queryBuilder.applyEmbeds(data, embedKeys);
                     }
 
+                    // Execute afterOperation hook
+                    if (tableConfig?.hooks?.afterOperation) {
+                        data = await tableConfig.hooks.afterOperation(hookContext, data);
+                    }
+
                     const totalCount = await queryBuilder.getTotalCount(params.filters);
                     const duration = Date.now() - startTime;
 
@@ -192,7 +239,12 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
                         error: error.message
                     }, 'GET_MANY request failed');
 
-                    ErrorHandler.handleError(res, error, 'getMany', requestId);
+                    // Check if error is from beforeOperation hook
+                    if (error.message && typeof error.message === 'string') {
+                        ErrorHandler.handleError(res, error, 'beforeOperation', requestId);
+                    } else {
+                        ErrorHandler.handleError(res, error, 'getMany', requestId);
+                    }
                 }
             });
         }
@@ -219,8 +271,54 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
                         validatedFields: Object.keys(validatedBody)
                     }, 'Request body validated');
 
+                    // Execute beforeOperation hook
+                    const hookContext: HookContext = {
+                        req,
+                        res,
+                        operation: 'CREATE',
+                        table: tableMetadata.name,
+                        record: validatedBody,
+                        metadata: {
+                            tableName: tableMetadata.name,
+                            primaryKey: primaryKeyColumn,
+                            columns: Object.keys(columns)
+                        }
+                    };
+
+                    if (tableConfig?.hooks?.beforeOperation) {
+                        try {
+                            await tableConfig.hooks.beforeOperation(hookContext);
+                        } catch (hookError) {
+                            logger.error({
+                                requestId,
+                                table: tableMetadata.name,
+                                duration: Date.now() - startTime,
+                                error: hookError
+                            }, 'CREATE request failed in beforeOperation hook');
+
+                            return ErrorHandler.handleError(res, hookError, 'beforeOperation', requestId);
+                        }
+                    }
+
                     const result = await db.insert(table).values(validatedBody).returning();
-                    const createdRecord = (result as any[])[0];
+                    let createdRecord = (result as any[])[0];
+
+                    // Execute afterOperation hook
+                    if (tableConfig?.hooks?.afterOperation) {
+                        try {
+                            createdRecord = await tableConfig.hooks.afterOperation(hookContext, createdRecord);
+                        } catch (hookError) {
+                            logger.error({
+                                requestId,
+                                table: tableMetadata.name,
+                                duration: Date.now() - startTime,
+                                error: hookError
+                            }, 'CREATE request failed in afterOperation hook');
+
+                            return ErrorHandler.handleError(res, hookError, 'afterOperation', requestId);
+                        }
+                    }
+
                     const duration = Date.now() - startTime;
 
                     logger.info({
@@ -261,6 +359,35 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
                         primaryKeyColumn
                     }, 'Processing GET_ONE request');
 
+                    // Execute beforeOperation hook
+                    const hookContext: HookContext = {
+                        req,
+                        res,
+                        operation: 'GET_ONE',
+                        table: tableMetadata.name,
+                        recordId: id,
+                        metadata: {
+                            tableName: tableMetadata.name,
+                            primaryKey: primaryKeyColumn,
+                            columns: Object.keys(columns)
+                        }
+                    };
+
+                    if (tableConfig?.hooks?.beforeOperation) {
+                        try {
+                            await tableConfig.hooks.beforeOperation(hookContext);
+                        } catch (hookError) {
+                            logger.error({
+                                requestId,
+                                table: tableMetadata.name,
+                                duration: Date.now() - startTime,
+                                error: hookError
+                            }, 'GET_ONE request failed in beforeOperation hook');
+
+                            return ErrorHandler.handleError(res, hookError, 'beforeOperation', requestId);
+                        }
+                    }
+
                     // Use dynamic primary key instead of hardcoded 'id'
                     if (!columns[primaryKeyColumn]) {
                         logger.error({
@@ -291,6 +418,24 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
                         return ErrorHandler.handleNotFound(res, undefined, requestId);
                     }
 
+                    let result = data[0];
+
+                    // Execute afterOperation hook
+                    if (tableConfig?.hooks?.afterOperation) {
+                        try {
+                            result = await tableConfig.hooks.afterOperation(hookContext, result);
+                        } catch (hookError) {
+                            logger.error({
+                                requestId,
+                                table: tableMetadata.name,
+                                duration: Date.now() - startTime,
+                                error: hookError
+                            }, 'GET_ONE request failed in afterOperation hook');
+
+                            return ErrorHandler.handleError(res, hookError, 'afterOperation', requestId);
+                        }
+                    }
+
                     logger.info({
                         requestId,
                         table: tableMetadata.name,
@@ -298,7 +443,7 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
                         duration
                     }, 'GET_ONE request completed successfully');
 
-                    res.json(data[0]);
+                    res.json(result);
                 } catch (error: any) {
                     const duration = Date.now() - startTime;
                     logger.error({
@@ -465,6 +610,35 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
                         id
                     }, 'Processing DELETE request');
 
+                    // Execute beforeOperation hook
+                    const hookContext: HookContext = {
+                        req,
+                        res,
+                        operation: 'DELETE',
+                        table: tableMetadata.name,
+                        recordId: id,
+                        metadata: {
+                            tableName: tableMetadata.name,
+                            primaryKey: primaryKeyColumn,
+                            columns: Object.keys(columns)
+                        }
+                    };
+
+                    if (tableConfig?.hooks?.beforeOperation) {
+                        try {
+                            await tableConfig.hooks.beforeOperation(hookContext);
+                        } catch (hookError) {
+                            logger.error({
+                                requestId,
+                                table: tableMetadata.name,
+                                duration: Date.now() - startTime,
+                                error: hookError
+                            }, 'DELETE request failed in beforeOperation hook');
+
+                            return ErrorHandler.handleError(res, hookError, 'beforeOperation', requestId);
+                        }
+                    }
+
                     // First check if the record exists using dynamic primary key
                     const existingRecord = await db.select().from(table).where(eq(columns[primaryKeyColumn], id));
                     if (existingRecord.length === 0) {
@@ -481,6 +655,25 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
                     }
 
                     await db.delete(table).where(eq(columns[primaryKeyColumn], id));
+
+                    const result = { deleted: true };
+
+                    // Execute afterOperation hook
+                    if (tableConfig?.hooks?.afterOperation) {
+                        try {
+                            await tableConfig.hooks.afterOperation(hookContext, result);
+                        } catch (hookError) {
+                            logger.error({
+                                requestId,
+                                table: tableMetadata.name,
+                                duration: Date.now() - startTime,
+                                error: hookError
+                            }, 'DELETE request failed in afterOperation hook');
+
+                            return ErrorHandler.handleError(res, hookError, 'afterOperation', requestId);
+                        }
+                    }
+
                     const duration = Date.now() - startTime;
 
                     logger.info({
@@ -501,7 +694,7 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
                         error: error.message
                     }, 'DELETE request failed');
 
-                    ErrorHandler.handleError(res, error, 'deleteOne', requestId);
+                    return ErrorHandler.handleError(res, error, 'deleteOne', requestId);
                 }
             });
         }

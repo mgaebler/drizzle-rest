@@ -18,6 +18,7 @@ Transform your Drizzle schema into a fully functional REST API with a single fun
 
 - 🚀 **Zero Configuration**: Generate REST endpoints from your Drizzle schema instantly
 - 🔍 **JSON-Server Compatible**: Familiar query syntax for filtering, sorting, and pagination
+- 🎣 **Hook System**: Authorization, data transformation, and custom logic with `beforeOperation` and `afterOperation` hooks
 - 🗄️ **PostgreSQL Support**: Full PostgreSQL database support
 - 📝 **Comprehensive Logging**: Built-in Pino logging with request tracing and debug modes
 
@@ -58,6 +59,26 @@ app.use(express.json());
 const apiRouter = createDrizzleRestAdapter({
   db: db,
   schema: schema,
+  tableOptions: {
+    users: {
+      hooks: {
+        beforeOperation: async (context) => {
+          // Authorization logic
+          if (!context.req.user) {
+            throw new Error('Authentication required');
+          }
+        },
+        afterOperation: async (context, result) => {
+          // Filter sensitive data
+          if (context.req.user?.role !== 'admin') {
+            const { password, ...safeResult } = result;
+            return safeResult;
+          }
+          return result;
+        }
+      }
+    }
+  }
 });
 
 // Mount the generated API
@@ -70,7 +91,17 @@ app.listen(3000, () => {
 
 That's it! Your API is now available with full CRUD operations for all tables in your schema.
 
-## 📖 API Usage
+## � Documentation
+
+For comprehensive guides and advanced features, check out our documentation:
+
+- **[Hook System](docs/hooks.md)** - Authorization, data transformation, and custom logic
+- **[Logging](docs/logging.md)** - Request tracing and debugging
+- **[Security](docs/security.md)** - Security best practices and configuration
+- **[Query Structure](docs/route_query_structure.md)** - Advanced query patterns
+- **[Concept](docs/concept_en.md)** - Architecture and design principles
+
+## �📖 API Usage
 
 ### Basic CRUD Operations
 
