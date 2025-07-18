@@ -18,7 +18,7 @@ This document tracks the implementation progress and **alpha release checklist**
 - [x] **.npmignore**: Specify files to exclude from npm package
 - [x] **GitHub Repository Setup**: Create public repository
 - [x] **Alpha Status Documentation**: Clear warnings about alpha state and API changes
-- [ ] **Package Scope**: Consider npm scope (e.g., `@mgaebler/drizzle-rest-adapter`)
+- [ ] **Package Scope**: Consider npm scope (e.g., `@mgaebler/drizzle-rest`)
 
 ### 🏗️ **Distribution & Packaging**
 - [x] **TypeScript-First Distribution**: Publishing source TypeScript files

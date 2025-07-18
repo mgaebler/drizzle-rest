@@ -5,8 +5,8 @@
 [![CI](https://github.com/mgaebler/drizzle-rest/actions/workflows/ci.yml/badge.svg)](https://github.com/mgaebler/drizzle-rest/actions/workflows/ci.yml)
 [![TypeScript](https://img.shields.io/badge/%3C%2F%3E-TypeScript-%230074c1.svg)](http://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Status: Alpha](https://img.shields.io/badge/Status-Alpha-red.svg)](https://github.com/mgaebler/drizzle-rest-adapter)
-[![Version: Pre-release](https://img.shields.io/badge/Version-v0.1.0--alpha-orange.svg)](https://github.com/mgaebler/drizzle-rest-adapter)
+[![Status: Alpha](https://img.shields.io/badge/Status-Alpha-red.svg)](https://github.com/mgaebler/drizzle-rest)
+[![Version: Pre-release](https://img.shields.io/badge/Version-v0.1.0--alpha-orange.svg)](https://github.com/mgaebler/drizzle-rest)
 
 > A dynamic REST API adapter for Drizzle ORM with JSON-Server compatible query syntax
 
@@ -29,10 +29,10 @@ For now, you can install it directly from the GitHub repository:
 
 ```bash
 # Install from GitHub (latest alpha)
-npm install git+https://github.com/mgaebler/drizzle-rest-adapter.git
+npm install git+https://github.com/mgaebler/drizzle-rest.git
 
 # Or clone and install locally for development
-git clone https://github.com/mgaebler/drizzle-rest-adapter.git
+git clone https://github.com/mgaebler/drizzle-rest.git
 cd drizzle-rest-adapter
 npm install
 npm run build
