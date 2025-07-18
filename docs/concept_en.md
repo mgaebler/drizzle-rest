@@ -187,19 +187,53 @@ interface DrizzleRestAdapterOptions {
 
   /**
    * Detailed configuration per table.
-   * Allows disabling endpoints or adding hooks.
+   * Allows disabling endpoints and adding security hooks.
    */
   tableOptions?: {
     [tableName: string]: {
-      disabledEndpoints?: Array<'GET_MANY' | 'GET_ONE' | 'CREATE' | 'UPDATE' | 'DELETE'>;
+      disabledEndpoints?: Array<'GET_MANY' | 'GET_ONE' | 'CREATE' | 'UPDATE' | 'REPLACE' | 'DELETE'>;
 
-      // Hooks for custom logic (e.g., permission checks)
+      // Security hooks for authorization (framework authentication required)
       hooks?: {
         beforeOperation?: (context: HookContext) => Promise<void>;
         afterOperation?: (context: HookContext, result: any) => Promise<any>;
       }
     }
   };
+
+  /** Security configuration */
+  security?: {
+    /** Maximum request body size in bytes (default: 1MB) */
+    maxBodySize?: number;
+    /** Enable request sanitization (default: true) */
+    sanitizeInput?: boolean;
+    /** Rate limiting configuration */
+    rateLimit?: {
+      windowMs: number;
+      max: number;
+    };
+  };
+
+  /** Logging configuration */
+  logging?: {
+    /** Logger instance or configuration */
+    logger?: Logger | LoggerOptions;
+    /** Request logging options */
+    requestLogging?: RequestLogOptions;
+  };
+}
+
+interface HookContext {
+  req: Request;           // Access to req.user from framework authentication
+  operation: 'GET_MANY' | 'GET_ONE' | 'CREATE' | 'UPDATE' | 'REPLACE' | 'DELETE';
+  table: string;          // Table name
+  record?: any;           // For CREATE/UPDATE operations
+  recordId?: string;      // For GET_ONE/UPDATE/DELETE operations
+  filters?: any;          // For GET_MANY operations
+  metadata: {
+    tableName: string;
+    primaryKey: string;
+    columns: string[];
   };
 }
 ```
@@ -249,15 +283,15 @@ The implementation is carried out in several sequential phases to ensure a stabl
 - Configuration-based endpoint activation/deactivation
 - Relation support for nested resources
 
-### Phase 5: Advanced Features and Optimizations
+### Phase 5: Advanced Features and Security
 
-**Goal**: Hooks, performance optimizations, and advanced functionalities
+**Goal**: Hooks for authorization, performance optimizations, and advanced functionalities
 
 **Deliverables Phase 5**:
-- Hook system for custom logic
+- Hook system for authorization and custom logic (CRITICAL FOR SECURITY)
 - Performance optimizations (query caching, connection pooling)
 - Advanced relation support (deep nesting)
-- Comprehensive documentation and examples
+- Comprehensive documentation and security examples
 
 ### Phase 6: Testing and Production Readiness
 
@@ -269,21 +303,159 @@ The implementation is carried out in several sequential phases to ensure a stabl
 - Production-ready error handling
 - Comprehensive documentation and migration guides
 
-### Implementation Status - UPDATED (July 12, 2025)
+### Implementation Status - UPDATED (July 18, 2025)
 
 **✅ COMPLETED PHASES:**
 
 1.  **✅ Phases 1-4: COMPLETE** - Core JSON-Server functionality fully implemented
-2.  **⏳ Phase 5: PENDING** - Advanced features (hooks, caching, optimizations)
+2.  **🚨 Phase 5: CRITICAL** - Hook system required for production security
 3.  **🔄 Phase 6: IN PROGRESS** - Testing and production readiness
 
-**Original Implementation Timeline:**
+**Security-First Release Strategy:**
 
-1.  **✅ Weeks 1-2**: Phase 1 (Schema Introspection) - **COMPLETE**
-2.  **✅ Weeks 3-4**: Phase 2 (Query Builder) - **COMPLETE**
-3.  **✅ Weeks 5-6**: Phase 3 (HTTP Handlers) - **COMPLETE**
-4.  **✅ Weeks 7-8**: Phase 4 (Router Assembly) - **COMPLETE**
-5.  **⏳ Weeks 9-10**: Phase 5 (Advanced Features) - **PENDING**
-6.  **🔄 Weeks 11-12**: Phase 6 (Testing & Production Readiness) - **IN PROGRESS**
+1.  **🚨 Hook System Implementation**: `beforeOperation`/`afterOperation` hooks for authorization (BLOCKING)
+2.  **� Authorization Patterns**: Framework auth + hook-based access control
+3.  **📋 Security Documentation**: Setup guides with authentication examples
+4.  **� Security Audit**: Address npm audit vulnerabilities and input validation
+5.  **🚀 Secure Alpha Release**: Only after authorization system is complete
 
-**Current Status**: The adapter provides a **fully functional JSON-Server compatible REST API** with complete filtering, pagination, sorting, and basic embedding capabilities. The core implementation strategy was successful, delivering a production-ready solution after Phase 4 as planned.
+**Current Status**: The adapter provides a **fully functional JSON-Server compatible REST API** with complete filtering, pagination, sorting, and basic embedding capabilities. **Hook-based authorization system is required before public release** to ensure secure access control in production environments.
+
+## 7. Security Architecture
+
+### Security Model
+
+The Drizzle REST Adapter follows a **layered security approach**:
+
+1. **Framework Layer**: Handles authentication (JWT, OAuth, sessions)
+2. **Adapter Layer**: Handles authorization via hooks
+3. **Database Layer**: Leverages Drizzle's type-safe query building
+
+### Authorization via Hooks
+
+**Key Finding**: During implementation, we discovered that the planned hook system is the **perfect solution for authorization**. Rather than building a separate authorization framework, hooks provide:
+
+- **Framework Agnostic**: Works with any authentication system
+- **Maximum Flexibility**: Custom authorization logic per table/operation
+- **Clean Architecture**: Separation of authentication (framework) and authorization (adapter)
+- **Row-Level Security**: Can check record ownership and relationships
+
+### Security Example
+
+```typescript
+// Framework handles authentication
+app.use('/api', passport.authenticate('jwt', { session: false }));
+
+// Adapter handles authorization via hooks
+const drizzleApiRouter = createDrizzleRestAdapter({
+  db, schema,
+  tableOptions: {
+    users: {
+      hooks: {
+        beforeOperation: async (context) => {
+          const { user } = context.req; // From framework auth
+          const { operation, recordId } = context;
+
+          // Role-based authorization
+          if (operation === 'DELETE' && user.role !== 'admin') {
+            throw new Error('Forbidden: Only admins can delete users');
+          }
+
+          // Record-level authorization
+          if (operation === 'UPDATE' && user.role !== 'admin' && user.id !== recordId) {
+            throw new Error('Forbidden: Can only update own profile');
+          }
+        },
+        afterOperation: async (context, result) => {
+          // Data filtering based on permissions
+          if (context.req.user.role !== 'admin') {
+            delete result.passwordHash;
+            delete result.internalNotes;
+          }
+          return result;
+        }
+      }
+    }
+  }
+});
+```
+
+### Security Benefits
+
+- **Default Secure**: No operations allowed until explicitly configured
+- **Granular Control**: Per-table, per-operation, per-record authorization
+- **Data Protection**: Sensitive field filtering in `afterOperation`
+- **Audit Trail**: All operations can be logged and monitored
+- **Type Safety**: Full TypeScript support for security logic
+
+-----
+
+## 8. Architectural Decisions and Findings
+
+### Hook-Based Authorization Discovery
+
+During the security analysis phase, a **critical architectural insight** was discovered: the planned hook system (Phase 5) is the ideal solution for authorization rather than building a separate security framework.
+
+#### The Problem
+Initially, the adapter exposed all CRUD operations publicly without any access control mechanism. This created a critical security vulnerability where any user could:
+- Read all data (`GET /users`, `GET /posts`)
+- Create records (`POST /users`)
+- Update any record (`PATCH /users/123`)
+- Delete any record (`DELETE /users/123`)
+
+#### The Solution Discovery
+Rather than implementing a complex authorization configuration system, we realized the already-planned hook system provides the perfect authorization mechanism:
+
+**Why Hooks Work Better:**
+1. **Leverage Existing Architecture**: Uses the planned Phase 5 hook system
+2. **Framework Agnostic**: Works with any authentication system (JWT, OAuth, sessions)
+3. **Maximum Flexibility**: Custom authorization logic per table and operation
+4. **Clean Separation**: Framework handles authentication, adapter handles authorization
+5. **No Breaking Changes**: Builds on existing configuration patterns
+
+#### Implementation Pattern
+```typescript
+// Authentication: Framework responsibility
+app.use('/api', authenticationMiddleware);
+
+// Authorization: Adapter hooks responsibility
+const adapter = createDrizzleRestAdapter({
+  tableOptions: {
+    users: {
+      hooks: {
+        beforeOperation: async (context) => {
+          // Custom authorization logic using context.req.user
+          if (!hasPermission(context.req.user, context.operation)) {
+            throw new Error('Forbidden');
+          }
+        }
+      }
+    }
+  }
+});
+```
+
+#### Architectural Benefits
+- **Security by Design**: Authorization becomes integral to the adapter's operation
+- **Developer Experience**: Familiar hook pattern for custom logic
+- **Performance**: Authorization only runs when operations are executed
+- **Maintainability**: Security logic is co-located with business logic
+- **Extensibility**: Same pattern works for audit logging, data validation, etc.
+
+### Design Principle: Separation of Concerns
+
+This discovery reinforced a key architectural principle:
+
+**Framework Responsibilities** (Authentication):
+- Token validation and parsing
+- User session management
+- `req.user` population
+- Authentication middleware
+
+**Adapter Responsibilities** (Authorization):
+- Permission checking via hooks
+- Row-level access control
+- Data filtering and transformation
+- Operation-specific business rules
+
+This separation ensures the adapter remains framework-agnostic while providing robust security capabilities.
