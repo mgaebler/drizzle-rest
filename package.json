@@ -64,7 +64,7 @@
         "@types/node": "^20.11.5",
         "@types/pino": "^7.0.5",
         "@types/supertest": "^6.0.0",
-        "drizzle-kit": "^0.18.1",
+        "drizzle-kit": "^0.31.4",
         "eslint": "^9.31.0",
         "eslint-plugin-drizzle": "^0.2.3",
         "eslint-plugin-simple-import-sort": "^12.1.1",
