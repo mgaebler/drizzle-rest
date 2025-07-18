@@ -1,3 +1,6 @@
 {
-    "github.copilot.chat.codeGeneration.useInstructionFiles": true
+    "github.copilot.chat.codeGeneration.useInstructionFiles": true,
+    "cSpell.words": [
+        "Pglite"
+    ]
 }
