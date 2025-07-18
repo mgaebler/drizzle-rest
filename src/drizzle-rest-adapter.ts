@@ -2,9 +2,10 @@ import { eq, getTableColumns } from 'drizzle-orm';
 import { PgTable } from 'drizzle-orm/pg-core';
 import { PgliteDatabase } from 'drizzle-orm/pglite';
 import { createInsertSchema } from 'drizzle-zod';
-import express, { Request, Response } from 'express';
+import express from 'express';
 
 import { ErrorHandler } from './utils/error-handler';
+import { createHookContext, HookContext, OperationType } from './utils/hook-context';
 import { createLogger, Logger, LoggerOptions } from './utils/logger';
 import { QueryBuilder } from './utils/query-builder';
 import { QueryParser } from './utils/query-parser';
@@ -14,23 +15,6 @@ import { SchemaInspector } from './utils/schema-inspector';
 // A more specific type can be used if the schema is known.
 // Using `any` for the schema makes the adapter more generic.
 type DrizzleDb = PgliteDatabase<any>;
-
-export type OperationType = 'GET_MANY' | 'GET_ONE' | 'CREATE' | 'UPDATE' | 'REPLACE' | 'DELETE';
-
-export interface HookContext {
-    req: Request & { user?: any };           // Access to req.user from framework auth
-    res: Response;          // Access to response object
-    operation: OperationType;
-    table: string;          // Table name
-    record?: any;           // For CREATE/UPDATE operations
-    recordId?: string;      // For GET_ONE/UPDATE/DELETE operations
-    filters?: any;          // For GET_MANY operations
-    metadata: {
-        tableName: string;
-        primaryKey: string;
-        columns: string[];
-    };
-}
 
 export interface TableHooks {
     beforeOperation?: (context: HookContext) => Promise<void>;
@@ -156,18 +140,15 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
                     const params = QueryParser.parseQueryParams(req);
 
                     // Execute beforeOperation hook
-                    const hookContext: HookContext = {
+                    const hookContext = createHookContext(
                         req,
                         res,
-                        operation: 'GET_MANY',
-                        table: tableMetadata.name,
-                        filters: params.filters,
-                        metadata: {
-                            tableName: tableMetadata.name,
-                            primaryKey: primaryKeyColumn,
-                            columns: Object.keys(columns)
-                        }
-                    };
+                        'GET_MANY',
+                        tableMetadata,
+                        primaryKeyColumn,
+                        columns,
+                        { filters: params.filters }
+                    );
 
                     if (tableConfig?.hooks?.beforeOperation) {
                         await tableConfig.hooks.beforeOperation(hookContext);
@@ -272,18 +253,15 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
                     }, 'Request body validated');
 
                     // Execute beforeOperation hook
-                    const hookContext: HookContext = {
+                    const hookContext = createHookContext(
                         req,
                         res,
-                        operation: 'CREATE',
-                        table: tableMetadata.name,
-                        record: validatedBody,
-                        metadata: {
-                            tableName: tableMetadata.name,
-                            primaryKey: primaryKeyColumn,
-                            columns: Object.keys(columns)
-                        }
-                    };
+                        'CREATE',
+                        tableMetadata,
+                        primaryKeyColumn,
+                        columns,
+                        { record: validatedBody }
+                    );
 
                     if (tableConfig?.hooks?.beforeOperation) {
                         try {
@@ -360,18 +338,15 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
                     }, 'Processing GET_ONE request');
 
                     // Execute beforeOperation hook
-                    const hookContext: HookContext = {
+                    const hookContext = createHookContext(
                         req,
                         res,
-                        operation: 'GET_ONE',
-                        table: tableMetadata.name,
-                        recordId: id,
-                        metadata: {
-                            tableName: tableMetadata.name,
-                            primaryKey: primaryKeyColumn,
-                            columns: Object.keys(columns)
-                        }
-                    };
+                        'GET_ONE',
+                        tableMetadata,
+                        primaryKeyColumn,
+                        columns,
+                        { recordId: id }
+                    );
 
                     if (tableConfig?.hooks?.beforeOperation) {
                         try {
@@ -611,18 +586,15 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
                     }, 'Processing DELETE request');
 
                     // Execute beforeOperation hook
-                    const hookContext: HookContext = {
+                    const hookContext = createHookContext(
                         req,
                         res,
-                        operation: 'DELETE',
-                        table: tableMetadata.name,
-                        recordId: id,
-                        metadata: {
-                            tableName: tableMetadata.name,
-                            primaryKey: primaryKeyColumn,
-                            columns: Object.keys(columns)
-                        }
-                    };
+                        'DELETE',
+                        tableMetadata,
+                        primaryKeyColumn,
+                        columns,
+                        { recordId: id }
+                    );
 
                     if (tableConfig?.hooks?.beforeOperation) {
                         try {
