@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 
 import { ErrorHandler } from '../utils/error-handler';
-import { createHookContext } from '../utils/hook-context';
+import { createHookContext, OperationType } from '../utils/hook-context';
 import { QueryBuilder } from '../utils/query-builder';
 import { QueryParser } from '../utils/query-parser';
 import { ActionContext, ActionHandler } from './types';
@@ -39,7 +39,7 @@ export const getManyAction: ActionHandler = async (
         const hookContext = createHookContext(
             req,
             res,
-            'GET_MANY',
+            OperationType.GET_MANY,
             tableMetadata,
             primaryKeyColumn,
             columns,

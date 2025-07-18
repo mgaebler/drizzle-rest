@@ -3,7 +3,7 @@ import { createInsertSchema } from 'drizzle-zod';
 import { Request, Response } from 'express';
 
 import { ErrorHandler } from '../utils/error-handler';
-import { createHookContext } from '../utils/hook-context';
+import { createHookContext, OperationType } from '../utils/hook-context';
 import { ActionContext, ActionHandler } from './types';
 
 export const replaceAction: ActionHandler = async (
@@ -50,7 +50,7 @@ export const replaceAction: ActionHandler = async (
         const hookContext = createHookContext(
             req,
             res,
-            'REPLACE',
+            OperationType.REPLACE,
             tableMetadata,
             primaryKeyColumn,
             columns,

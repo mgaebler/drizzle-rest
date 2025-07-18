@@ -2,7 +2,7 @@ import { eq } from 'drizzle-orm';
 import { Request, Response } from 'express';
 
 import { ErrorHandler } from '../utils/error-handler';
-import { createHookContext } from '../utils/hook-context';
+import { createHookContext, OperationType } from '../utils/hook-context';
 import { ActionContext, ActionHandler } from './types';
 
 export const getOneAction: ActionHandler = async (
@@ -37,7 +37,7 @@ export const getOneAction: ActionHandler = async (
         const hookContext = createHookContext(
             req,
             res,
-            'GET_ONE',
+            OperationType.GET_ONE,
             tableMetadata,
             primaryKeyColumn,
             columns,

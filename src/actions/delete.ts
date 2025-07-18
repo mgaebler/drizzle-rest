@@ -2,7 +2,7 @@ import { eq } from 'drizzle-orm';
 import { Request, Response } from 'express';
 
 import { ErrorHandler } from '../utils/error-handler';
-import { createHookContext } from '../utils/hook-context';
+import { createHookContext, OperationType } from '../utils/hook-context';
 import { ActionContext, ActionHandler } from './types';
 
 export const deleteAction: ActionHandler = async (
@@ -36,7 +36,7 @@ export const deleteAction: ActionHandler = async (
         const hookContext = createHookContext(
             req,
             res,
-            'DELETE',
+            OperationType.DELETE,
             tableMetadata,
             primaryKeyColumn,
             columns,

@@ -131,7 +131,7 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
         const tableConfig = tableOptions?.[tableMetadata.name];
 
         // GET /<table-name>
-        if (!tableConfig?.disabledEndpoints?.includes('GET_MANY')) {
+        if (!tableConfig?.disabledEndpoints?.includes(OperationType.GET_MANY)) {
             router.get(resourcePath, async (req, res) => {
                 const actionContext: ActionContext = {
                     db,
@@ -150,7 +150,7 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
         }
 
         // POST /<table-name>
-        if (!tableConfig?.disabledEndpoints?.includes('CREATE')) {
+        if (!tableConfig?.disabledEndpoints?.includes(OperationType.CREATE)) {
             router.post(resourcePath, async (req, res) => {
                 const actionContext: ActionContext = {
                     db,
@@ -169,7 +169,7 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
         }
 
         // GET /<table-name>/:id
-        if (!tableConfig?.disabledEndpoints?.includes('GET_ONE')) {
+        if (!tableConfig?.disabledEndpoints?.includes(OperationType.GET_ONE)) {
             router.get(itemPath, async (req, res) => {
                 const actionContext: ActionContext = {
                     db,
@@ -188,7 +188,7 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
         }
 
         // PATCH /<table-name>/:id
-        if (!tableConfig?.disabledEndpoints?.includes('UPDATE')) {
+        if (!tableConfig?.disabledEndpoints?.includes(OperationType.UPDATE)) {
             router.patch(itemPath, async (req, res) => {
                 const actionContext: ActionContext = {
                     db,
@@ -207,7 +207,7 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
         }
 
         // PUT /<table-name>/:id
-        if (!tableConfig?.disabledEndpoints?.includes('REPLACE')) {
+        if (!tableConfig?.disabledEndpoints?.includes(OperationType.REPLACE)) {
             router.put(itemPath, async (req, res) => {
                 const actionContext: ActionContext = {
                     db,
@@ -226,7 +226,7 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
         }
 
         // DELETE /<table-name>/:id
-        if (!tableConfig?.disabledEndpoints?.includes('DELETE')) {
+        if (!tableConfig?.disabledEndpoints?.includes(OperationType.DELETE)) {
             router.delete(itemPath, async (req, res) => {
                 const actionContext: ActionContext = {
                     db,

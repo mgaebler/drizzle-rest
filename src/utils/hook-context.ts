@@ -1,6 +1,13 @@
 import { Request, Response } from 'express';
 
-export type OperationType = 'GET_MANY' | 'GET_ONE' | 'CREATE' | 'UPDATE' | 'REPLACE' | 'DELETE';
+export enum OperationType {
+    GET_MANY = 'GET_MANY',
+    GET_ONE = 'GET_ONE',
+    CREATE = 'CREATE',
+    UPDATE = 'UPDATE',
+    REPLACE = 'REPLACE',
+    DELETE = 'DELETE'
+}
 
 export interface HookContext {
     req: Request & { user?: any };           // Access to req.user from framework auth
