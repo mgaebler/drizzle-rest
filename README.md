@@ -1,4 +1,4 @@
-# Drizzle REST Adapter
+# Drizzle REST
 
 *Transform your database schema into a REST API in seconds.*
 
