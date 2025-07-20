@@ -29,7 +29,13 @@ app.use(express.urlencoded({ extended: true }));
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const distPath = path.resolve(__dirname, "../dist");
+
 app.use("/admin", express.static(distPath));
+
+// Redirect root path to /admin
+app.get("/", (req, res) => {
+    res.redirect("/admin");
+});
 
 async function startServer() {
     try {

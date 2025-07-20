@@ -15,8 +15,8 @@ export const users = pgTable("users", {
     email: varchar("email", { length: 255 }).notNull().unique(),
     bio: text("bio"),
     avatar: varchar("avatar", { length: 500 }),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
 });
 
 // Posts table - blog posts
@@ -30,8 +30,8 @@ export const posts = pgTable("posts", {
     userId: integer("user_id")
         .references(() => users.id)
         .notNull(),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
 });
 
 // Comments table - post comments
@@ -45,8 +45,8 @@ export const comments = pgTable("comments", {
         .references(() => users.id)
         .notNull(),
     parentId: integer("parent_id"), // For nested comments - will add reference after declaration
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
 });
 
 // Categories table - post categories
@@ -56,7 +56,7 @@ export const categories = pgTable("categories", {
     description: text("description"),
     slug: varchar("slug", { length: 100 }).notNull().unique(),
     color: varchar("color", { length: 7 }).default("#6366f1"), // Hex color
-    createdAt: timestamp("created_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
 });
 
 // Tags table - post tags
@@ -64,7 +64,7 @@ export const tags = pgTable("tags", {
     id: serial("id").primaryKey(),
     name: varchar("name", { length: 50 }).notNull().unique(),
     slug: varchar("slug", { length: 50 }).notNull().unique(),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
 });
 
 // Post-Category junction table (many-to-many)
