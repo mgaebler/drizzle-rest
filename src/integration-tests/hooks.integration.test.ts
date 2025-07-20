@@ -9,17 +9,48 @@ import { HookContext } from '@/utils/hook-context';
 import { createDrizzleRestAdapter } from '../drizzle-rest-adapter';
 import { setupTestDatabase, TEST_USERS } from './test-helpers';
 
-// Mock user for testing authorization
+// Example permission lists for different user types
+const userPermissions = [
+    "users:read", "users:update",
+    "comments:read", "comments:create", "comments:update",
+    "posts:read"
+];
+
+const editorPermissions = [
+    "users:read", "users:update",
+    "comments:read", "comments:create", "comments:update", "comments:delete",
+    "posts:read", "posts:create", "posts:update", "posts:write",
+    "categories:read"
+];
+
+const adminPermissions = [
+    "users:read", "users:write", "users:delete", "users:create", "users:update",
+    "comments:read", "comments:write", "comments:delete", "comments:create", "comments:update",
+    "posts:read", "posts:write", "posts:delete", "posts:create", "posts:update",
+    "categories:read", "categories:write", "categories:delete", "categories:create", "categories:update",
+    "tags:read", "tags:write", "tags:delete", "tags:create", "tags:update"
+];
+
+// Mock users with permission-based authorization
 const mockUser = {
     id: 1,
     role: 'user',
-    fullName: 'Mock User'
+    fullName: 'Mock User',
+    permissions: userPermissions
+};
+
+const mockEditorUser = {
+    id: 2,
+    role: 'editor',
+    fullName: 'Mock Editor',
+    permissions: editorPermissions
 };
 
 const mockAdminUser = {
-    id: 2,
+    id: 3,
     role: 'admin',
-    fullName: 'Mock Admin'
+    fullName: 'Mock Admin',
+    permissions: adminPermissions
 };
 
 // Helper to create app with auth middleware and hooks
@@ -244,8 +275,197 @@ describe('Hook System Integration Tests', () => {
         });
     });
 
+    describe('Permission-based authorization', () => {
+        // Helper function to check if user has permission
+        const hasPermission = (user: any, permission: string): boolean => {
+            return user?.permissions?.includes(permission) || false;
+        };
+
+        // Helper function to get required permission for operation
+        const getRequiredPermission = (table: string, operation: string): string => {
+            const actionMap: Record<string, string> = {
+                'CREATE': 'create',
+                'GET_ONE': 'read',
+                'GET_MANY': 'read',
+                'UPDATE': 'update',
+                'REPLACE': 'write',
+                'DELETE': 'delete'
+            };
+            return `${table}:${actionMap[operation]}`;
+        };
+
+        it('should allow user with correct permissions to perform operation', async () => {
+            const app = createAppWithHooks({
+                users: {
+                    hooks: {
+                        beforeOperation: async (context: HookContext) => {
+                            const requiredPermission = getRequiredPermission(context.table, context.operation);
+                            if (!hasPermission(context.req.user, requiredPermission)) {
+                                throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
+                            }
+                        }
+                    }
+                }
+            });
+
+            // User has "users:read" permission
+            const res = await request(app)
+                .get('/api/v1/users');
+
+            expect(res.status).toBe(200);
+        });
+
+        it('should block user without correct permissions', async () => {
+            const app = createAppWithHooks({
+                users: {
+                    hooks: {
+                        beforeOperation: async (context: HookContext) => {
+                            const requiredPermission = getRequiredPermission(context.table, context.operation);
+                            if (!hasPermission(context.req.user, requiredPermission)) {
+                                throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
+                            }
+                        }
+                    }
+                }
+            });
+
+            // User does NOT have "users:delete" permission
+            const res = await request(app)
+                .delete('/api/v1/users/1');
+
+            expect(res.status).toBe(403);
+            expect(res.body.error).toBe('Forbidden: Missing permission users:delete');
+        });
+
+        it('should allow admin with full permissions to perform any operation', async () => {
+            const app = createAppWithAdminUser({
+                users: {
+                    hooks: {
+                        beforeOperation: async (context: HookContext) => {
+                            const requiredPermission = getRequiredPermission(context.table, context.operation);
+                            if (!hasPermission(context.req.user, requiredPermission)) {
+                                throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Admin has "users:delete" permission
+            const res = await request(app)
+                .delete('/api/v1/users/1');
+
+            expect(res.status).toBe(404); // 404 because user doesn't exist, but permission passed
+        });
+
+        it('should demonstrate editor permissions for posts', async () => {
+            const appWithEditor = express();
+            appWithEditor.use(express.json());
+
+            // Mock authentication middleware with editor user
+            appWithEditor.use((req, res, next) => {
+                (req as any).user = mockEditorUser;
+                next();
+            });
+
+            const drizzleApiRouter = createDrizzleRestAdapter({
+                db: db,
+                schema: schema,
+                tableOptions: {
+                    posts: {
+                        hooks: {
+                            beforeOperation: async (context: HookContext) => {
+                                const requiredPermission = getRequiredPermission(context.table, context.operation);
+                                if (!hasPermission(context.req.user, requiredPermission)) {
+                                    throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            appWithEditor.use('/api/v1', drizzleApiRouter);
+
+            // Editor has "posts:read" permission
+            const readRes = await request(appWithEditor)
+                .get('/api/v1/posts');
+            expect(readRes.status).toBe(200);
+
+            // Editor has "posts:create" permission
+            const createRes = await request(appWithEditor)
+                .post('/api/v1/posts')
+                .send({ title: 'Test Post', content: 'Test content' });
+            expect(createRes.status).not.toBe(403); // Should not be forbidden due to permissions
+        });
+
+        it('should demonstrate granular permission control', async () => {
+            // Create a user with very specific permissions
+            const limitedUser = {
+                id: 4,
+                role: 'limited',
+                fullName: 'Limited User',
+                permissions: ['posts:read', 'comments:read'] // Only read permissions
+            };
+
+            const appWithLimitedUser = express();
+            appWithLimitedUser.use(express.json());
+            appWithLimitedUser.use((req, res, next) => {
+                (req as any).user = limitedUser;
+                next();
+            });
+
+            const drizzleApiRouter = createDrizzleRestAdapter({
+                db: db,
+                schema: schema,
+                tableOptions: {
+                    posts: {
+                        hooks: {
+                            beforeOperation: async (context: HookContext) => {
+                                const requiredPermission = getRequiredPermission(context.table, context.operation);
+                                if (!hasPermission(context.req.user, requiredPermission)) {
+                                    throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
+                                }
+                            }
+                        }
+                    },
+                    users: {
+                        hooks: {
+                            beforeOperation: async (context: HookContext) => {
+                                const requiredPermission = getRequiredPermission(context.table, context.operation);
+                                if (!hasPermission(context.req.user, requiredPermission)) {
+                                    throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            appWithLimitedUser.use('/api/v1', drizzleApiRouter);
+
+            // Limited user can read posts
+            const postsRes = await request(appWithLimitedUser)
+                .get('/api/v1/posts');
+            expect(postsRes.status).toBe(200);
+
+            // Limited user cannot read users (no users:read permission)
+            const usersRes = await request(appWithLimitedUser)
+                .get('/api/v1/users');
+            expect(usersRes.status).toBe(403);
+            expect(usersRes.body.error).toBe('Forbidden: Missing permission users:read');
+
+            // Limited user cannot create posts (no posts:create permission)
+            const createRes = await request(appWithLimitedUser)
+                .post('/api/v1/posts')
+                .send({ title: 'Test', content: 'Test' });
+            expect(createRes.status).toBe(403);
+            expect(createRes.body.error).toBe('Forbidden: Missing permission posts:create');
+        });
+    });
+
     describe('Authorization scenarios', () => {
-        it('should allow admin to delete users', async () => {
+        it('should allow admin to delete users with permission-based auth', async () => {
             // Create a test user first
             const [testUser] = await db.insert(schema.users).values(TEST_USERS.alice).returning();
 
@@ -253,8 +473,9 @@ describe('Hook System Integration Tests', () => {
                 users: {
                     hooks: {
                         beforeOperation: async (context: HookContext) => {
-                            if (context.operation === 'DELETE' && context.req.user.role !== 'admin') {
-                                throw new Error('Forbidden: Only admins can delete users');
+                            const requiredPermission = `${context.table}:delete`;
+                            if (!context.req.user.permissions?.includes(requiredPermission)) {
+                                throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
                             }
                         }
                     }
@@ -267,7 +488,7 @@ describe('Hook System Integration Tests', () => {
             expect(res.status).toBe(204);
         });
 
-        it('should prevent non-admin from deleting users', async () => {
+        it('should prevent non-admin from deleting users with permission-based auth', async () => {
             // Create a test user first
             const [testUser] = await db.insert(schema.users).values(TEST_USERS.alice).returning();
 
@@ -275,8 +496,9 @@ describe('Hook System Integration Tests', () => {
                 users: {
                     hooks: {
                         beforeOperation: async (context: HookContext) => {
-                            if (context.operation === 'DELETE' && context.req.user.role !== 'admin') {
-                                throw new Error('Forbidden: Only admins can delete users');
+                            const requiredPermission = `${context.table}:delete`;
+                            if (!context.req.user.permissions?.includes(requiredPermission)) {
+                                throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
                             }
                         }
                     }
@@ -287,25 +509,79 @@ describe('Hook System Integration Tests', () => {
                 .delete(`/api/v1/users/${testUser.id}`);
 
             expect(res.status).toBe(403);
-            expect(res.body.error).toBe('Forbidden: Only admins can delete users');
+            expect(res.body.error).toBe('Forbidden: Missing permission users:delete');
         });
 
-        it('should auto-set author in beforeOperation hook for CREATE operations', async () => {
-            let capturedRecord: any = null;
-
+        it('should auto-set author and check permissions in beforeOperation hook', async () => {
             const app = createAppWithHooks({
                 users: {
                     hooks: {
                         beforeOperation: async (context: HookContext) => {
+                            // Check permissions first
+                            const requiredPermission = `${context.table}:create`;
+                            if (!context.req.user.permissions?.includes(requiredPermission)) {
+                                throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
+                            }
+
+                            // Auto-set createdBy to current user
                             if (context.operation === 'CREATE') {
-                                // Auto-set createdBy to current user
                                 context.record.createdBy = context.req.user?.id;
-                                capturedRecord = context.record;
                             }
                         }
                     }
                 }
             });
+
+            // User does NOT have "users:create" permission, so this should fail
+            const res = await request(app)
+                .post('/api/v1/users')
+                .send(TEST_USERS.alice);
+
+            expect(res.status).toBe(403);
+            expect(res.body.error).toBe('Forbidden: Missing permission users:create');
+        });
+
+        it('should auto-set author when user has correct permissions', async () => {
+            let capturedRecord: any = null;
+
+            // Create a user with create permissions
+            const userWithCreatePermission = {
+                ...mockUser,
+                permissions: [...userPermissions, 'users:create']
+            };
+
+            const app = express();
+            app.use(express.json());
+            app.use((req, res, next) => {
+                (req as any).user = userWithCreatePermission;
+                next();
+            });
+
+            const drizzleApiRouter = createDrizzleRestAdapter({
+                db: db,
+                schema: schema,
+                tableOptions: {
+                    users: {
+                        hooks: {
+                            beforeOperation: async (context: HookContext) => {
+                                // Check permissions first
+                                const requiredPermission = `${context.table}:create`;
+                                if (!context.req.user.permissions?.includes(requiredPermission)) {
+                                    throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
+                                }
+
+                                // Auto-set createdBy to current user
+                                if (context.operation === 'CREATE') {
+                                    context.record.createdBy = context.req.user?.id;
+                                    capturedRecord = context.record;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            app.use('/api/v1', drizzleApiRouter);
 
             const res = await request(app)
                 .post('/api/v1/users')
@@ -314,7 +590,7 @@ describe('Hook System Integration Tests', () => {
             expect(res.status).toBe(201);
             expect(capturedRecord).toEqual({
                 ...TEST_USERS.alice,
-                createdBy: mockUser.id
+                createdBy: userWithCreatePermission.id
             });
         });
     });
