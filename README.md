@@ -5,12 +5,14 @@
 [![CI](https://github.com/mgaebler/drizzle-rest/actions/workflows/ci.yml/badge.svg)](https://github.com/mgaebler/drizzle-rest/actions/workflows/ci.yml)
 [![TypeScript](https://img.shields.io/badge/%3C%2F%3E-TypeScript-%230074c1.svg)](http://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Status: Alpha](https://img.shields.io/badge/Status-Alpha-red.svg)](https://github.com/mgaebler/drizzle-rest)
-[![Version: Pre-release](https://img.shields.io/badge/Version-v0.1.0--alpha-orange.svg)](https://github.com/mgaebler/drizzle-rest)
+[![npm version](https://img.shields.io/npm/v/drizzle-rest-adapter.svg)](https://www.npmjs.com/package/drizzle-rest-adapter)
+[![Alpha Release](https://img.shields.io/badge/Status-Alpha-orange.svg)](https://www.npmjs.com/package/drizzle-rest-adapter)
 
 > A dynamic REST API adapter for Drizzle ORM with JSON-Server compatible query syntax
 
-⚠️ **Alpha Version**: This project is in active development. APIs may change and features are still being finalized. Use in production at your own risk.
+⚠️ **Alpha Release**: This project is in active development. APIs may change and features are still being finalized. Use in production at your own risk.
+
+🎉 **Now Available on npm!** Alpha versions are published and ready for testing. First stable release (1.0.0) coming soon!
 
 Transform your Drizzle schema into a fully functional REST API with a single function call. Perfect for rapid prototyping, admin panels, and seamless migration from JSON-Server.
 
@@ -24,25 +26,42 @@ Transform your Drizzle schema into a fully functional REST API with a single fun
 
 ## 📦 Installation
 
-> **Alpha Release**: This package is currently in alpha development and not yet published to npm. APIs may change between versions.
+The package is now available on npm! Currently in alpha development:
 
-For now, you can install it directly from the GitHub repository:
-
+### Alpha Release (Only Available Version)
 ```bash
-# Install from GitHub (latest alpha)
-npm install git+https://github.com/mgaebler/drizzle-rest.git
+# Install the alpha version (only version available)
+npm install drizzle-rest-adapter@alpha
 
-# Or clone and install locally for development
-git clone https://github.com/mgaebler/drizzle-rest.git
-cd drizzle-rest-adapter
-npm install
-npm run build
-```
-
-Once stable, it will be published to npm as:
-```bash
+# Or install by default (currently alpha)
 npm install drizzle-rest-adapter
+
+# Install specific alpha version
+npm install drizzle-rest-adapter@0.1.2-alpha.0
 ```
+
+### Development Setup
+```bash
+# Clone for local development
+git clone https://github.com/mgaebler/drizzle-rest.git
+cd drizzle-rest
+npm install
+```
+
+### Requirements
+- **Node.js**: >= 20.0.0
+- **TypeScript**: >= 5.0.0 (if using TypeScript)
+- **Package Manager**: npm, yarn, or pnpm
+
+### 📋 Version Information
+
+| Version | Status | Description | Install Command |
+|---------|--------|-------------|-----------------|
+| `0.1.2-alpha.0` | Alpha (Only Available) | Initial alpha release, active development | `npm install drizzle-rest-adapter@alpha` |
+
+**No Stable Release Yet**: Only alpha version `0.1.2-alpha.0` is currently available. The first stable release will be `1.0.0`.
+
+**TypeScript Distribution**: This package distributes TypeScript source files directly for better IDE support and type safety. No build step required!
 
 ## 🚀 Quick Start
 
@@ -91,7 +110,27 @@ app.listen(3000, () => {
 
 That's it! Your API is now available with full CRUD operations for all tables in your schema.
 
-## � Documentation
+### 🎯 What You Get
+
+After running the above code, you'll have a fully functional REST API with endpoints like:
+
+```bash
+# Users CRUD
+GET    /api/v1/users              # List all users
+GET    /api/v1/users/1            # Get user by ID
+POST   /api/v1/users              # Create new user
+PATCH  /api/v1/users/1            # Update user
+PUT    /api/v1/users/1            # Replace user
+DELETE /api/v1/users/1            # Delete user
+
+# Advanced querying (JSON-Server compatible)
+GET /api/v1/users?name_like=John   # Filter by name
+GET /api/v1/users?_sort=name       # Sort by name
+GET /api/v1/users?_page=1&_per_page=10  # Pagination
+GET /api/v1/users?_embed=posts     # Include related posts
+```
+
+## 📖 Documentation
 
 For comprehensive guides and advanced features, check out our documentation:
 
@@ -101,7 +140,7 @@ For comprehensive guides and advanced features, check out our documentation:
 - **[Query Structure](docs/route_query_structure.md)** - Advanced query patterns
 - **[Concept](docs/concept_en.md)** - Architecture and design principles
 
-## �📖 API Usage
+## 📖 API Usage
 
 ### Basic CRUD Operations
 
@@ -201,8 +240,8 @@ Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 ### Development Setup
 
 ```bash
-git clone https://github.com/yourusername/drizzle-rest-adapter.git
-cd drizzle-rest-adapter
+git clone https://github.com/mgaebler/drizzle-rest.git
+cd drizzle-rest
 npm install
 npm run dev
 ```
