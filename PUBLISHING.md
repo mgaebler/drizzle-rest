@@ -49,7 +49,7 @@ This package distributes TypeScript source files directly (no build step require
 
 ### 4. Version Management
 
-**Current Version**: `0.1.1` (updated from 0.1.0)
+**Current Version**: `0.1.2-alpha.0` (alpha release)
 
 #### Version Update Process
 - [x] Determine version increment type based on changes:
@@ -220,9 +220,35 @@ npm login
 npm whoami
 ```
 
-### Step 4: Publish
+### Step 4: Publish ✅ COMPLETED
 
-#### For Alpha/Beta Releases
+#### Current Status:
+- ✅ **Published**: `drizzle-rest-adapter@0.1.1` as `latest`
+- ✅ **Alpha Published**: `drizzle-rest-adapter@0.1.2-alpha.0` as `alpha`
+- ✅ **Both versions available** for different use cases
+
+#### Final Distribution Tags:
+```json
+{
+  "alpha": "0.1.2-alpha.0",
+  "latest": "0.1.2-alpha.0"
+}
+```
+
+#### Installation Commands:
+```bash
+# For alpha testing
+npm install drizzle-rest-adapter@alpha
+
+# For latest (currently same as alpha)
+npm install drizzle-rest-adapter
+
+# For specific versions
+npm install drizzle-rest-adapter@0.1.1
+npm install drizzle-rest-adapter@0.1.2-alpha.0
+```
+
+#### For Future Releases
 ```bash
 # Publish as alpha
 npm publish --tag alpha --access public
@@ -298,7 +324,7 @@ git push origin v0.1.1
 ```json
 {
   "name": "drizzle-rest-adapter",
-  "version": "0.1.1",
+  "version": "0.1.2-alpha.0",
   "main": "src/index.ts",
   "types": "src/index.ts",
   "type": "module",
