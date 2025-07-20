@@ -1,5 +1,8 @@
 node_modules
 dist
 
+# Package files
+*.tgz
+
 # os files
 .DS_Store
