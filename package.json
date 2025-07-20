@@ -1,6 +1,6 @@
 {
     "name": "drizzle-rest-adapter",
-    "version": "0.1.1",
+    "version": "0.1.2-alpha.0",
     "description": "A dynamic REST API adapter for Drizzle ORM with JSON-Server compatible query syntax",
     "main": "src/index.ts",
     "types": "src/index.ts",
