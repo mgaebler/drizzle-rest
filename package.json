@@ -14,7 +14,7 @@
     "scripts": {
         "start": "tsx --require tsconfig-paths/register src/index.ts",
         "dev": "tsx --require tsconfig-paths/register --watch src/",
-        "prepublishOnly": "npm test",
+        "prepublishOnly": "npm run test && npm run lint",
         "db:migrate": "drizzle-kit migrate",
         "db:generate": "drizzle-kit generate",
         "test": "vitest --run",

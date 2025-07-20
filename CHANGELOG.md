@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2025-07-20
+
+### Changed
+- Enhanced `prepublishOnly` script to include linting validation
+- Improved `.npmignore` configuration for more selective file inclusion
+- Only essential source files and documentation are now included in published package
+
+### Added
+- Comprehensive publishing documentation with step-by-step guide
+- Version management workflow documentation
+- Package validation and testing procedures
+
 ### Removed
 - OpenAPI documentation generation - moved out of core adapter to maintain single responsibility principle
 

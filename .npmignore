@@ -3,15 +3,16 @@
 
 # Then explicitly include what should be packaged
 !src/
-!src/db/
-!src/db/*.ts
+!src/actions/
+!src/actions/**
 !src/utils/
-!src/utils/*.ts
-!src/*.ts
+!src/utils/**
+!src/index.ts
+!src/drizzle-rest-adapter.ts
 
 # Explicitly exclude test files and directories
-src/tests
-src/tests/
+src/integration-tests/
+src/db/
 src/**/*.test.ts
 src/**/*.spec.ts
 
