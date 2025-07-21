@@ -1,6 +1,8 @@
 # Technical Concept: Drizzle REST Adapter (Revised)
 
-The core idea is a single function, `createDrizzleRestAdapter`, which takes a configuration object and returns a ready-to-use middleware compatible with frameworks like Express or Fastify. The middleware generates a REST API at runtime based on a Drizzle schema.
+- The core idea is a single function, `createDrizzleRestAdapter`, which takes a configuration object and returns a ready-to-use middleware.
+- The middleware generates a REST API at runtime based on a Drizzle schema.
+- It should be compatible with frameworks like Express, Fastify, react-router and Nextjs. *(Currently implemented: Express. Others planned for future releases.)*
 
 -----
 
@@ -127,7 +129,7 @@ GET /posts?authorId=123 # Then filter posts
 
 This design decision keeps the adapter focused on relational database best practices while maintaining JSON-Server compatibility for the most commonly used features.
 
-## 🎉 **IMPLEMENTATION STATUS (July 12, 2025): 100% COMPLETE**
+## 🎉 **IMPLEMENTATION STATUS (July 21, 2025): 100% COMPLETE**
 
 The JSON-Server dialect specification outlined above has been **FULLY IMPLEMENTED** in the Drizzle REST Adapter:
 
@@ -153,7 +155,7 @@ The JSON-Server dialect specification outlined above has been **FULLY IMPLEMENTE
 - **✅ Error Handling**: Comprehensive error responses with proper HTTP status codes
 - **✅ Type Safety**: Full TypeScript support with Zod validation schemas
 
-The adapter is **production-ready** for JSON-Server compatible REST APIs with relational databases.
+The adapter is **feature-complete** for JSON-Server compatible REST APIs with relational databases and is in **alpha testing phase** (v0.1.2-alpha.2).
 
 -----
 
