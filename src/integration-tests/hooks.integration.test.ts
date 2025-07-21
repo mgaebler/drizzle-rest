@@ -7,7 +7,7 @@ import * as schema from '@/db/schema.js';
 import { HookContext } from '@/utils/hook-context';
 
 import { createDrizzleRestAdapter } from '../drizzle-rest-adapter';
-import { setupTestDatabase, TEST_USERS } from './test-helpers';
+import { createTestAdapterOptions, setupTestDatabase, TEST_USERS } from './test-helpers';
 
 // Example permission lists for different user types
 const userPermissions = [
@@ -65,11 +65,7 @@ const createAppWithHooks = (tableOptions: any = {}) => {
         next();
     });
 
-    const drizzleApiRouter = createDrizzleRestAdapter({
-        db: db,
-        schema: schema,
-        tableOptions,
-    });
+    const drizzleApiRouter = createDrizzleRestAdapter(createTestAdapterOptions(tableOptions));
 
     app.use('/api/v1', drizzleApiRouter);
     return app;
@@ -86,11 +82,7 @@ const createAppWithAdminUser = (tableOptions: any = {}) => {
         next();
     });
 
-    const drizzleApiRouter = createDrizzleRestAdapter({
-        db: db,
-        schema: schema,
-        tableOptions,
-    });
+    const drizzleApiRouter = createDrizzleRestAdapter(createTestAdapterOptions(tableOptions));
 
     app.use('/api/v1', drizzleApiRouter);
     return app;
@@ -368,22 +360,18 @@ describe('Hook System Integration Tests', () => {
                 next();
             });
 
-            const drizzleApiRouter = createDrizzleRestAdapter({
-                db: db,
-                schema: schema,
-                tableOptions: {
-                    posts: {
-                        hooks: {
-                            beforeOperation: async (context: HookContext) => {
-                                const requiredPermission = getRequiredPermission(context.table, context.operation);
-                                if (!hasPermission(context.req.user, requiredPermission)) {
-                                    throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
-                                }
+            const drizzleApiRouter = createDrizzleRestAdapter(createTestAdapterOptions({
+                posts: {
+                    hooks: {
+                        beforeOperation: async (context: HookContext) => {
+                            const requiredPermission = getRequiredPermission(context.table, context.operation);
+                            if (!hasPermission(context.req.user, requiredPermission)) {
+                                throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
                             }
                         }
                     }
                 }
-            });
+            }));
 
             appWithEditor.use('/api/v1', drizzleApiRouter);
 
@@ -415,32 +403,28 @@ describe('Hook System Integration Tests', () => {
                 next();
             });
 
-            const drizzleApiRouter = createDrizzleRestAdapter({
-                db: db,
-                schema: schema,
-                tableOptions: {
-                    posts: {
-                        hooks: {
-                            beforeOperation: async (context: HookContext) => {
-                                const requiredPermission = getRequiredPermission(context.table, context.operation);
-                                if (!hasPermission(context.req.user, requiredPermission)) {
-                                    throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
-                                }
+            const drizzleApiRouter = createDrizzleRestAdapter(createTestAdapterOptions({
+                posts: {
+                    hooks: {
+                        beforeOperation: async (context: HookContext) => {
+                            const requiredPermission = getRequiredPermission(context.table, context.operation);
+                            if (!hasPermission(context.req.user, requiredPermission)) {
+                                throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
                             }
                         }
-                    },
-                    users: {
-                        hooks: {
-                            beforeOperation: async (context: HookContext) => {
-                                const requiredPermission = getRequiredPermission(context.table, context.operation);
-                                if (!hasPermission(context.req.user, requiredPermission)) {
-                                    throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
-                                }
+                    }
+                },
+                users: {
+                    hooks: {
+                        beforeOperation: async (context: HookContext) => {
+                            const requiredPermission = getRequiredPermission(context.table, context.operation);
+                            if (!hasPermission(context.req.user, requiredPermission)) {
+                                throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
                             }
                         }
                     }
                 }
-            });
+            }));
 
             appWithLimitedUser.use('/api/v1', drizzleApiRouter);
 
@@ -557,29 +541,25 @@ describe('Hook System Integration Tests', () => {
                 next();
             });
 
-            const drizzleApiRouter = createDrizzleRestAdapter({
-                db: db,
-                schema: schema,
-                tableOptions: {
-                    users: {
-                        hooks: {
-                            beforeOperation: async (context: HookContext) => {
-                                // Check permissions first
-                                const requiredPermission = `${context.table}:create`;
-                                if (!context.req.user.permissions?.includes(requiredPermission)) {
-                                    throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
-                                }
+            const drizzleApiRouter = createDrizzleRestAdapter(createTestAdapterOptions({
+                users: {
+                    hooks: {
+                        beforeOperation: async (context: HookContext) => {
+                            // Check permissions first
+                            const requiredPermission = `${context.table}:create`;
+                            if (!context.req.user.permissions?.includes(requiredPermission)) {
+                                throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
+                            }
 
-                                // Auto-set createdBy to current user
-                                if (context.operation === 'CREATE') {
-                                    context.record.createdBy = context.req.user?.id;
-                                    capturedRecord = context.record;
-                                }
+                            // Auto-set createdBy to current user
+                            if (context.operation === 'CREATE') {
+                                context.record.createdBy = context.req.user?.id;
+                                capturedRecord = context.record;
                             }
                         }
                     }
                 }
-            });
+            }));
 
             app.use('/api/v1', drizzleApiRouter);
 

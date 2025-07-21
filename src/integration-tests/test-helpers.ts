@@ -6,18 +6,51 @@ import { expect } from 'vitest';
 
 import { db } from '@/db/connection';
 import * as schema from '@/db/schema.js';
+import { createLogger } from '@/utils/logger';
 
-import { createDrizzleRestAdapter } from '../drizzle-rest-adapter';
+import { createDrizzleRestAdapter, DrizzleRestAdapterOptions } from '../drizzle-rest-adapter';
 
-// Setup Express app with Drizzle REST adapter
+// Shared test logger instance - consistent across all tests
+export const testLogger = createLogger({
+    level: 'warn', // Only show warnings and errors during tests
+    pretty: false, // Use JSON format for better test output parsing
+});
+
+// Standard test logging configuration
+export const testLoggingConfig = {
+    logger: testLogger,
+    requestLogging: {
+        enabled: false, // Disable request logging during tests to reduce noise
+    },
+} as const;
+
+// Standard test adapter options that should be used across all test files
+export const createTestAdapterOptions = (
+    tableOptions?: DrizzleRestAdapterOptions['tableOptions']
+): DrizzleRestAdapterOptions => ({
+    db,
+    schema,
+    logging: testLoggingConfig,
+    ...((tableOptions && { tableOptions }) || {}),
+});
+
+// Setup Express app with Drizzle REST adapter using consistent test configuration
 export const createTestApp = () => {
     const app = express();
     app.use(express.json());
 
-    const drizzleApiRouter = createDrizzleRestAdapter({
-        db: db,
-        schema: schema,
-    });
+    const drizzleApiRouter = createDrizzleRestAdapter(createTestAdapterOptions());
+
+    app.use('/api/v1', drizzleApiRouter);
+    return app;
+};
+
+// Setup Express app with custom table options but consistent logging
+export const createTestAppWithOptions = (tableOptions?: DrizzleRestAdapterOptions['tableOptions']) => {
+    const app = express();
+    app.use(express.json());
+
+    const drizzleApiRouter = createDrizzleRestAdapter(createTestAdapterOptions(tableOptions));
 
     app.use('/api/v1', drizzleApiRouter);
     return app;

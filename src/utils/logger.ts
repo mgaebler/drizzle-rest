@@ -15,9 +15,12 @@ export interface LoggerOptions {
  * Creates a configured Pino logger instance for drizzle-rest-adapter
  */
 export function createLogger(options: LoggerOptions = {}): pino.Logger {
+    const isProduction = process.env.NODE_ENV === 'production';
+    const isDevelopment = process.env.NODE_ENV === 'development';
+
     const {
-        level = 'info',
-        pretty = process.env.NODE_ENV === 'development',
+        level = isDevelopment ? 'debug' : 'info',
+        pretty = isDevelopment,
         base = {},
         pinoOptions = {}
     } = options;
@@ -46,10 +49,20 @@ export function createLogger(options: LoggerOptions = {}): pino.Logger {
         level,
         base: {
             service: 'drizzle-rest-adapter',
+            version: process.env.npm_package_version || 'unknown',
+            environment: process.env.NODE_ENV || 'development',
             ...base
         },
         timestamp: pino.stdTimeFunctions.isoTime,
         transport,
+        // Disable pretty printing in production for better performance
+        ...(isProduction && { formatters: { level: (label) => ({ level: label }) } }),
+        serializers: {
+            error: pino.stdSerializers.err,
+            req: pino.stdSerializers.req,
+            res: pino.stdSerializers.res,
+            ...pinoOptions.serializers
+        },
         ...pinoOptions
     };
 
