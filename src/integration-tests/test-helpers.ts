@@ -19,9 +19,6 @@ export const testLogger = createLogger({
 // Standard test logging configuration
 export const testLoggingConfig = {
     logger: testLogger,
-    requestLogging: {
-        enabled: false, // Disable request logging during tests to reduce noise
-    },
 } as const;
 
 // Standard test adapter options that should be used across all test files

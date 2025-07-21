@@ -10,10 +10,9 @@ The Drizzle REST Adapter includes comprehensive logging capabilities using [Pino
 
 - 🚀 **High Performance**: Pino-based structured logging
 - 🐛 **Debug Mode**: Detailed debugging information
-- 📝 **Request/Response Logging**: Comprehensive HTTP request tracking
+- 📝 **Operation Logging**: Comprehensive database operation tracking
 - 🎯 **Structured Data**: Machine-readable JSON logs with context
 - 🎨 **Pretty Printing**: Human-readable output for development
-- 🔍 **Request Tracing**: Request ID tracking across operations
 - ⚡ **Configurable**: Flexible logging options per environment
 
 ## Quick Start
@@ -33,13 +32,7 @@ const apiRouter = createDrizzleRestAdapter({
     db,
     schema,
     logging: {
-        logger,
-        requestLogging: {
-            enabled: true,
-            logQuery: true,
-            logBody: true,
-            logHeaders: true
-        }
+        logger
     }
 });
 ```
@@ -71,27 +64,6 @@ interface LoggerOptions {
     base?: Record<string, any>;
     /** Additional Pino options */
     pinoOptions?: pino.LoggerOptions;
-}
-```
-
-### Request Logging Options
-
-```typescript
-interface RequestLogOptions {
-    /** Enable request/response logging middleware */
-    enabled?: boolean;
-    /** Include request body in logs (be careful with sensitive data) */
-    logBody?: boolean;
-    /** Include response body in logs (can be verbose) */
-    logResponseBody?: boolean;
-    /** Include query parameters in logs */
-    logQuery?: boolean;
-    /** Include request headers in logs */
-    logHeaders?: boolean;
-    /** Maximum body size to log (in characters) */
-    maxBodySize?: number;
-    /** Custom request ID header name */
-    requestIdHeader?: string;
 }
 ```
 
@@ -186,14 +158,7 @@ const apiRouter = createDrizzleRestAdapter({
     db,
     schema,
     logging: {
-        logger,
-        requestLogging: {
-            enabled: true,
-            logBody: false,        // Disable in production
-            logResponseBody: false, // Disable in production
-            logHeaders: false,     // Disable in production
-            logQuery: true         // Query params are usually safe
-        }
+        logger
     }
 });
 ```
@@ -215,16 +180,10 @@ This will start the server with debug logging and make various API calls to demo
 ### Express.js with Custom Middleware
 ```typescript
 import express from 'express';
-import { createDrizzleRestAdapter, createLogger, requestLoggingMiddleware } from 'drizzle-rest-adapter';
+import { createDrizzleRestAdapter, createLogger } from 'drizzle-rest-adapter';
 
 const app = express();
 const logger = createLogger({ level: 'debug' });
-
-// Add global request logging
-app.use(requestLoggingMiddleware(logger, {
-    logQuery: true,
-    logHeaders: false
-}));
 
 // Add API routes with logging
 app.use('/api/v1', createDrizzleRestAdapter({
@@ -251,8 +210,7 @@ const apiRouter = createDrizzleRestAdapter({
     db,
     schema,
     logging: {
-        logger: customLogger,
-        requestLogging: { enabled: true }
+        logger: customLogger
     }
 });
 ```
@@ -262,7 +220,6 @@ const apiRouter = createDrizzleRestAdapter({
 - Pino is designed for high-performance logging
 - Structured logs are faster than string formatting
 - Pretty printing should only be used in development
-- Request body logging can impact performance with large payloads
 - Use appropriate log levels in production (info/warn/error)
 
 ## Best Practices
@@ -282,12 +239,11 @@ Our Pino logging implementation has been successfully integrated into the Drizzl
 
 #### 🚀 Core Logging Infrastructure
 - **High-Performance JSON Logging**: Structured logging using Pino for maximum performance
-- **Request ID Tracking**: Automatic generation and correlation of request IDs across all operations
 - **Environment-Based Configuration**: Automatic detection of development vs production environments
 - **Pretty Printing**: Human-readable logs in development, machine-readable JSON in production
 
-#### 📊 Comprehensive Request/Response Logging
-- **Request Lifecycle Tracking**: Complete request flow from incoming to response
+#### 📊 Comprehensive Operation Logging
+- **Database Operation Tracking**: Complete operation flow from request to response
 - **Performance Metrics**: Response times, record counts, and operation duration
 - **Query Parameter Analysis**: Detailed logging of filters, sorting, pagination, and embedding
 - **Error Context**: Rich error information with stack traces and validation details
@@ -426,7 +382,6 @@ const logger = createLogger({
 [2025-07-14 14:54:54] INFO: Drizzle REST Adapter initialization completed
     tablesProcessed: 7
     routesRegistered: 35
-    hasRequestLogging: true
 ```
 
 #### Database Operations Tracked

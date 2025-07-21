@@ -137,14 +137,6 @@ const apiRouter = createDrizzleRestAdapter({
             // Disable dangerous endpoints if needed
             disabledEndpoints: ['DELETE']
         }
-    },
-    logging: {
-        requestLogging: {
-            enabled: true,
-            logBody: false, // Avoid logging sensitive data
-            logHeaders: false,
-            logQuery: true
-        }
     }
 });
 ```

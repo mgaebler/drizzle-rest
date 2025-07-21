@@ -51,13 +51,6 @@ async function startServer() {
             schema: schema,
             logging: {
                 logger,
-                requestLogging: {
-                    enabled: true,
-                    logQuery: true,
-                    logBody: useDebugLogging, // Only log request bodies when debug logging is enabled
-                    logResponseBody: false, // Keep response logging disabled for performance
-                    logHeaders: useDebugLogging,
-                },
             },
         });
 

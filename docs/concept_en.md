@@ -218,8 +218,6 @@ interface DrizzleRestAdapterOptions {
   logging?: {
     /** Logger instance or configuration */
     logger?: Logger | LoggerOptions;
-    /** Request logging options */
-    requestLogging?: RequestLogOptions;
   };
 }
 
