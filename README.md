@@ -12,8 +12,6 @@
 
 ⚠️ **Alpha Release**: This project is in active development. APIs may change and features are still being finalized. Use in production at your own risk.
 
-🎉 **Now Available on npm!** Alpha versions are published and ready for testing. First stable release (1.0.0) coming soon!
-
 Transform your Drizzle schema into a fully functional REST API with a single function call. Perfect for rapid prototyping, admin panels, and seamless migration from JSON-Server.
 
 ## ✨ Features
@@ -22,46 +20,12 @@ Transform your Drizzle schema into a fully functional REST API with a single fun
 - 🔍 **JSON-Server Compatible**: Familiar query syntax for filtering, sorting, and pagination
 - 🎣 **Hook System**: Authorization, data transformation, and custom logic with `beforeOperation` and `afterOperation` hooks
 - 🗄️ **PostgreSQL Support**: Full PostgreSQL database support
-- 📝 **Comprehensive Logging**: Built-in Pino logging with request tracing and debug modes
 
 ## 📦 Installation
 
-The package is now available on npm! Currently in alpha development:
-
-### Alpha Release (Only Available Version)
 ```bash
-# Install the alpha version (only version available)
-npm install drizzle-rest-adapter@alpha
-
-# Or install by default (currently alpha)
 npm install drizzle-rest-adapter
-
-# Install specific alpha version
-npm install drizzle-rest-adapter@0.1.2-alpha.0
 ```
-
-### Development Setup
-```bash
-# Clone for local development
-git clone https://github.com/mgaebler/drizzle-rest.git
-cd drizzle-rest
-npm install
-```
-
-### Requirements
-- **Node.js**: >= 20.0.0
-- **TypeScript**: >= 5.0.0 (if using TypeScript)
-- **Package Manager**: npm, yarn, or pnpm
-
-### 📋 Version Information
-
-| Version | Status | Description | Install Command |
-|---------|--------|-------------|-----------------|
-| `0.1.2-alpha.0` | Alpha (Only Available) | Initial alpha release, active development | `npm install drizzle-rest-adapter@alpha` |
-
-**No Stable Release Yet**: Only alpha version `0.1.2-alpha.0` is currently available. The first stable release will be `1.0.0`.
-
-**TypeScript Distribution**: This package distributes TypeScript source files directly for better IDE support and type safety. No build step required!
 
 ## 🚀 Quick Start
 
@@ -78,26 +42,6 @@ app.use(express.json());
 const apiRouter = createDrizzleRestAdapter({
   db: db,
   schema: schema,
-  tableOptions: {
-    users: {
-      hooks: {
-        beforeOperation: async (context) => {
-          // Authorization logic
-          if (!context.req.user) {
-            throw new Error('Authentication required');
-          }
-        },
-        afterOperation: async (context, result) => {
-          // Filter sensitive data
-          if (context.req.user?.role !== 'admin') {
-            const { password, ...safeResult } = result;
-            return safeResult;
-          }
-          return result;
-        }
-      }
-    }
-  }
 });
 
 // Mount the generated API
@@ -110,35 +54,6 @@ app.listen(3000, () => {
 
 That's it! Your API is now available with full CRUD operations for all tables in your schema.
 
-### 🎯 What You Get
-
-After running the above code, you'll have a fully functional REST API with endpoints like:
-
-```bash
-# Users CRUD
-GET    /api/v1/users              # List all users
-GET    /api/v1/users/1            # Get user by ID
-POST   /api/v1/users              # Create new user
-PATCH  /api/v1/users/1            # Update user
-PUT    /api/v1/users/1            # Replace user
-DELETE /api/v1/users/1            # Delete user
-
-# Advanced querying (JSON-Server compatible)
-GET /api/v1/users?name_like=John   # Filter by name
-GET /api/v1/users?_sort=name       # Sort by name
-GET /api/v1/users?_page=1&_per_page=10  # Pagination
-GET /api/v1/users?_embed=posts     # Include related posts
-```
-
-## 📖 Documentation
-
-For comprehensive guides and advanced features, check out our documentation:
-
-- **[Hook System](docs/hooks.md)** - Authorization, data transformation, and custom logic
-- **[Logging](docs/logging.md)** - Request tracing and debugging
-- **[Security](docs/security.md)** - Security best practices and configuration
-- **[Query Structure](docs/route_query_structure.md)** - Advanced query patterns
-- **[Concept](docs/concept_en.md)** - Architecture and design principles
 
 ## 📖 API Usage
 
