@@ -214,11 +214,8 @@ interface DrizzleRestAdapterOptions {
     };
   };
 
-  /** Logging configuration */
-  logging?: {
-    /** Logger instance or configuration */
-    logger?: Logger | LoggerOptions;
-  };
+  /** Logger instance to use (create with createLogger() if needed) */
+  logger?: Logger;
 }
 
 interface HookContext {

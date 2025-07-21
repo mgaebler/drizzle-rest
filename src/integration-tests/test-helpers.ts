@@ -16,18 +16,13 @@ export const testLogger = createLogger({
     pretty: false, // Use JSON format for better test output parsing
 });
 
-// Standard test logging configuration
-export const testLoggingConfig = {
-    logger: testLogger,
-} as const;
-
 // Standard test adapter options that should be used across all test files
 export const createTestAdapterOptions = (
     tableOptions?: DrizzleRestAdapterOptions['tableOptions']
 ): DrizzleRestAdapterOptions => ({
     db,
     schema,
-    logging: testLoggingConfig,
+    logger: testLogger,
     ...((tableOptions && { tableOptions }) || {}),
 });
 

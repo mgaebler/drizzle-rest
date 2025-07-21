@@ -14,7 +14,7 @@ import {
 } from './actions';
 import { ErrorHandler } from './utils/error-handler';
 import { HookContext, OperationType } from './utils/hook-context';
-import { createLogger, Logger, LoggerOptions } from './utils/logger';
+import { createLogger, Logger } from './utils/logger';
 import { SchemaInspector } from './utils/schema-inspector';
 
 // A more specific type can be used if the schema is known.
@@ -54,24 +54,19 @@ export interface DrizzleRestAdapterOptions {
         };
     };
 
-    /** Logging configuration */
-    logging?: {
-        /** Logger instance to use (if not provided, creates a default one) */
-        logger?: Logger;
-        /** Logger configuration options */
-        loggerOptions?: LoggerOptions;
-    };
+    /** Logger instance to use (create with createLogger() if needed) */
+    logger?: Logger;
 }
 
 export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => {
     const router = express.Router();
-    const { db, schema, tableOptions, logging } = options;
+    const { db, schema, tableOptions, logger } = options;
 
     // Set up logging
-    const logger = logging?.logger || createLogger(logging?.loggerOptions || {});
-    ErrorHandler.setLogger(logger);
+    const effectiveLogger = logger || createLogger();
+    ErrorHandler.setLogger(effectiveLogger);
 
-    logger.info({
+    effectiveLogger.info({
         tablesCount: Object.keys(schema).length
     }, 'Initializing Drizzle REST Adapter');
 
@@ -79,7 +74,7 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
     const inspector = new SchemaInspector(schema);
     const tables = inspector.extractTables();
 
-    logger.debug({
+    effectiveLogger.debug({
         tables: tables.map(t => ({
             name: t.name,
             primaryKey: t.primaryKey,
@@ -96,7 +91,7 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
         const resourcePath = `/${tableMetadata.name}`;
         const itemPath = `${resourcePath}/:id`;
 
-        logger.debug({
+        effectiveLogger.debug({
             table: tableMetadata.name,
             resourcePath,
             primaryKey: tableMetadata.primaryKey
@@ -105,7 +100,7 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
         // Get primary key column name(s)
         const primaryKeyColumns = tableMetadata.primaryKey;
         if (primaryKeyColumns.length === 0) {
-            logger.warn({
+            effectiveLogger.warn({
                 table: tableMetadata.name
             }, 'Skipping table: no primary key found');
             return;
@@ -128,7 +123,7 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
                     schema,
                     tablesMetadataMap,
                     tableConfig,
-                    logger
+                    logger: effectiveLogger
                 };
 
                 await getManyAction(req, res, actionContext);
@@ -147,7 +142,7 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
                     schema,
                     tablesMetadataMap,
                     tableConfig,
-                    logger
+                    logger: effectiveLogger
                 };
 
                 await createAction(req, res, actionContext);
@@ -166,7 +161,7 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
                     schema,
                     tablesMetadataMap,
                     tableConfig,
-                    logger
+                    logger: effectiveLogger
                 };
 
                 await getOneAction(req, res, actionContext);
@@ -185,7 +180,7 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
                     schema,
                     tablesMetadataMap,
                     tableConfig,
-                    logger
+                    logger: effectiveLogger
                 };
 
                 await updateAction(req, res, actionContext);
@@ -204,7 +199,7 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
                     schema,
                     tablesMetadataMap,
                     tableConfig,
-                    logger
+                    logger: effectiveLogger
                 };
 
                 await replaceAction(req, res, actionContext);
@@ -223,7 +218,7 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
                     schema,
                     tablesMetadataMap,
                     tableConfig,
-                    logger
+                    logger: effectiveLogger
                 };
 
                 await deleteAction(req, res, actionContext);
@@ -231,7 +226,7 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
         }
     });
 
-    logger.info({
+    effectiveLogger.info({
         tablesProcessed: tables.length,
         routesRegistered: tables.length * 5 // approximate, depends on disabled endpoints
     }, 'Drizzle REST Adapter initialization completed');

@@ -31,9 +31,7 @@ const logger = createLogger({
 const apiRouter = createDrizzleRestAdapter({
     db,
     schema,
-    logging: {
-        logger
-    }
+    logger
 });
 ```
 
@@ -157,9 +155,7 @@ const logger = createLogger({
 const apiRouter = createDrizzleRestAdapter({
     db,
     schema,
-    logging: {
-        logger
-    }
+    logger
 });
 ```
 
@@ -189,7 +185,7 @@ const logger = createLogger({ level: 'debug' });
 app.use('/api/v1', createDrizzleRestAdapter({
     db,
     schema,
-    logging: { logger }
+    logger
 }));
 ```
 
@@ -209,9 +205,7 @@ const customLogger = pino({
 const apiRouter = createDrizzleRestAdapter({
     db,
     schema,
-    logging: {
-        logger: customLogger
-    }
+    logger: customLogger
 });
 ```
 

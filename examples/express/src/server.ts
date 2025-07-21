@@ -58,9 +58,7 @@ async function startServer() {
         const apiRouter = createDrizzleRestAdapter({
             db: db as any,
             schema: schema,
-            logging: {
-                logger
-            }
+            logger
         });
 
         // Mount the API routes
