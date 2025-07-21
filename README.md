@@ -177,7 +177,6 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 - [Drizzle ORM](https://orm.drizzle.team/) for the excellent database toolkit
 - [JSON-Server](https://github.com/typicode/json-server) for the API design inspiration
-- The TypeScript and Express.js communities
 
 ---
 
