@@ -45,7 +45,7 @@ When using the Drizzle REST Adapter:
 - **Hook-Based Authorization**: Fine-grained access control via hooks
 - **Error Sanitization**: Stack traces hidden in production
 
-For detailed security guidance, see [docs/security.md](docs/security.md).
+> **Note**: For general Express.js security practices (authentication, rate limiting, HTTPS, etc.), refer to the [Express.js Security Best Practices](https://expressjs.com/en/advanced/best-practice-security.html) documentation.
 
 ## Disclosure Policy
 

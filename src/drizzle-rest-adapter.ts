@@ -41,19 +41,6 @@ export interface DrizzleRestAdapterOptions {
         }
     };
 
-    /** Security configuration */
-    security?: {
-        /** Maximum request body size in bytes (default: 1MB) */
-        maxBodySize?: number;
-        /** Enable request sanitization (default: true) */
-        sanitizeInput?: boolean;
-        /** Rate limiting configuration */
-        rateLimit?: {
-            windowMs: number;
-            max: number;
-        };
-    };
-
     /** Logger instance to use (create with createLogger() if needed) */
     logger?: Logger;
 }
