@@ -32,18 +32,7 @@ export const createTestAdapterOptions = (
 });
 
 // Setup Express app with Drizzle REST adapter using consistent test configuration
-export const createTestApp = () => {
-    const app = express();
-    app.use(express.json());
-
-    const drizzleApiRouter = createDrizzleRestAdapter(createTestAdapterOptions());
-
-    app.use('/api/v1', drizzleApiRouter);
-    return app;
-};
-
-// Setup Express app with custom table options but consistent logging
-export const createTestAppWithOptions = (tableOptions?: DrizzleRestAdapterOptions['tableOptions']) => {
+export const createTestApp = (tableOptions?: DrizzleRestAdapterOptions['tableOptions']) => {
     const app = express();
     app.use(express.json());
 
