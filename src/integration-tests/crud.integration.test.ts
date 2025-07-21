@@ -1,4 +1,4 @@
-import { beforeEach,describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import {
     apiRequest,
@@ -7,7 +7,8 @@ import {
     expectSuccessResponse,
     expectUserProperties,
     setupTestDatabase,
-    TEST_USERS} from './test-helpers';
+    TEST_USERS
+} from './test-helpers';
 
 describe('CRUD Operations', () => {
     beforeEach(async () => {
