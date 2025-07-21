@@ -15,7 +15,6 @@ import {
 import { ErrorHandler } from './utils/error-handler';
 import { HookContext, OperationType } from './utils/hook-context';
 import { createLogger, Logger, LoggerOptions } from './utils/logger';
-import { requestLoggingMiddleware, RequestLogOptions } from './utils/request-logger';
 import { SchemaInspector } from './utils/schema-inspector';
 
 // A more specific type can be used if the schema is known.
@@ -61,11 +60,6 @@ export interface DrizzleRestAdapterOptions {
         logger?: Logger;
         /** Logger configuration options */
         loggerOptions?: LoggerOptions;
-        /** Request logging configuration */
-        requestLogging?: RequestLogOptions & {
-            /** Enable request/response logging middleware */
-            enabled?: boolean;
-        };
     };
 }
 
@@ -78,16 +72,8 @@ export const createDrizzleRestAdapter = (options: DrizzleRestAdapterOptions) => 
     ErrorHandler.setLogger(logger);
 
     logger.info({
-        tablesCount: Object.keys(schema).length,
-        hasRequestLogging: !!logging?.requestLogging?.enabled
+        tablesCount: Object.keys(schema).length
     }, 'Initializing Drizzle REST Adapter');
-
-    // Add request logging middleware if enabled
-    if (logging?.requestLogging?.enabled !== false) {
-        const requestLogOptions = logging?.requestLogging || {};
-        router.use(requestLoggingMiddleware(logger, requestLogOptions));
-        logger.debug('Request logging middleware enabled');
-    }
 
     // Use schema introspection instead of simple iteration
     const inspector = new SchemaInspector(schema);
