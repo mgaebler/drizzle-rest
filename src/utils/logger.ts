@@ -22,16 +22,25 @@ export function createLogger(options: LoggerOptions = {}): pino.Logger {
         pinoOptions = {}
     } = options;
 
-    const transport = pretty ? {
-        target: 'pino-pretty',
-        options: {
-            colorize: true,
-            translateTime: 'yyyy-mm-dd HH:MM:ss',
-            ignore: 'pid,hostname',
-            singleLine: false,
-            hideObject: false
+    let transport;
+    if (pretty) {
+        try {
+            transport = {
+                target: 'pino-pretty',
+                options: {
+                    colorize: true,
+                    translateTime: 'yyyy-mm-dd HH:MM:ss',
+                    ignore: 'pid,hostname',
+                    singleLine: false,
+                    hideObject: false
+                }
+            };
+        } catch {
+            // Fallback to default transport if pino-pretty is not available
+            console.warn('pino-pretty not available, using default transport');
+            transport = undefined;
         }
-    } : undefined;
+    }
 
     const loggerConfig: pino.LoggerOptions = {
         level,
