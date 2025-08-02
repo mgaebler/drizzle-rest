@@ -1,6 +1,6 @@
 // Main library exports (backward compatible)
-export type { DrizzleRestAdapterOptions } from './drizzle-rest-adapter';
-export { createDrizzleRestAdapter } from './drizzle-rest-adapter';
+export type { ExpressDrizzleRestAdapterOptions as DrizzleRestAdapterOptions } from './express';
+export { createExpressDrizzleRestAdapter as createDrizzleRestAdapter } from './express';
 
 // Framework-agnostic core exports
 export type { FrameworkAdapter } from './adapters/framework-adapter';

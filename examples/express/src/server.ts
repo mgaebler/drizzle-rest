@@ -1,5 +1,5 @@
 import { migrate } from 'drizzle-orm/pglite/migrator';
-import { createDrizzleRestAdapter, createLogger } from 'drizzle-rest-adapter';
+import { createExpressDrizzleRestAdapter, createLogger } from 'drizzle-rest-adapter';
 import express from 'express';
 
 import { db } from '@/db/connection';
@@ -55,7 +55,7 @@ async function startServer() {
         await seedDatabase();
 
         // Create the REST API adapter with logging enabled
-        const apiRouter = createDrizzleRestAdapter({
+        const apiRouter = createExpressDrizzleRestAdapter({
             db: db as any,
             schema: schema,
             logger

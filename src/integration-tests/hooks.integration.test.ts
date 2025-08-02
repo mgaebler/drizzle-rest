@@ -6,7 +6,7 @@ import { HookContext } from '@/core/utils/hook-context';
 import { db } from '@/db/connection';
 import * as schema from '@/db/schema.js';
 
-import { createDrizzleRestAdapter } from '../drizzle-rest-adapter';
+import { createExpressDrizzleRestAdapter } from '../express';
 import { createTestAdapterOptions, setupTestDatabase, TEST_USERS } from './test-helpers';
 
 // Example permission lists for different user types
@@ -65,7 +65,7 @@ const createAppWithHooks = (tableOptions: any = {}) => {
         next();
     });
 
-    const drizzleApiRouter = createDrizzleRestAdapter(createTestAdapterOptions(tableOptions));
+    const drizzleApiRouter = createExpressDrizzleRestAdapter(createTestAdapterOptions(tableOptions));
 
     app.use('/api/v1', drizzleApiRouter);
     return app;
@@ -82,7 +82,7 @@ const createAppWithAdminUser = (tableOptions: any = {}) => {
         next();
     });
 
-    const drizzleApiRouter = createDrizzleRestAdapter(createTestAdapterOptions(tableOptions));
+    const drizzleApiRouter = createExpressDrizzleRestAdapter(createTestAdapterOptions(tableOptions));
 
     app.use('/api/v1', drizzleApiRouter);
     return app;
@@ -360,7 +360,7 @@ describe('Hook System Integration Tests', () => {
                 next();
             });
 
-            const drizzleApiRouter = createDrizzleRestAdapter(createTestAdapterOptions({
+            const drizzleApiRouter = createExpressDrizzleRestAdapter(createTestAdapterOptions({
                 posts: {
                     hooks: {
                         beforeOperation: async (context: HookContext) => {
@@ -403,7 +403,7 @@ describe('Hook System Integration Tests', () => {
                 next();
             });
 
-            const drizzleApiRouter = createDrizzleRestAdapter(createTestAdapterOptions({
+            const drizzleApiRouter = createExpressDrizzleRestAdapter(createTestAdapterOptions({
                 posts: {
                     hooks: {
                         beforeOperation: async (context: HookContext) => {
@@ -541,7 +541,7 @@ describe('Hook System Integration Tests', () => {
                 next();
             });
 
-            const drizzleApiRouter = createDrizzleRestAdapter(createTestAdapterOptions({
+            const drizzleApiRouter = createExpressDrizzleRestAdapter(createTestAdapterOptions({
                 users: {
                     hooks: {
                         beforeOperation: async (context: HookContext) => {

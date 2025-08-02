@@ -31,14 +31,14 @@ try {
 
     // Create test file
     const testContent = `
-import { createDrizzleRestAdapter } from 'drizzle-rest-adapter';
+import { createExpressDrizzleRestAdapter } from 'drizzle-rest-adapter';
 
 console.log('✅ Import successful');
-console.log('✅ Function type:', typeof createDrizzleRestAdapter);
+console.log('✅ Function type:', typeof createExpressDrizzleRestAdapter);
 
 // Test that function exists and throws without proper options
 try {
-    createDrizzleRestAdapter();
+    createExpressDrizzleRestAdapter();
 } catch (error) {
     console.log('✅ Function validates parameters correctly');
 }

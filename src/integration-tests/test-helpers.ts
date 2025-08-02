@@ -8,7 +8,10 @@ import { db } from '@/db/connection';
 import * as schema from '@/db/schema.js';
 import { createLogger } from '@/utils/logger';
 
-import { createDrizzleRestAdapter, DrizzleRestAdapterOptions } from '../drizzle-rest-adapter';
+import { createExpressDrizzleRestAdapter, ExpressDrizzleRestAdapterOptions } from '../express';
+
+// Type alias for backward compatibility
+type DrizzleRestAdapterOptions = ExpressDrizzleRestAdapterOptions;
 
 // Shared test logger instance - consistent across all tests
 export const testLogger = createLogger({
@@ -27,17 +30,17 @@ export const createTestAdapterOptions = (
 });
 
 // Setup Express app with Drizzle REST adapter using consistent test configuration
-export const createTestApp = (tableOptions?: DrizzleRestAdapterOptions['tableOptions']) => {
+export const setupExpressApp = (tableOptions?: DrizzleRestAdapterOptions['tableOptions']): express.Application => {
     const app = express();
     app.use(express.json());
 
-    const drizzleApiRouter = createDrizzleRestAdapter(createTestAdapterOptions(tableOptions));
+    const drizzleApiRouter = createExpressDrizzleRestAdapter(createTestAdapterOptions(tableOptions));
 
     app.use('/api/v1', drizzleApiRouter);
     return app;
 };
 
-export const app = createTestApp();
+export const app = setupExpressApp();
 
 // Test data constants
 export const TEST_USERS = {
