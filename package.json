@@ -1,100 +1,100 @@
 {
-  "name": "drizzle-rest-adapter",
-  "version": "0.1.2-alpha.3",
-  "description": "A dynamic REST API adapter for Drizzle ORM with JSON-Server compatible query syntax",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
-  "type": "module",
-  "exports": {
-    ".": {
-      "import": "./src/index.ts",
-      "types": "./src/index.ts"
+    "name": "drizzle-rest-adapter",
+    "version": "0.1.2-alpha.3",
+    "description": "A dynamic REST API adapter for Drizzle ORM with JSON-Server compatible query syntax",
+    "main": "src/index.ts",
+    "types": "src/index.ts",
+    "type": "module",
+    "exports": {
+        ".": {
+            "import": "./src/index.ts",
+            "types": "./src/index.ts"
+        }
+    },
+    "scripts": {
+        "build:check": "npm run tsc && npm run lint && npm run test",
+        "build": "echo 'TypeScript source distribution - no build step required'",
+        "ci": "npm run build:check && npm run package:verify",
+        "clean": "rm -rf node_modules package-lock.json && npm install",
+        "db:generate": "drizzle-kit generate",
+        "db:migrate": "drizzle-kit migrate",
+        "dev": "tsx --require tsconfig-paths/register --watch src/",
+        "lint:fix": "eslint . --fix",
+        "lint": "eslint .",
+        "package:test": "npm pack && tsx scripts/test-package.ts",
+        "package:verify": "npm pack --dry-run",
+        "prebuild": "npm run build:check",
+        "prepare": "husky",
+        "prepublishOnly": "npm run test && npm run lint",
+        "prerelease": "npm run build:check && npm run security:check",
+        "release:alpha": "npm version prerelease --preid=alpha && npm publish --tag alpha --access public",
+        "release:beta": "npm version prerelease --preid=beta && npm publish --tag beta --access public",
+        "release:major": "npm version major && npm publish --access public",
+        "release:minor": "npm version minor && npm publish --access public",
+        "release:patch": "npm version patch && npm publish --access public",
+        "security:check": "npm audit --audit-level=high",
+        "security:fix": "npm audit fix",
+        "start": "tsx --require tsconfig-paths/register src/index.ts",
+        "test:watch": "vitest",
+        "test": "vitest --run",
+        "tsc": "tsc --noEmit"
+    },
+    "keywords": [
+        "drizzle",
+        "drizzle-orm",
+        "rest",
+        "api",
+        "json-server",
+        "typescript",
+        "express",
+        "crud",
+        "adapter",
+        "database",
+        "postgresql"
+    ],
+    "author": "Marian Gaebler <marian.gaebler@gmail.com>",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/mgaebler/drizzle-rest.git"
+    },
+    "bugs": {
+        "url": "https://github.com/mgaebler/drizzle-rest/issues"
+    },
+    "homepage": "https://github.com/mgaebler/drizzle-rest#readme",
+    "engines": {
+        "node": ">=20.0.0",
+        "npm": ">=10.0.0"
+    },
+    "dependencies": {
+        "@electric-sql/pglite": "^0.3.4",
+        "drizzle-orm": "^0.44.2",
+        "drizzle-seed": "^0.3.1",
+        "drizzle-zod": "^0.5.1",
+        "express": "^4.18.2",
+        "pino": "^9.7.0",
+        "zod": "^3.22.4"
+    },
+    "devDependencies": {
+        "@stylistic/eslint-plugin": "^5.1.0",
+        "@types/express": "^4.17.21",
+        "@types/node": "^20.11.5",
+        "@types/pino": "^7.0.5",
+        "@types/supertest": "^6.0.0",
+        "drizzle-kit": "^0.31.4",
+        "eslint": "^9.31.0",
+        "eslint-plugin-drizzle": "^0.2.3",
+        "eslint-plugin-simple-import-sort": "^12.1.1",
+        "globals": "^16.3.0",
+        "husky": "^9.1.7",
+        "jiti": "^2.4.2",
+        "pino-pretty": "^13.0.0",
+        "supertest": "^6.3.4",
+        "tsconfig-paths": "^4.2.0",
+        "tsx": "^4.7.0",
+        "typescript": "^5.3.3",
+        "typescript-eslint": "^8.36.0",
+        "vite-tsconfig-paths": "^5.1.4",
+        "vitest": "^3.2.4"
     }
-  },
-  "scripts": {
-    "build:check": "npm run tsc && npm run lint && npm run test",
-    "build": "echo 'TypeScript source distribution - no build step required'",
-    "ci": "npm run build:check && npm run package:verify",
-    "clean": "rm -rf node_modules package-lock.json && npm install",
-    "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
-    "dev": "tsx --require tsconfig-paths/register --watch src/",
-    "lint:fix": "eslint . --fix",
-    "lint": "eslint .",
-    "package:test": "npm pack && tsx scripts/test-package.ts",
-    "package:verify": "npm pack --dry-run",
-    "prebuild": "npm run build:check",
-    "prepare": "husky",
-    "prepublishOnly": "npm run test && npm run lint",
-    "prerelease": "npm run build:check && npm run security:check",
-    "release:alpha": "npm version prerelease --preid=alpha && npm publish --tag alpha --access public",
-    "release:beta": "npm version prerelease --preid=beta && npm publish --tag beta --access public",
-    "release:major": "npm version major && npm publish --access public",
-    "release:minor": "npm version minor && npm publish --access public",
-    "release:patch": "npm version patch && npm publish --access public",
-    "security:check": "npm audit --audit-level=high",
-    "security:fix": "npm audit fix",
-    "start": "tsx --require tsconfig-paths/register src/index.ts",
-    "test:watch": "vitest",
-    "test": "vitest --run",
-    "tsc": "tsc --noEmit"
-  },
-  "keywords": [
-    "drizzle",
-    "drizzle-orm",
-    "rest",
-    "api",
-    "json-server",
-    "typescript",
-    "express",
-    "crud",
-    "adapter",
-    "database",
-    "postgresql"
-  ],
-  "author": "Marian Gaebler <marian.gaebler@gmail.com>",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/mgaebler/drizzle-rest.git"
-  },
-  "bugs": {
-    "url": "https://github.com/mgaebler/drizzle-rest/issues"
-  },
-  "homepage": "https://github.com/mgaebler/drizzle-rest#readme",
-  "engines": {
-    "node": ">=20.0.0",
-    "npm": ">=10.0.0"
-  },
-  "dependencies": {
-    "@electric-sql/pglite": "^0.3.4",
-    "drizzle-orm": "^0.44.2",
-    "drizzle-seed": "^0.3.1",
-    "drizzle-zod": "^0.5.1",
-    "express": "^4.18.2",
-    "pino": "^9.7.0",
-    "zod": "^3.22.4"
-  },
-  "devDependencies": {
-    "@stylistic/eslint-plugin": "^5.1.0",
-    "@types/express": "^4.17.21",
-    "@types/node": "^20.11.5",
-    "@types/pino": "^7.0.5",
-    "@types/supertest": "^6.0.0",
-    "drizzle-kit": "^0.31.4",
-    "eslint": "^9.31.0",
-    "eslint-plugin-drizzle": "^0.2.3",
-    "eslint-plugin-simple-import-sort": "^12.1.1",
-    "globals": "^16.3.0",
-    "husky": "^9.1.7",
-    "jiti": "^2.4.2",
-    "pino-pretty": "^13.0.0",
-    "supertest": "^6.3.4",
-    "tsconfig-paths": "^4.2.0",
-    "tsx": "^4.7.0",
-    "typescript": "^5.3.3",
-    "typescript-eslint": "^8.36.0",
-    "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.2.4"
-  }
 }
