@@ -5,7 +5,7 @@ import express, { Request as ExpressRequest, Response as ExpressResponse } from 
 import { ExpressAdapter } from './adapters/express-adapter';
 import { CoreDrizzleRestAdapter, CoreDrizzleRestAdapterOptions } from './core/adapter';
 import { CoreHookContext, OperationType } from './core/hook-context';
-import { HookContext } from './utils/hook-context';
+import { HookContext } from './core/utils/hook-context';
 import { Logger } from './utils/logger';
 
 interface TableHooks {

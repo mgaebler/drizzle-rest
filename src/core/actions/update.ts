@@ -1,9 +1,9 @@
 import { eq } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
 
-import { CoreErrorHandler } from '../../utils/core-error-handler';
 import { CoreActionContext, CoreActionHandler } from '../handler';
 import { createCoreHookContext, OperationType } from '../hook-context';
+import { CoreErrorHandler } from '../utils/core-error-handler';
 import { createDrizzleResponse, DrizzleRequest, DrizzleResponse } from '../web-api-types';
 
 export const coreUpdateAction: CoreActionHandler = async (

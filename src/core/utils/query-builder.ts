@@ -1,4 +1,4 @@
-import { and,asc, desc } from 'drizzle-orm';
+import { and, asc, desc } from 'drizzle-orm';
 import { PgTable } from 'drizzle-orm/pg-core';
 
 import { EmbedBuilder } from './embed-builder';

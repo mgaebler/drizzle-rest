@@ -2,9 +2,9 @@ import express from 'express';
 import request from 'supertest';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { HookContext } from '@/core/utils/hook-context';
 import { db } from '@/db/connection';
 import * as schema from '@/db/schema.js';
-import { HookContext } from '@/utils/hook-context';
 
 import { createDrizzleRestAdapter } from '../drizzle-rest-adapter';
 import { createTestAdapterOptions, setupTestDatabase, TEST_USERS } from './test-helpers';
