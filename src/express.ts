@@ -1,12 +1,12 @@
-import express, { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 import { PgTable } from 'drizzle-orm/pg-core';
 import { PgliteDatabase } from 'drizzle-orm/pglite';
+import express, { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 
 import { ExpressAdapter } from './adapters/express-adapter';
 import { CoreDrizzleRestAdapter, CoreDrizzleRestAdapterOptions } from './core/adapter';
-import { OperationType, CoreHookContext } from './core/hook-context';
-import { Logger } from './utils/logger';
+import { CoreHookContext, OperationType } from './core/hook-context';
 import { HookContext } from './utils/hook-context';
+import { Logger } from './utils/logger';
 
 interface TableHooks {
     beforeOperation?: (context: any) => Promise<void>;
@@ -16,7 +16,7 @@ interface TableHooks {
 /**
  * Transform Express-style hooks to be compatible with the core framework-agnostic format
  */
-const transformExpressHooks = (hooks: TableHooks, adapter: ExpressAdapter): TableHooks => {
+const transformExpressHooks = (hooks: TableHooks, _adapter: ExpressAdapter): TableHooks => {
     const transformedHooks: TableHooks = {};
 
     if (hooks.beforeOperation) {
