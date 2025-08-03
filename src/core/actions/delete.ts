@@ -23,7 +23,6 @@ export const coreDeleteAction: ICoreActionHandler = createActionHandler(
     },
     {
         operationType: OperationTypeEnum.DELETE,
-        operationName: 'DELETE',
         includeId: true,
         statusCode: 204
     },

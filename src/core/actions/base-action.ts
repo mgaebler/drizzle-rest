@@ -7,7 +7,6 @@ import { CoreErrorHandler } from '../utils/core-error-handler';
 
 export interface ActionOptions {
     operationType: OperationTypeEnum;
-    operationName: string;
     includeId?: boolean;
     statusCode?: number;
 }
@@ -37,7 +36,7 @@ export abstract class BaseAction {
         options: ActionOptions
     ): Promise<IAdapterResponse> {
         const { tableMetadata, logger } = context;
-        const { operationType, operationName, includeId = false, statusCode = 200 } = options;
+        const { operationType, includeId = false, statusCode = 200 } = options;
 
         const requestId = request.requestId || 'unknown';
         const startTime = Date.now();
@@ -45,7 +44,7 @@ export abstract class BaseAction {
 
         try {
             // Initial logging
-            this.logStart(logger, requestId, tableMetadata.name, operationName, request, id);
+            this.logStart(logger, requestId, tableMetadata.name, operationType, request, id);
 
             // Execute beforeOperation hook
             const beforeHookResult = await this.executeBeforeHook(
@@ -53,8 +52,7 @@ export abstract class BaseAction {
                 context,
                 operationType,
                 requestId,
-                startTime,
-                operationName
+                startTime
             );
 
             // If beforeHook returned an error response, return it immediately
@@ -72,8 +70,7 @@ export abstract class BaseAction {
                 operationType,
                 result,
                 requestId,
-                startTime,
-                operationName
+                startTime
             );
 
             // If afterHook returned an error response, return it immediately
@@ -82,12 +79,12 @@ export abstract class BaseAction {
             }
 
             // Success logging
-            this.logSuccess(logger, requestId, tableMetadata.name, operationName, startTime, id);
+            this.logSuccess(logger, requestId, tableMetadata.name, operationType, startTime, id);
 
             return createAdapterResponse(afterHookResult.result, statusCode);
 
         } catch (error: any) {
-            return this.handleError(error, requestId, tableMetadata.name, operationName, startTime, id, logger);
+            return this.handleError(error, requestId, tableMetadata.name, operationType, startTime, id, logger);
         }
     }
 
@@ -96,8 +93,7 @@ export abstract class BaseAction {
         context: ICoreActionContext,
         operationType: OperationTypeEnum,
         requestId: string,
-        startTime: number,
-        operationName: string
+        startTime: number
     ): Promise<IAdapterResponse | null> {
         const { tableMetadata, primaryKeyColumn, columns, tableConfig, logger } = context;
 
@@ -121,7 +117,7 @@ export abstract class BaseAction {
                 table: tableMetadata.name,
                 duration: Date.now() - startTime,
                 error: hookError
-            }, `${operationName} request failed in beforeOperation hook`);
+            }, `${operationType} request failed in beforeOperation hook`);
 
             return CoreErrorHandler.handleError(hookError, 'beforeOperation', requestId);
         }
@@ -133,8 +129,7 @@ export abstract class BaseAction {
         operationType: OperationTypeEnum,
         result: any,
         requestId: string,
-        startTime: number,
-        operationName: string
+        startTime: number
     ): Promise<{ result: any; error?: IAdapterResponse }> {
         const { tableMetadata, primaryKeyColumn, columns, tableConfig, logger } = context;
 
@@ -169,7 +164,7 @@ export abstract class BaseAction {
                 table: tableMetadata.name,
                 duration: Date.now() - startTime,
                 error: hookError
-            }, `${operationName} request failed in afterOperation hook`);
+            }, `${operationType} request failed in afterOperation hook`);
 
             return {
                 result: null,
@@ -182,7 +177,7 @@ export abstract class BaseAction {
         logger: any,
         requestId: string,
         tableName: string,
-        operationName: string,
+        operation: OperationTypeEnum,
         request: IAdapterRequest,
         id?: string
     ): void {
@@ -195,14 +190,14 @@ export abstract class BaseAction {
         if (request.body) logData.bodyKeys = Object.keys(request.body);
         if (request.query && Object.keys(request.query).length > 0) logData.query = request.query;
 
-        logger.debug(logData, `Processing ${operationName} request`);
+        logger.debug(logData, `Processing ${operation} request`);
     }
 
     protected logSuccess(
         logger: any,
         requestId: string,
         tableName: string,
-        operationName: string,
+        operation: OperationTypeEnum,
         startTime: number,
         id?: string
     ): void {
@@ -215,14 +210,14 @@ export abstract class BaseAction {
 
         if (id) logData.id = id;
 
-        logger.info(logData, `${operationName} request completed successfully`);
+        logger.info(logData, `${operation} request completed successfully`);
     }
 
     private handleError(
         error: any,
         requestId: string,
         tableName: string,
-        operationName: string,
+        operation: OperationTypeEnum,
         startTime: number,
         id: string | undefined,
         logger: any
@@ -237,19 +232,19 @@ export abstract class BaseAction {
 
         if (id) logData.id = id;
 
-        logger.error(logData, `${operationName} request failed`);
+        logger.error(logData, `${operation} request failed`);
 
-        return CoreErrorHandler.handleError(error, operationName.toLowerCase(), requestId);
+        return CoreErrorHandler.handleError(error, operation.toLowerCase(), requestId);
     }
 
-    protected handleNotFound(requestId: string, tableName: string, operationName: string, startTime: number, id: string, logger: any): IAdapterResponse {
+    protected handleNotFound(requestId: string, tableName: string, operation: OperationTypeEnum, startTime: number, id: string, logger: any): IAdapterResponse {
         const duration = Date.now() - startTime;
         logger.info({
             requestId,
             table: tableName,
             id,
             duration
-        }, `${operationName} request: record not found`);
+        }, `${operation} request: record not found`);
 
         return CoreErrorHandler.handleNotFound('Record not found', requestId);
     }

@@ -66,7 +66,6 @@ class GetManyAction extends BaseAction {
 export const coreGetManyAction: ICoreActionHandler = (request, context) => {
     const action = new GetManyAction();
     return action.execute(request, context, {
-        operationType: OperationTypeEnum.GET_MANY,
-        operationName: 'GET_MANY'
+        operationType: OperationTypeEnum.GET_MANY
     });
 };

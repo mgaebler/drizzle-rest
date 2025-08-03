@@ -16,7 +16,6 @@ export const coreCreateAction: ICoreActionHandler = createActionHandler(
     },
     {
         operationType: OperationTypeEnum.CREATE,
-        operationName: 'CREATE',
         statusCode: 201
     },
     (request) => ({ record: request.body })
