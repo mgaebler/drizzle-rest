@@ -1,13 +1,5 @@
 import { IAdapterRequest } from './adapter-api';
-
-export enum OperationType {
-    GET_MANY = 'GET_MANY',
-    GET_ONE = 'GET_ONE',
-    CREATE = 'CREATE',
-    UPDATE = 'UPDATE',
-    REPLACE = 'REPLACE',
-    DELETE = 'DELETE'
-}
+import { OperationType } from './types/operation.types';
 
 interface CoreHookContext {
     request: IAdapterRequest;           // Framework-agnostic request

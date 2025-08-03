@@ -2,7 +2,7 @@ import express from 'express';
 import request from 'supertest';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { HookContext } from '@/core/utils/hook-context';
+import { HookContext } from '@/adapters/express-adapter';
 import { db } from '@/db/connection';
 import * as schema from '@/db/schema.js';
 

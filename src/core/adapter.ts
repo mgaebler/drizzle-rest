@@ -13,7 +13,7 @@ import {
 } from './actions';
 import { IAdapterRequest, IAdapterResponse } from './adapter-api';
 import { DrizzleDb, ICoreActionContext, IDrizzleRestHandler, IRouteHandler } from './handler.types';
-import { OperationType } from './hook-context';
+import { OperationType } from './types/operation.types';
 import { CoreErrorHandler } from './utils/core-error-handler';
 import { SchemaInspector } from './utils/schema-inspector';
 

@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm';
 
 import { ICoreActionHandler } from '../handler.types';
-import { OperationType } from '../hook-context';
+import { OperationType } from '../types/operation.types';
 import { createActionHandler } from './base-action';
 
 export const coreGetOneAction: ICoreActionHandler = createActionHandler(

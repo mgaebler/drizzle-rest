@@ -1,6 +1,7 @@
 import { createAdapterResponse, IAdapterRequest, IAdapterResponse } from '../adapter-api';
 import { ICoreActionContext, ICoreActionHandler } from '../handler.types';
-import { createCoreHookContext, OperationType } from '../hook-context';
+import { createCoreHookContext } from '../hook-context';
+import { OperationType } from '../types/operation.types';
 import { CoreErrorHandler } from '../utils/core-error-handler';
 
 export interface ActionOptions {

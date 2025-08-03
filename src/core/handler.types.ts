@@ -4,7 +4,7 @@ import { PgliteDatabase } from 'drizzle-orm/pglite';
 import { IFrameworkAdapter } from '../adapters/framework-adapter';
 import { Logger } from '../utils/logger';
 import { IAdapterRequest, IAdapterResponse } from './adapter-api';
-import { OperationType } from './utils/hook-context';
+import { OperationType } from './types/operation.types';
 import { TableMetadata } from './utils/schema-inspector';
 
 /**
