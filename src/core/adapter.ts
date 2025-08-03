@@ -335,12 +335,3 @@ export class CoreDrizzleRestAdapter implements IDrizzleRestHandler {
         return params;
     }
 }
-
-/**
- * Create a framework-agnostic Drizzle REST adapter
- */
-export const createCoreDrizzleRestAdapter = (
-    options: ICoreDrizzleRestAdapterOptions
-): CoreDrizzleRestAdapter => {
-    return new CoreDrizzleRestAdapter(options);
-};
