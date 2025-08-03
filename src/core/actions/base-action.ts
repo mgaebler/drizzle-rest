@@ -3,7 +3,7 @@ import { createCoreHookContext } from '../hook-context';
 import type { IAdapterRequest, IAdapterResponse } from '../types/adapter.types';
 import { ICoreActionContext, ICoreActionHandler } from '../types/handler.types';
 import { OperationTypeEnum } from '../types/operation.types';
-import { CoreErrorHandler } from '../utils/core-error-handler';
+import { CoreErrorHandler } from '../utils/error-handler';
 
 export interface ActionOptions {
     operationType: OperationTypeEnum;

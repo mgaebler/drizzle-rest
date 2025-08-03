@@ -1,7 +1,7 @@
 import { ICoreActionHandler } from '../types/handler.types';
 import { OperationTypeEnum } from '../types/operation.types';
-import { CoreQueryParser } from '../utils/core-query-parser';
 import { QueryBuilder } from '../utils/query-builder';
+import { CoreQueryParser } from '../utils/query-parser';
 import { ActionOptions, BaseAction } from './base-action';
 
 class GetManyAction extends BaseAction {

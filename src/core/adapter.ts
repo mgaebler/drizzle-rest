@@ -14,7 +14,7 @@ import { IAdapterRequest, IAdapterResponse } from './types/adapter.types';
 import { IFrameworkAdapter } from './types/adapter.types';
 import { DrizzleDb, ICoreActionContext, IDrizzleRestHandler, IRouteHandler } from './types/handler.types';
 import { OperationTypeEnum } from './types/operation.types';
-import { CoreErrorHandler } from './utils/core-error-handler';
+import { CoreErrorHandler } from './utils/error-handler';
 import { SchemaInspector } from './utils/schema-inspector';
 
 interface TableHooks {
