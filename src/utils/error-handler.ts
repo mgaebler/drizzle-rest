@@ -1,6 +1,6 @@
 import { Response } from 'express';
 
-import { defaultLogger, Logger } from './logger';
+import { defaultLogger, Logger } from '../core/logger';
 
 export class ErrorHandler {
     private static logger: Logger = defaultLogger;

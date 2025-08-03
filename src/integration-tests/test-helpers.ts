@@ -4,9 +4,9 @@ import express from 'express';
 import request from 'supertest';
 import { expect } from 'vitest';
 
+import { createLogger } from '@/core/logger';
 import { db } from '@/db/connection';
 import * as schema from '@/db/schema.js';
-import { createLogger } from '@/utils/logger';
 
 import { ICoreRestAdapterOptions } from '../core/adapter';
 import { createExpressDrizzleRestAdapter } from '../express';

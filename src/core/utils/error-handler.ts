@@ -1,5 +1,5 @@
-import { defaultLogger, Logger } from '../../utils/logger';
 import { createAdapterResponse } from '../adapter-api';
+import { defaultLogger, Logger } from '../logger';
 import type { IAdapterResponse } from '../types/adapter.types';
 
 export class CoreErrorHandler {
