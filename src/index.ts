@@ -6,11 +6,11 @@ export type { IAdapterRequest, IAdapterResponse } from './core/adapter-api';
 
 // Handler types and interfaces (consolidated)
 export type {
-    ICoreActionContext as CoreActionContext,
-    ICoreActionHandler as CoreActionHandler,
     DrizzleDb,
-    IDrizzleRestHandler as DrizzleRestHandler,
-    IRouteHandler as RouteHandler
+    ICoreActionContext,
+    ICoreActionHandler,
+    IDrizzleRestHandler,
+    IRouteHandler
 } from './core/handler.types';
 
 // Framework-specific exports
