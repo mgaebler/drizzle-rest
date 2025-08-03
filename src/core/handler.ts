@@ -5,7 +5,7 @@ import { FrameworkAdapter } from '../adapters/framework-adapter';
 import { Logger } from '../utils/logger';
 import { OperationType } from './utils/hook-context';
 import { TableMetadata } from './utils/schema-inspector';
-import { DrizzleRequest, DrizzleResponse } from './web-api';
+import { AdapterRequest, AdapterResponse } from './web-api';
 
 /**
  * Framework-agnostic database type
@@ -39,16 +39,16 @@ export interface CoreActionContext {
  */
 export interface CoreActionHandler {
     (
-        request: DrizzleRequest,
+        request: AdapterRequest,
         context: CoreActionContext
-    ): Promise<DrizzleResponse>;
+    ): Promise<AdapterResponse>;
 }
 
 /**
  * Main framework-agnostic handler interface
  */
 export interface DrizzleRestHandler {
-    handle(request: DrizzleRequest): Promise<DrizzleResponse>;
+    handle(request: AdapterRequest): Promise<AdapterResponse>;
 }
 
 /**
@@ -57,5 +57,5 @@ export interface DrizzleRestHandler {
 export interface RouteHandler {
     method: string;
     path: string;
-    handler: (request: DrizzleRequest) => Promise<DrizzleResponse>;
+    handler: (request: AdapterRequest) => Promise<AdapterResponse>;
 }

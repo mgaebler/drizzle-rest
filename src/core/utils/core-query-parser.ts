@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { DrizzleRequest } from '../web-api';
+import { AdapterRequest } from '../web-api';
 
 // Define Zod schemas for validation and parsing
 const SortSchema = z.string().optional().transform((value) => {
@@ -56,7 +56,7 @@ export class CoreQueryParser {
         '_page', '_per_page', '_start', '_end', '_limit', '_sort', '_embed'
     ];
 
-    static parseQueryParams(request: DrizzleRequest): ParsedQueryParams {
+    static parseQueryParams(request: AdapterRequest): ParsedQueryParams {
         try {
             // Parse and validate using Zod
             const parsed = QueryParamsSchema.parse(request.query);
@@ -88,7 +88,7 @@ export class CoreQueryParser {
         }
     }
 
-    private static fallbackParse(request: DrizzleRequest): ParsedQueryParams {
+    private static fallbackParse(request: AdapterRequest): ParsedQueryParams {
         const query = request.query || {};
 
         // Basic pagination

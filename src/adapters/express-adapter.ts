@@ -1,6 +1,6 @@
 import { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 
-import { DrizzleRequest, DrizzleResponse } from '../core/web-api';
+import { AdapterRequest, AdapterResponse } from '../core/web-api';
 import { FrameworkAdapter } from './framework-adapter';
 
 /**
@@ -12,7 +12,7 @@ export class ExpressAdapter implements FrameworkAdapter {
     async parseRequest(
         req: ExpressRequest,
         params: Record<string, string> = {}
-    ): Promise<DrizzleRequest> {
+    ): Promise<AdapterRequest> {
         // Convert Express headers to plain object
         const headers: Record<string, string> = {};
         Object.entries(req.headers).forEach(([key, value]) => {
@@ -35,7 +35,7 @@ export class ExpressAdapter implements FrameworkAdapter {
     }
 
     async sendResponse(
-        response: DrizzleResponse,
+        response: AdapterResponse,
         res: ExpressResponse
     ): Promise<void> {
         // Set headers

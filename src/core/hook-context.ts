@@ -1,4 +1,4 @@
-import { DrizzleRequest } from './web-api';
+import { AdapterRequest } from './web-api';
 
 export enum OperationType {
     GET_MANY = 'GET_MANY',
@@ -10,7 +10,7 @@ export enum OperationType {
 }
 
 export interface CoreHookContext {
-    request: DrizzleRequest;           // Framework-agnostic request
+    request: AdapterRequest;           // Framework-agnostic request
     operation: OperationType;
     table: string;          // Table name
     record?: any;           // For CREATE/UPDATE operations
@@ -27,7 +27,7 @@ export interface CoreHookContext {
  * Helper function to create CoreHookContext objects for framework-agnostic operations
  */
 export const createCoreHookContext = (
-    request: DrizzleRequest,
+    request: AdapterRequest,
     operation: OperationType,
     tableMetadata: any,
     primaryKeyColumn: string,

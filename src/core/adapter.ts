@@ -15,7 +15,7 @@ import { CoreActionContext, DrizzleDb, DrizzleRestHandler, RouteHandler } from '
 import { OperationType } from './hook-context';
 import { CoreErrorHandler } from './utils/core-error-handler';
 import { SchemaInspector } from './utils/schema-inspector';
-import { DrizzleRequest, DrizzleResponse } from './web-api';
+import { AdapterRequest, AdapterResponse } from './web-api';
 
 interface TableHooks {
     beforeOperation?: (context: any) => Promise<void>;
@@ -204,7 +204,7 @@ export class CoreDrizzleRestAdapter implements DrizzleRestHandler {
         }, 'Core Drizzle REST Adapter initialization completed');
     }
 
-    async handle(request: DrizzleRequest): Promise<DrizzleResponse> {
+    async handle(request: AdapterRequest): Promise<AdapterResponse> {
         const requestId = request.requestId || Math.random().toString(36).substring(7);
         const startTime = Date.now();
 
@@ -259,7 +259,7 @@ export class CoreDrizzleRestAdapter implements DrizzleRestHandler {
         }
     }
 
-    private findMatchingRoute(request: DrizzleRequest): RouteHandler | null {
+    private findMatchingRoute(request: AdapterRequest): RouteHandler | null {
         const routeKey = `${request.method}:${this.normalizeUrlPath(request.url)}`;
 
         // Try exact match first

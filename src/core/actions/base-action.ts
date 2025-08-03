@@ -1,7 +1,7 @@
 import { CoreActionContext, CoreActionHandler } from '../handler';
 import { createCoreHookContext, OperationType } from '../hook-context';
 import { CoreErrorHandler } from '../utils/core-error-handler';
-import { createDrizzleResponse, DrizzleRequest, DrizzleResponse } from '../web-api';
+import { AdapterRequest, AdapterResponse, createDrizzleResponse } from '../web-api';
 
 export interface ActionOptions {
     operationType: OperationType;
@@ -21,19 +21,19 @@ export interface HookData {
  */
 export abstract class BaseAction {
     protected abstract executeCore(
-        request: DrizzleRequest,
+        request: AdapterRequest,
         context: CoreActionContext
     ): Promise<any>;
 
-    protected createHookData(_request: DrizzleRequest): HookData {
+    protected createHookData(_request: AdapterRequest): HookData {
         return {};
     }
 
     public async execute(
-        request: DrizzleRequest,
+        request: AdapterRequest,
         context: CoreActionContext,
         options: ActionOptions
-    ): Promise<DrizzleResponse> {
+    ): Promise<AdapterResponse> {
         const { tableMetadata, logger } = context;
         const { operationType, operationName, includeId = false, statusCode = 200 } = options;
 
@@ -90,13 +90,13 @@ export abstract class BaseAction {
     }
 
     private async executeBeforeHook(
-        request: DrizzleRequest,
+        request: AdapterRequest,
         context: CoreActionContext,
         operationType: OperationType,
         requestId: string,
         startTime: number,
         operationName: string
-    ): Promise<DrizzleResponse | null> {
+    ): Promise<AdapterResponse | null> {
         const { tableMetadata, primaryKeyColumn, columns, tableConfig, logger } = context;
 
         if (!tableConfig?.hooks?.beforeOperation) return null;
@@ -126,14 +126,14 @@ export abstract class BaseAction {
     }
 
     private async executeAfterHook(
-        request: DrizzleRequest,
+        request: AdapterRequest,
         context: CoreActionContext,
         operationType: OperationType,
         result: any,
         requestId: string,
         startTime: number,
         operationName: string
-    ): Promise<{ result: any; error?: DrizzleResponse }> {
+    ): Promise<{ result: any; error?: AdapterResponse }> {
         const { tableMetadata, primaryKeyColumn, columns, tableConfig, logger } = context;
 
         if (!tableConfig?.hooks?.afterOperation) {
@@ -181,7 +181,7 @@ export abstract class BaseAction {
         requestId: string,
         tableName: string,
         operationName: string,
-        request: DrizzleRequest,
+        request: AdapterRequest,
         id?: string
     ): void {
         const logData: any = {
@@ -224,7 +224,7 @@ export abstract class BaseAction {
         startTime: number,
         id: string | undefined,
         logger: any
-    ): DrizzleResponse {
+    ): AdapterResponse {
         const duration = Date.now() - startTime;
         const logData: any = {
             requestId,
@@ -240,7 +240,7 @@ export abstract class BaseAction {
         return CoreErrorHandler.handleError(error, operationName.toLowerCase(), requestId);
     }
 
-    protected handleNotFound(requestId: string, tableName: string, operationName: string, startTime: number, id: string, logger: any): DrizzleResponse {
+    protected handleNotFound(requestId: string, tableName: string, operationName: string, startTime: number, id: string, logger: any): AdapterResponse {
         const duration = Date.now() - startTime;
         logger.info({
             requestId,
@@ -257,20 +257,20 @@ export abstract class BaseAction {
  * Utility function for creating simple action handlers
  */
 export function createActionHandler(
-    executeCore: (request: DrizzleRequest, context: CoreActionContext) => Promise<any>,
+    executeCore: (request: AdapterRequest, context: CoreActionContext) => Promise<any>,
     options: ActionOptions,
-    createHookData?: (request: DrizzleRequest) => HookData
+    createHookData?: (request: AdapterRequest) => HookData
 ): CoreActionHandler {
     const action = new (class extends BaseAction {
-        protected async executeCore(request: DrizzleRequest, context: CoreActionContext): Promise<any> {
+        protected async executeCore(request: AdapterRequest, context: CoreActionContext): Promise<any> {
             return executeCore(request, context);
         }
 
-        protected createHookData(_request: DrizzleRequest): HookData {
+        protected createHookData(_request: AdapterRequest): HookData {
             return createHookData ? createHookData(_request) : {};
         }
     })();
 
-    return (request: DrizzleRequest, context: CoreActionContext) =>
+    return (request: AdapterRequest, context: CoreActionContext) =>
         action.execute(request, context, options);
 }

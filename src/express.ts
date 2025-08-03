@@ -4,15 +4,29 @@ import { ExpressAdapter } from './adapters/express-adapter';
 import { CoreDrizzleRestAdapter, CoreDrizzleRestAdapterOptions } from './core/adapter';
 
 /**
- * Create an Express router using the framework-agnostic core
+ * Configuration options for Express Drizzle REST adapter.
+ * The 'adapter' is automatically provided and doesn't need to be specified.
+ */
+export type ExpressDrizzleRestOptions = Omit<CoreDrizzleRestAdapterOptions, 'adapter'>;
+
+/**
+ * Create an Express router with automatic REST API endpoints for your Drizzle schema.
+ *
+ * The framework adapter is automatically configured for Express - you only need to
+ * provide your database, schema, and any optional configuration.
+ *
+ * @param options - Database, schema, and configuration options (adapter is auto-provided)
+ * @returns Express router with REST endpoints
  */
 export const createExpressDrizzleRestAdapter = (
-    options: Omit<CoreDrizzleRestAdapterOptions, 'adapter'>
+    options: ExpressDrizzleRestOptions
 ): express.Router => {
     const router = express.Router();
+
+    // Automatically create the Express framework adapter
     const adapter = new ExpressAdapter();
 
-    // Create core adapter with Express adapter
+    // Combine user options with the auto-provided Express adapter
     const coreOptions: CoreDrizzleRestAdapterOptions = {
         ...options,
         adapter
@@ -25,13 +39,13 @@ export const createExpressDrizzleRestAdapter = (
     router.all('*', async (req: ExpressRequest, res: ExpressResponse, next) => {
         try {
             // Convert Express request to our internal format
-            const drizzleRequest = await adapter.parseRequest(req);
+            const apiRequest = await adapter.parseRequest(req);
 
             // Handle with core adapter
-            const drizzleResponse = await coreAdapter.handle(drizzleRequest);
+            const apiResponse = await coreAdapter.handle(apiRequest);
 
             // Send response through Express adapter
-            await adapter.sendResponse(drizzleResponse, res);
+            await adapter.sendResponse(apiResponse, res);
 
         } catch (error) {
             next(error);

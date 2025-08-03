@@ -3,10 +3,9 @@
  */
 
 /**
- * Framework-agnostic request interface based on Web API Request
- * but with additional properties needed by the adapter
+ * Framework-agnostic request interface that adapters produce for the core system
  */
-export interface DrizzleRequest {
+export interface AdapterRequest {
     /** HTTP method */
     method: string;
 
@@ -32,7 +31,7 @@ export interface DrizzleRequest {
 /**
  * Framework-agnostic response builder
  */
-export interface DrizzleResponse {
+export interface AdapterResponse {
     /** HTTP status code */
     status: number;
 
@@ -50,7 +49,7 @@ export function createDrizzleResponse(
     body: any,
     status: number = 200,
     headers: Record<string, string> = {}
-): DrizzleResponse {
+): AdapterResponse {
     return {
         status,
         headers: {
@@ -64,7 +63,7 @@ export function createDrizzleResponse(
 /**
  * Create a Web API Response from our internal format
  */
-export function toWebApiResponse(drizzleResponse: DrizzleResponse): Response {
+export function toWebApiResponse(drizzleResponse: AdapterResponse): Response {
     return new Response(JSON.stringify(drizzleResponse.body), {
         status: drizzleResponse.status,
         headers: drizzleResponse.headers
@@ -72,13 +71,13 @@ export function toWebApiResponse(drizzleResponse: DrizzleResponse): Response {
 }
 
 /**
- * Parse Web API Request to our internal format
+ * Parse Web API Request to our internal adapter format
  */
-export async function parseDrizzleRequest(
+export async function parseToAdapterRequest(
     request: Request,
     params: Record<string, string> = {},
     requestId?: string
-): Promise<DrizzleRequest> {
+): Promise<AdapterRequest> {
     const url = new URL(request.url);
     const query: Record<string, any> = {};
 

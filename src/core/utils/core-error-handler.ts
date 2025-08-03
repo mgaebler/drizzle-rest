@@ -1,5 +1,5 @@
 import { defaultLogger, Logger } from '../../utils/logger';
-import { createDrizzleResponse, DrizzleResponse } from '../web-api';
+import { AdapterResponse,createDrizzleResponse } from '../web-api';
 
 export class CoreErrorHandler {
     private static logger: Logger = defaultLogger;
@@ -8,7 +8,7 @@ export class CoreErrorHandler {
         this.logger = logger;
     }
 
-    static handleError(error: any, operation: string, requestId?: string): DrizzleResponse {
+    static handleError(error: any, operation: string, requestId?: string): AdapterResponse {
         const errorContext = {
             operation,
             requestId,
@@ -60,7 +60,7 @@ export class CoreErrorHandler {
         }, 500);
     }
 
-    static handleNotFound(message = 'Not Found', requestId?: string): DrizzleResponse {
+    static handleNotFound(message = 'Not Found', requestId?: string): AdapterResponse {
         this.logger.info({
             requestId,
             message
@@ -72,7 +72,7 @@ export class CoreErrorHandler {
         }, 404);
     }
 
-    static handleValidationError(error: any, requestId?: string): DrizzleResponse {
+    static handleValidationError(error: any, requestId?: string): AdapterResponse {
         this.logger.warn({
             requestId,
             error: {
