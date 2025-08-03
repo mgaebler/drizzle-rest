@@ -47,7 +47,7 @@ export interface ICoreActionHandler {
 /**
  * Main framework-agnostic handler interface
  */
-export interface IDrizzleRestHandler {
+export interface IAdapterRestHandler {
     handle(request: IAdapterRequest): Promise<IAdapterResponse>;
 }
 

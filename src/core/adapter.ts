@@ -12,7 +12,7 @@ import {
 } from './actions';
 import { IAdapterRequest, IAdapterResponse } from './types/adapter.types';
 import { IFrameworkAdapter } from './types/adapter.types';
-import { DrizzleDb, ICoreActionContext, IDrizzleRestHandler, IRouteHandler } from './types/handler.types';
+import { DrizzleDb, IAdapterRestHandler as IRestHandler, ICoreActionContext, IRouteHandler } from './types/handler.types';
 import { OperationTypeEnum } from './types/operation.types';
 import { CoreErrorHandler } from './utils/error-handler';
 import { SchemaInspector } from './utils/schema-inspector';
@@ -22,7 +22,7 @@ interface TableHooks {
     afterOperation?: (context: any, result: any) => Promise<any>;
 }
 
-export interface ICoreDrizzleRestAdapterOptions {
+export interface ICoreRestAdapterOptions {
     /** The Drizzle database instance. */
     db: DrizzleDb;
 
@@ -45,15 +45,15 @@ export interface ICoreDrizzleRestAdapterOptions {
 }
 
 /**
- * Core framework-agnostic Drizzle REST adapter
+ * Core framework-agnostic REST adapter
  */
-export class CoreDrizzleRestAdapter implements IDrizzleRestHandler {
+export class CoreRestAdapter implements IRestHandler {
     private routes: Map<string, IRouteHandler> = new Map();
-    private options: ICoreDrizzleRestAdapterOptions;
+    private options: ICoreRestAdapterOptions;
     private logger: Logger;
     private tablesMetadataMap: Map<string, any> = new Map();
 
-    constructor(options: ICoreDrizzleRestAdapterOptions) {
+    constructor(options: ICoreRestAdapterOptions) {
         this.options = options;
         this.logger = options.logger || createLogger();
 
@@ -63,7 +63,7 @@ export class CoreDrizzleRestAdapter implements IDrizzleRestHandler {
         this.logger.info({
             tablesCount: Object.keys(options.schema).length,
             framework: options.adapter.name
-        }, 'Initializing Core Drizzle REST Adapter');
+        }, 'Initializing Core REST Adapter');
 
         this.setupRoutes();
     }
