@@ -3,7 +3,7 @@ import { createCoreHookContext, OperationType } from '../hook-context';
 import { CoreErrorHandler } from '../utils/core-error-handler';
 import { CoreQueryParser } from '../utils/core-query-parser';
 import { QueryBuilder } from '../utils/query-builder';
-import { createDrizzleResponse, DrizzleRequest, DrizzleResponse } from '../web-api-types';
+import { createDrizzleResponse, DrizzleRequest, DrizzleResponse } from '../web-api';
 
 export const coreGetManyAction: CoreActionHandler = async (
     request: DrizzleRequest,

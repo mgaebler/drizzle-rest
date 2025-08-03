@@ -1,6 +1,6 @@
 import { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 
-import { DrizzleRequest, DrizzleResponse } from '../core/web-api-types';
+import { DrizzleRequest, DrizzleResponse } from '../core/web-api';
 import { FrameworkAdapter } from './framework-adapter';
 
 /**

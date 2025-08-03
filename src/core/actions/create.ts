@@ -3,7 +3,7 @@ import { createInsertSchema } from 'drizzle-zod';
 import { CoreActionContext, CoreActionHandler } from '../handler';
 import { createCoreHookContext, OperationType } from '../hook-context';
 import { CoreErrorHandler } from '../utils/core-error-handler';
-import { createDrizzleResponse, DrizzleRequest, DrizzleResponse } from '../web-api-types';
+import { createDrizzleResponse, DrizzleRequest, DrizzleResponse } from '../web-api';
 
 export const coreCreateAction: CoreActionHandler = async (
     request: DrizzleRequest,

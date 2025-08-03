@@ -15,7 +15,7 @@ import { CoreActionContext, DrizzleDb, DrizzleRestHandler, RouteHandler } from '
 import { OperationType } from './hook-context';
 import { CoreErrorHandler } from './utils/core-error-handler';
 import { SchemaInspector } from './utils/schema-inspector';
-import { DrizzleRequest, DrizzleResponse } from './web-api-types';
+import { DrizzleRequest, DrizzleResponse } from './web-api';
 
 interface TableHooks {
     beforeOperation?: (context: any) => Promise<void>;

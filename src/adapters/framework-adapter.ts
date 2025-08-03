@@ -1,4 +1,4 @@
-import { DrizzleRequest, DrizzleResponse } from '../core/web-api-types';
+import { DrizzleRequest, DrizzleResponse } from '../core/web-api';
 
 /**
  * Framework adapter interface for converting between framework-specific

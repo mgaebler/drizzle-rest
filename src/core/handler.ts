@@ -5,7 +5,7 @@ import { FrameworkAdapter } from '../adapters/framework-adapter';
 import { Logger } from '../utils/logger';
 import { OperationType } from './utils/hook-context';
 import { TableMetadata } from './utils/schema-inspector';
-import { DrizzleRequest, DrizzleResponse } from './web-api-types';
+import { DrizzleRequest, DrizzleResponse } from './web-api';
 
 /**
  * Framework-agnostic database type

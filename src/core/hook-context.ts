@@ -1,4 +1,4 @@
-import { DrizzleRequest } from '../core/web-api-types';
+import { DrizzleRequest } from './web-api';
 
 export enum OperationType {
     GET_MANY = 'GET_MANY',

@@ -149,8 +149,3 @@ export const createExpressDrizzleRestAdapter = (
 
     return router;
 };
-
-/**
- * Maintain backward compatibility - this is the main export that existing users rely on
- */
-export const createDrizzleRestAdapter = createExpressDrizzleRestAdapter;

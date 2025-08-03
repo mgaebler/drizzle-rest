@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { DrizzleRequest } from '../web-api-types';
+import { DrizzleRequest } from '../web-api';
 
 // Define Zod schemas for validation and parsing
 const SortSchema = z.string().optional().transform((value) => {
