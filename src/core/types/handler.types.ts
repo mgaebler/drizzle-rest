@@ -3,8 +3,8 @@ import { PgliteDatabase } from 'drizzle-orm/pglite';
 
 import { Logger } from '../../utils/logger';
 import { TableMetadata } from '../utils/schema-inspector';
-import { IAdapterRequest, IAdapterResponse } from './framework-adapter';
-import { IFrameworkAdapter } from './framework-adapter';
+import { IAdapterRequest, IAdapterResponse } from './adapter.types';
+import { IFrameworkAdapter } from './adapter.types';
 import { OperationType } from './operation.types';
 
 /**

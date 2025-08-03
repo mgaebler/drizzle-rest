@@ -1,7 +1,7 @@
 import { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 
-import { IAdapterRequest, IAdapterResponse } from '../core/types/framework-adapter';
-import { IFrameworkAdapter } from '../core/types/framework-adapter';
+import { IAdapterRequest, IAdapterResponse } from '../core/types/adapter.types';
+import { IFrameworkAdapter } from '../core/types/adapter.types';
 import { OperationType } from '../core/types/operation.types';
 
 export interface HookContext {

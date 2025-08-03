@@ -2,7 +2,7 @@
  * Web API standard types and utilities for framework-agnostic implementation
  */
 
-import { IAdapterResponse } from './types/framework-adapter';
+import { IAdapterResponse } from './types/adapter.types';
 
 /**
  * Convert Web API Response to our internal format

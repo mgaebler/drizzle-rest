@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { IAdapterRequest } from '../types/framework-adapter';
+import { IAdapterRequest } from '../types/adapter.types';
 import { ParsedQueryParams } from '../types/query.types';
 
 // Define Zod schemas for validation and parsing

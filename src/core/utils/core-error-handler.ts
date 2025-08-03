@@ -1,6 +1,6 @@
 import { defaultLogger, Logger } from '../../utils/logger';
 import { createAdapterResponse } from '../adapter-api';
-import type { IAdapterResponse } from '../types/framework-adapter';
+import type { IAdapterResponse } from '../types/adapter.types';
 
 export class CoreErrorHandler {
     private static logger: Logger = defaultLogger;
