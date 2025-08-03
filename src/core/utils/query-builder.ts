@@ -1,12 +1,11 @@
 import { and, asc, desc } from 'drizzle-orm';
 import { PgTable } from 'drizzle-orm/pg-core';
 
+import { DrizzleDb } from '../handler.types';
 import { EmbedBuilder } from './embed-builder';
 import { FilterBuilder } from './filter-builder';
 import { ParsedQueryParams } from './query-parser';
 import { TableMetadata } from './schema-inspector';
-
-type DrizzleDb = any; // Using generic type for compatibility
 
 export class QueryBuilder {
     private filterBuilder: FilterBuilder;

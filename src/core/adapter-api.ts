@@ -5,7 +5,7 @@
 /**
  * Framework-agnostic request interface that adapters produce for the core system
  */
-export interface AdapterRequest {
+export interface IAdapterRequest {
     /** HTTP method */
     method: string;
 
@@ -31,7 +31,7 @@ export interface AdapterRequest {
 /**
  * Framework-agnostic response builder
  */
-export interface AdapterResponse {
+export interface IAdapterResponse {
     /** HTTP status code */
     status: number;
 
@@ -49,7 +49,7 @@ export function createAdapterResponse(
     body: any,
     status: number = 200,
     headers: Record<string, string> = {}
-): AdapterResponse {
+): IAdapterResponse {
     return {
         status,
         headers: {
@@ -63,7 +63,7 @@ export function createAdapterResponse(
 /**
  * Create a Web API Response from our internal format
  */
-export function toWebApiResponse(adapterResponse: AdapterResponse): Response {
+export function toWebApiResponse(adapterResponse: IAdapterResponse): Response {
     return new Response(JSON.stringify(adapterResponse.body), {
         status: adapterResponse.status,
         headers: adapterResponse.headers
@@ -77,7 +77,7 @@ export async function parseToAdapterRequest(
     request: Request,
     params: Record<string, string> = {},
     requestId?: string
-): Promise<AdapterRequest> {
+): Promise<IAdapterRequest> {
     const url = new URL(request.url);
     const query: Record<string, any> = {};
 

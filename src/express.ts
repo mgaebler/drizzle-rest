@@ -1,13 +1,13 @@
 import express, { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 
 import { ExpressAdapter } from './adapters/express-adapter';
-import { CoreDrizzleRestAdapter, CoreDrizzleRestAdapterOptions } from './core/adapter';
+import { CoreDrizzleRestAdapter, ICoreDrizzleRestAdapterOptions } from './core/adapter';
 
 /**
  * Configuration options for Express Drizzle REST adapter.
  * The 'adapter' is automatically provided and doesn't need to be specified.
  */
-export type ExpressDrizzleRestOptions = Omit<CoreDrizzleRestAdapterOptions, 'adapter'>;
+export type ExpressDrizzleRestOptions = Omit<ICoreDrizzleRestAdapterOptions, 'adapter'>;
 
 /**
  * Create an Express router with automatic REST API endpoints for your Drizzle schema.
@@ -27,7 +27,7 @@ export const createExpressDrizzleRestAdapter = (
     const adapter = new ExpressAdapter();
 
     // Combine user options with the auto-provided Express adapter
-    const coreOptions: CoreDrizzleRestAdapterOptions = {
+    const coreOptions: ICoreDrizzleRestAdapterOptions = {
         ...options,
         adapter
     };

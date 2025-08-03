@@ -1,5 +1,5 @@
 import { defaultLogger, Logger } from '../../utils/logger';
-import { AdapterResponse, createAdapterResponse } from '../adapter-api';
+import { createAdapterResponse,IAdapterResponse } from '../adapter-api';
 
 export class CoreErrorHandler {
     private static logger: Logger = defaultLogger;
@@ -8,7 +8,7 @@ export class CoreErrorHandler {
         this.logger = logger;
     }
 
-    static handleError(error: any, operation: string, requestId?: string): AdapterResponse {
+    static handleError(error: any, operation: string, requestId?: string): IAdapterResponse {
         const errorContext = {
             operation,
             requestId,
@@ -60,7 +60,7 @@ export class CoreErrorHandler {
         }, 500);
     }
 
-    static handleNotFound(message = 'Not Found', requestId?: string): AdapterResponse {
+    static handleNotFound(message = 'Not Found', requestId?: string): IAdapterResponse {
         this.logger.info({
             requestId,
             message
@@ -72,7 +72,7 @@ export class CoreErrorHandler {
         }, 404);
     }
 
-    static handleValidationError(error: any, requestId?: string): AdapterResponse {
+    static handleValidationError(error: any, requestId?: string): IAdapterResponse {
         this.logger.warn({
             requestId,
             error: {

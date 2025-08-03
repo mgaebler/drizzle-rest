@@ -1,4 +1,4 @@
-import { AdapterRequest, AdapterResponse, createAdapterResponse } from '../adapter-api';
+import { createAdapterResponse, IAdapterRequest, IAdapterResponse } from '../adapter-api';
 import { ICoreActionContext, ICoreActionHandler } from '../handler.types';
 import { createCoreHookContext, OperationType } from '../hook-context';
 import { CoreErrorHandler } from '../utils/core-error-handler';
@@ -21,19 +21,19 @@ export interface HookData {
  */
 export abstract class BaseAction {
     protected abstract executeCore(
-        request: AdapterRequest,
+        request: IAdapterRequest,
         context: ICoreActionContext
     ): Promise<any>;
 
-    protected createHookData(_request: AdapterRequest): HookData {
+    protected createHookData(_request: IAdapterRequest): HookData {
         return {};
     }
 
     public async execute(
-        request: AdapterRequest,
+        request: IAdapterRequest,
         context: ICoreActionContext,
         options: ActionOptions
-    ): Promise<AdapterResponse> {
+    ): Promise<IAdapterResponse> {
         const { tableMetadata, logger } = context;
         const { operationType, operationName, includeId = false, statusCode = 200 } = options;
 
@@ -90,13 +90,13 @@ export abstract class BaseAction {
     }
 
     private async executeBeforeHook(
-        request: AdapterRequest,
+        request: IAdapterRequest,
         context: ICoreActionContext,
         operationType: OperationType,
         requestId: string,
         startTime: number,
         operationName: string
-    ): Promise<AdapterResponse | null> {
+    ): Promise<IAdapterResponse | null> {
         const { tableMetadata, primaryKeyColumn, columns, tableConfig, logger } = context;
 
         if (!tableConfig?.hooks?.beforeOperation) return null;
@@ -126,14 +126,14 @@ export abstract class BaseAction {
     }
 
     private async executeAfterHook(
-        request: AdapterRequest,
+        request: IAdapterRequest,
         context: ICoreActionContext,
         operationType: OperationType,
         result: any,
         requestId: string,
         startTime: number,
         operationName: string
-    ): Promise<{ result: any; error?: AdapterResponse }> {
+    ): Promise<{ result: any; error?: IAdapterResponse }> {
         const { tableMetadata, primaryKeyColumn, columns, tableConfig, logger } = context;
 
         if (!tableConfig?.hooks?.afterOperation) {
@@ -181,7 +181,7 @@ export abstract class BaseAction {
         requestId: string,
         tableName: string,
         operationName: string,
-        request: AdapterRequest,
+        request: IAdapterRequest,
         id?: string
     ): void {
         const logData: any = {
@@ -224,7 +224,7 @@ export abstract class BaseAction {
         startTime: number,
         id: string | undefined,
         logger: any
-    ): AdapterResponse {
+    ): IAdapterResponse {
         const duration = Date.now() - startTime;
         const logData: any = {
             requestId,
@@ -240,7 +240,7 @@ export abstract class BaseAction {
         return CoreErrorHandler.handleError(error, operationName.toLowerCase(), requestId);
     }
 
-    protected handleNotFound(requestId: string, tableName: string, operationName: string, startTime: number, id: string, logger: any): AdapterResponse {
+    protected handleNotFound(requestId: string, tableName: string, operationName: string, startTime: number, id: string, logger: any): IAdapterResponse {
         const duration = Date.now() - startTime;
         logger.info({
             requestId,
@@ -257,20 +257,20 @@ export abstract class BaseAction {
  * Utility function for creating simple action handlers
  */
 export function createActionHandler(
-    executeCore: (request: AdapterRequest, context: ICoreActionContext) => Promise<any>,
+    executeCore: (request: IAdapterRequest, context: ICoreActionContext) => Promise<any>,
     options: ActionOptions,
-    createHookData?: (request: AdapterRequest) => HookData
+    createHookData?: (request: IAdapterRequest) => HookData
 ): ICoreActionHandler {
     const action = new (class extends BaseAction {
-        protected async executeCore(request: AdapterRequest, context: ICoreActionContext): Promise<any> {
+        protected async executeCore(request: IAdapterRequest, context: ICoreActionContext): Promise<any> {
             return executeCore(request, context);
         }
 
-        protected createHookData(_request: AdapterRequest): HookData {
+        protected createHookData(_request: IAdapterRequest): HookData {
             return createHookData ? createHookData(_request) : {};
         }
     })();
 
-    return (request: AdapterRequest, context: ICoreActionContext) =>
+    return (request: IAdapterRequest, context: ICoreActionContext) =>
         action.execute(request, context, options);
 }

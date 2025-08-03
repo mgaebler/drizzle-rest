@@ -1,7 +1,7 @@
 import { getTableColumns } from 'drizzle-orm';
 import { PgTable } from 'drizzle-orm/pg-core';
 
-import { FrameworkAdapter } from '../adapters/framework-adapter';
+import { IFrameworkAdapter } from '../adapters/framework-adapter';
 import { createLogger, Logger } from '../utils/logger';
 import {
     coreCreateAction,
@@ -11,7 +11,7 @@ import {
     coreReplaceAction,
     coreUpdateAction
 } from './actions';
-import { AdapterRequest, AdapterResponse } from './adapter-api';
+import { IAdapterRequest, IAdapterResponse } from './adapter-api';
 import { DrizzleDb, ICoreActionContext, IDrizzleRestHandler, IRouteHandler } from './handler.types';
 import { OperationType } from './hook-context';
 import { CoreErrorHandler } from './utils/core-error-handler';
@@ -22,7 +22,7 @@ interface TableHooks {
     afterOperation?: (context: any, result: any) => Promise<any>;
 }
 
-export interface CoreDrizzleRestAdapterOptions {
+export interface ICoreDrizzleRestAdapterOptions {
     /** The Drizzle database instance. */
     db: DrizzleDb;
 
@@ -41,7 +41,7 @@ export interface CoreDrizzleRestAdapterOptions {
     logger?: Logger;
 
     /** Framework adapter for handling requests/responses */
-    adapter: FrameworkAdapter;
+    adapter: IFrameworkAdapter;
 }
 
 /**
@@ -49,11 +49,11 @@ export interface CoreDrizzleRestAdapterOptions {
  */
 export class CoreDrizzleRestAdapter implements IDrizzleRestHandler {
     private routes: Map<string, IRouteHandler> = new Map();
-    private options: CoreDrizzleRestAdapterOptions;
+    private options: ICoreDrizzleRestAdapterOptions;
     private logger: Logger;
     private tablesMetadataMap: Map<string, any> = new Map();
 
-    constructor(options: CoreDrizzleRestAdapterOptions) {
+    constructor(options: ICoreDrizzleRestAdapterOptions) {
         this.options = options;
         this.logger = options.logger || createLogger();
 
@@ -204,7 +204,7 @@ export class CoreDrizzleRestAdapter implements IDrizzleRestHandler {
         }, 'Core Drizzle REST Adapter initialization completed');
     }
 
-    async handle(request: AdapterRequest): Promise<AdapterResponse> {
+    async handle(request: IAdapterRequest): Promise<IAdapterResponse> {
         const requestId = request.requestId || Math.random().toString(36).substring(7);
         const startTime = Date.now();
 
@@ -259,7 +259,7 @@ export class CoreDrizzleRestAdapter implements IDrizzleRestHandler {
         }
     }
 
-    private findMatchingRoute(request: AdapterRequest): IRouteHandler | null {
+    private findMatchingRoute(request: IAdapterRequest): IRouteHandler | null {
         const routeKey = `${request.method}:${this.normalizeUrlPath(request.url)}`;
 
         // Try exact match first
@@ -340,7 +340,7 @@ export class CoreDrizzleRestAdapter implements IDrizzleRestHandler {
  * Create a framework-agnostic Drizzle REST adapter
  */
 export const createCoreDrizzleRestAdapter = (
-    options: CoreDrizzleRestAdapterOptions
+    options: ICoreDrizzleRestAdapterOptions
 ): CoreDrizzleRestAdapter => {
     return new CoreDrizzleRestAdapter(options);
 };

@@ -1,8 +1,7 @@
 import { eq } from 'drizzle-orm';
 
+import { DrizzleDb } from '../handler.types';
 import { RelationMetadata, TableMetadata } from './schema-inspector';
-
-type DrizzleDb = any;
 
 export class EmbedBuilder {
     constructor(

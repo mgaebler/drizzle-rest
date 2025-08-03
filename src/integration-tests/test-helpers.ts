@@ -8,11 +8,11 @@ import { db } from '@/db/connection';
 import * as schema from '@/db/schema.js';
 import { createLogger } from '@/utils/logger';
 
-import { CoreDrizzleRestAdapterOptions } from '../core/adapter';
+import { ICoreDrizzleRestAdapterOptions } from '../core/adapter';
 import { createExpressDrizzleRestAdapter } from '../express';
 
 // Type alias for backward compatibility
-type DrizzleRestAdapterOptions = Omit<CoreDrizzleRestAdapterOptions, 'adapter'>;
+type DrizzleRestAdapterOptions = Omit<ICoreDrizzleRestAdapterOptions, 'adapter'>;
 
 // Shared test logger instance - consistent across all tests
 export const testLogger = createLogger({

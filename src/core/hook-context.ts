@@ -1,4 +1,4 @@
-import { AdapterRequest } from './adapter-api';
+import { IAdapterRequest } from './adapter-api';
 
 export enum OperationType {
     GET_MANY = 'GET_MANY',
@@ -10,7 +10,7 @@ export enum OperationType {
 }
 
 export interface CoreHookContext {
-    request: AdapterRequest;           // Framework-agnostic request
+    request: IAdapterRequest;           // Framework-agnostic request
     operation: OperationType;
     table: string;          // Table name
     record?: any;           // For CREATE/UPDATE operations
@@ -27,7 +27,7 @@ export interface CoreHookContext {
  * Helper function to create CoreHookContext objects for framework-agnostic operations
  */
 export const createCoreHookContext = (
-    request: AdapterRequest,
+    request: IAdapterRequest,
     operation: OperationType,
     tableMetadata: any,
     primaryKeyColumn: string,

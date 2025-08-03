@@ -1,18 +1,18 @@
 import { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 
-import { AdapterRequest, AdapterResponse } from '../core/adapter-api';
-import { FrameworkAdapter } from './framework-adapter';
+import { IAdapterRequest, IAdapterResponse } from '../core/adapter-api';
+import { IFrameworkAdapter } from './framework-adapter';
 
 /**
  * Express.js adapter for converting between Express req/res and our internal format
  */
-export class ExpressAdapter implements FrameworkAdapter {
+export class ExpressAdapter implements IFrameworkAdapter {
     readonly name = 'express';
 
     async parseRequest(
         req: ExpressRequest,
         params: Record<string, string> = {}
-    ): Promise<AdapterRequest> {
+    ): Promise<IAdapterRequest> {
         // Convert Express headers to plain object
         const headers: Record<string, string> = {};
         Object.entries(req.headers).forEach(([key, value]) => {
@@ -35,7 +35,7 @@ export class ExpressAdapter implements FrameworkAdapter {
     }
 
     async sendResponse(
-        response: AdapterResponse,
+        response: IAdapterResponse,
         res: ExpressResponse
     ): Promise<void> {
         // Set headers
