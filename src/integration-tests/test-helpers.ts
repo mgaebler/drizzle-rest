@@ -15,7 +15,7 @@ import { createExpressDrizzleRestAdapter } from '../express';
 type DrizzleRestAdapterOptions = Omit<ICoreDrizzleRestAdapterOptions, 'adapter'>;
 
 // Shared test logger instance - consistent across all tests
-export const testLogger = createLogger({
+const testLogger = createLogger({
     level: 'warn', // Only show warnings and errors during tests
     pretty: false, // Use JSON format for better test output parsing
 });
@@ -31,7 +31,7 @@ export const createTestAdapterOptions = (
 });
 
 // Setup Express app with Drizzle REST adapter using consistent test configuration
-export const setupExpressApp = (tableOptions?: DrizzleRestAdapterOptions['tableOptions']): express.Application => {
+const setupExpressApp = (tableOptions?: DrizzleRestAdapterOptions['tableOptions']): express.Application => {
     const app = express();
     app.use(express.json());
 
