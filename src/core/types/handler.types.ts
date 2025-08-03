@@ -1,11 +1,11 @@
 import { PgTable } from 'drizzle-orm/pg-core';
 import { PgliteDatabase } from 'drizzle-orm/pglite';
 
-import { IFrameworkAdapter } from '../adapters/framework-adapter';
-import { Logger } from '../utils/logger';
-import { IAdapterRequest, IAdapterResponse } from './adapter-api';
-import { OperationType } from './types/operation.types';
-import { TableMetadata } from './utils/schema-inspector';
+import { IFrameworkAdapter } from '../../adapters/framework-adapter';
+import { Logger } from '../../utils/logger';
+import { IAdapterRequest, IAdapterResponse } from '../adapter-api';
+import { TableMetadata } from '../utils/schema-inspector';
+import { OperationType } from './operation.types';
 
 /**
  * Framework-agnostic database type

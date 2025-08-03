@@ -1,6 +1,6 @@
 import { createInsertSchema } from 'drizzle-zod';
 
-import { ICoreActionHandler } from '../handler.types';
+import { ICoreActionHandler } from '../types/handler.types';
 import { OperationType } from '../types/operation.types';
 import { createActionHandler } from './base-action';
 

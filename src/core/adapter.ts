@@ -12,7 +12,7 @@ import {
     coreUpdateAction
 } from './actions';
 import { IAdapterRequest, IAdapterResponse } from './adapter-api';
-import { DrizzleDb, ICoreActionContext, IDrizzleRestHandler, IRouteHandler } from './handler.types';
+import { DrizzleDb, ICoreActionContext, IDrizzleRestHandler, IRouteHandler } from './types/handler.types';
 import { OperationType } from './types/operation.types';
 import { CoreErrorHandler } from './utils/core-error-handler';
 import { SchemaInspector } from './utils/schema-inspector';

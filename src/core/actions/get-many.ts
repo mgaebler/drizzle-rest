@@ -1,4 +1,4 @@
-import { ICoreActionHandler } from '../handler.types';
+import { ICoreActionHandler } from '../types/handler.types';
 import { OperationType } from '../types/operation.types';
 import { CoreQueryParser } from '../utils/core-query-parser';
 import { QueryBuilder } from '../utils/query-builder';

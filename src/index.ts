@@ -11,7 +11,7 @@ export type {
     ICoreActionHandler,
     IDrizzleRestHandler,
     IRouteHandler
-} from './core/handler.types';
+} from './core/types/handler.types';
 
 // Framework-specific exports
 export { createExpressDrizzleRestAdapter } from './express';
