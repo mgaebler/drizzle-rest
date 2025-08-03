@@ -13,7 +13,7 @@ import {
 import { IAdapterRequest, IAdapterResponse } from './types/adapter.types';
 import { IFrameworkAdapter } from './types/adapter.types';
 import { DrizzleDb, ICoreActionContext, IDrizzleRestHandler, IRouteHandler } from './types/handler.types';
-import { OperationType } from './types/operation.types';
+import { OperationTypeEnum } from './types/operation.types';
 import { CoreErrorHandler } from './utils/core-error-handler';
 import { SchemaInspector } from './utils/schema-inspector';
 
@@ -32,7 +32,7 @@ export interface ICoreDrizzleRestAdapterOptions {
     /** Detailed configuration per table. */
     tableOptions?: {
         [tableName: string]: {
-            disabledEndpoints?: Array<OperationType>;
+            disabledEndpoints?: Array<OperationTypeEnum>;
             hooks?: TableHooks;
         }
     };
@@ -126,7 +126,7 @@ export class CoreDrizzleRestAdapter implements IDrizzleRestHandler {
             });
 
             // GET /<table-name> (GET_MANY)
-            if (!tableConfig?.disabledEndpoints?.includes(OperationType.GET_MANY)) {
+            if (!tableConfig?.disabledEndpoints?.includes(OperationTypeEnum.GET_MANY)) {
                 this.routes.set(`GET:${resourcePath}`, {
                     method: 'GET',
                     path: resourcePath,
@@ -138,7 +138,7 @@ export class CoreDrizzleRestAdapter implements IDrizzleRestHandler {
             }
 
             // POST /<table-name> (CREATE)
-            if (!tableConfig?.disabledEndpoints?.includes(OperationType.CREATE)) {
+            if (!tableConfig?.disabledEndpoints?.includes(OperationTypeEnum.CREATE)) {
                 this.routes.set(`POST:${resourcePath}`, {
                     method: 'POST',
                     path: resourcePath,
@@ -150,7 +150,7 @@ export class CoreDrizzleRestAdapter implements IDrizzleRestHandler {
             }
 
             // GET /<table-name>/:id (GET_ONE)
-            if (!tableConfig?.disabledEndpoints?.includes(OperationType.GET_ONE)) {
+            if (!tableConfig?.disabledEndpoints?.includes(OperationTypeEnum.GET_ONE)) {
                 this.routes.set(`GET:${itemPath}`, {
                     method: 'GET',
                     path: itemPath,
@@ -162,7 +162,7 @@ export class CoreDrizzleRestAdapter implements IDrizzleRestHandler {
             }
 
             // PATCH /<table-name>/:id (UPDATE)
-            if (!tableConfig?.disabledEndpoints?.includes(OperationType.UPDATE)) {
+            if (!tableConfig?.disabledEndpoints?.includes(OperationTypeEnum.UPDATE)) {
                 this.routes.set(`PATCH:${itemPath}`, {
                     method: 'PATCH',
                     path: itemPath,
@@ -174,7 +174,7 @@ export class CoreDrizzleRestAdapter implements IDrizzleRestHandler {
             }
 
             // PUT /<table-name>/:id (REPLACE)
-            if (!tableConfig?.disabledEndpoints?.includes(OperationType.REPLACE)) {
+            if (!tableConfig?.disabledEndpoints?.includes(OperationTypeEnum.REPLACE)) {
                 this.routes.set(`PUT:${itemPath}`, {
                     method: 'PUT',
                     path: itemPath,
@@ -186,7 +186,7 @@ export class CoreDrizzleRestAdapter implements IDrizzleRestHandler {
             }
 
             // DELETE /<table-name>/:id (DELETE)
-            if (!tableConfig?.disabledEndpoints?.includes(OperationType.DELETE)) {
+            if (!tableConfig?.disabledEndpoints?.includes(OperationTypeEnum.DELETE)) {
                 this.routes.set(`DELETE:${itemPath}`, {
                     method: 'DELETE',
                     path: itemPath,

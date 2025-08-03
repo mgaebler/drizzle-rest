@@ -1,5 +1,5 @@
 import { ICoreActionHandler } from '../types/handler.types';
-import { OperationType } from '../types/operation.types';
+import { OperationTypeEnum } from '../types/operation.types';
 import { CoreQueryParser } from '../utils/core-query-parser';
 import { QueryBuilder } from '../utils/query-builder';
 import { ActionOptions, BaseAction } from './base-action';
@@ -66,7 +66,7 @@ class GetManyAction extends BaseAction {
 export const coreGetManyAction: ICoreActionHandler = (request, context) => {
     const action = new GetManyAction();
     return action.execute(request, context, {
-        operationType: OperationType.GET_MANY,
+        operationType: OperationTypeEnum.GET_MANY,
         operationName: 'GET_MANY'
     });
 };

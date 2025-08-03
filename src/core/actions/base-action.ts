@@ -2,11 +2,11 @@ import { createAdapterResponse } from '../adapter-api';
 import { createCoreHookContext } from '../hook-context';
 import type { IAdapterRequest, IAdapterResponse } from '../types/adapter.types';
 import { ICoreActionContext, ICoreActionHandler } from '../types/handler.types';
-import { OperationType } from '../types/operation.types';
+import { OperationTypeEnum } from '../types/operation.types';
 import { CoreErrorHandler } from '../utils/core-error-handler';
 
 export interface ActionOptions {
-    operationType: OperationType;
+    operationType: OperationTypeEnum;
     operationName: string;
     includeId?: boolean;
     statusCode?: number;
@@ -94,7 +94,7 @@ export abstract class BaseAction {
     private async executeBeforeHook(
         request: IAdapterRequest,
         context: ICoreActionContext,
-        operationType: OperationType,
+        operationType: OperationTypeEnum,
         requestId: string,
         startTime: number,
         operationName: string
@@ -130,7 +130,7 @@ export abstract class BaseAction {
     private async executeAfterHook(
         request: IAdapterRequest,
         context: ICoreActionContext,
-        operationType: OperationType,
+        operationType: OperationTypeEnum,
         result: any,
         requestId: string,
         startTime: number,

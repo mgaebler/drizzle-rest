@@ -2,7 +2,7 @@ import { eq } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
 
 import { ICoreActionHandler } from '../types/handler.types';
-import { OperationType } from '../types/operation.types';
+import { OperationTypeEnum } from '../types/operation.types';
 import { createActionHandler } from './base-action';
 
 export const coreUpdateAction: ICoreActionHandler = createActionHandler(
@@ -27,7 +27,7 @@ export const coreUpdateAction: ICoreActionHandler = createActionHandler(
         return results[0];
     },
     {
-        operationType: OperationType.UPDATE,
+        operationType: OperationTypeEnum.UPDATE,
         operationName: 'UPDATE',
         includeId: true
     },

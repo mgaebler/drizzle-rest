@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm';
 
 import { ICoreActionHandler } from '../types/handler.types';
-import { OperationType } from '../types/operation.types';
+import { OperationTypeEnum } from '../types/operation.types';
 import { createActionHandler } from './base-action';
 
 export const coreGetOneAction: ICoreActionHandler = createActionHandler(
@@ -23,7 +23,7 @@ export const coreGetOneAction: ICoreActionHandler = createActionHandler(
         return results[0];
     },
     {
-        operationType: OperationType.GET_ONE,
+        operationType: OperationTypeEnum.GET_ONE,
         operationName: 'GET_ONE',
         includeId: true
     },

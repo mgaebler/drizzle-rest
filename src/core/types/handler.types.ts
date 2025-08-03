@@ -5,7 +5,7 @@ import { Logger } from '../../utils/logger';
 import { TableMetadata } from '../utils/schema-inspector';
 import { IAdapterRequest, IAdapterResponse } from './adapter.types';
 import { IFrameworkAdapter } from './adapter.types';
-import { OperationType } from './operation.types';
+import { OperationTypeEnum } from './operation.types';
 
 /**
  * Framework-agnostic database type
@@ -24,7 +24,7 @@ export interface ICoreActionContext {
     schema: Record<string, PgTable | any>;
     tablesMetadataMap: Map<string, any>;
     tableConfig?: {
-        disabledEndpoints?: Array<OperationType>;
+        disabledEndpoints?: Array<OperationTypeEnum>;
         hooks?: {
             beforeOperation?: (context: any) => Promise<void>;
             afterOperation?: (context: any, result: any) => Promise<any>;

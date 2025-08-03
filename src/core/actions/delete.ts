@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm';
 
 import { ICoreActionHandler } from '../types/handler.types';
-import { OperationType } from '../types/operation.types';
+import { OperationTypeEnum } from '../types/operation.types';
 import { createActionHandler } from './base-action';
 
 export const coreDeleteAction: ICoreActionHandler = createActionHandler(
@@ -22,7 +22,7 @@ export const coreDeleteAction: ICoreActionHandler = createActionHandler(
         return null; // DELETE returns 204 No Content
     },
     {
-        operationType: OperationType.DELETE,
+        operationType: OperationTypeEnum.DELETE,
         operationName: 'DELETE',
         includeId: true,
         statusCode: 204
