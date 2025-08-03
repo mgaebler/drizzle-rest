@@ -39,7 +39,13 @@
         "test": "vitest --run",
         "tsc": "tsc --noEmit",
         "unused-exports": "ts-unused-exports tsconfig.json --excludePathsFromReport=src/index.ts",
-        "unused-exports:custom": "tsx scripts/find-unused-exports.ts"
+        "unused-exports:custom": "tsx scripts/find-unused-exports.ts",
+        "deps:graph": "depcruise --no-config --output-type mermaid src/core > core-dependencies.mmd",
+        "deps:graph:all": "depcruise --no-config --output-type mermaid src > all-dependencies.mmd",
+        "deps:circular": "madge --circular src",
+        "deps:json": "madge --json src/core > core-dependencies.json",
+        "deps:dot": "madge --dot src/core > core-dependencies.dot",
+        "deps:summary": "madge --summary src/core"
     },
     "keywords": [
         "drizzle",
@@ -83,6 +89,7 @@
         "@types/node": "^20.11.5",
         "@types/pino": "^7.0.5",
         "@types/supertest": "^6.0.0",
+        "dependency-cruiser": "^17.0.0",
         "drizzle-kit": "^0.31.4",
         "eslint": "^9.31.0",
         "eslint-plugin-drizzle": "^0.2.3",
@@ -91,6 +98,7 @@
         "globals": "^16.3.0",
         "husky": "^9.1.7",
         "jiti": "^2.4.2",
+        "madge": "^8.0.0",
         "pino-pretty": "^13.0.0",
         "supertest": "^6.3.4",
         "ts-unused-exports": "^11.0.1",
