@@ -37,7 +37,9 @@
         "start": "tsx --require tsconfig-paths/register src/index.ts",
         "test:watch": "vitest",
         "test": "vitest --run",
-        "tsc": "tsc --noEmit"
+        "tsc": "tsc --noEmit",
+        "unused-exports": "ts-unused-exports tsconfig.json --excludePathsFromReport=src/index.ts",
+        "unused-exports:custom": "tsx scripts/find-unused-exports.ts"
     },
     "keywords": [
         "drizzle",
@@ -85,11 +87,13 @@
         "eslint": "^9.31.0",
         "eslint-plugin-drizzle": "^0.2.3",
         "eslint-plugin-simple-import-sort": "^12.1.1",
+        "eslint-plugin-unused-imports": "^4.1.4",
         "globals": "^16.3.0",
         "husky": "^9.1.7",
         "jiti": "^2.4.2",
         "pino-pretty": "^13.0.0",
         "supertest": "^6.3.4",
+        "ts-unused-exports": "^11.0.1",
         "tsconfig-paths": "^4.2.0",
         "tsx": "^4.7.0",
         "typescript": "^5.3.3",
