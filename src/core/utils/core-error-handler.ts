@@ -1,5 +1,5 @@
 import { defaultLogger, Logger } from '../../utils/logger';
-import { AdapterResponse,createDrizzleResponse } from '../web-api';
+import { AdapterResponse, createDrizzleResponse } from '../adapter-api';
 
 export class CoreErrorHandler {
     private static logger: Logger = defaultLogger;

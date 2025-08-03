@@ -1,4 +1,4 @@
-import { AdapterRequest } from './web-api';
+import { AdapterRequest } from './adapter-api';
 
 export enum OperationType {
     GET_MANY = 'GET_MANY',

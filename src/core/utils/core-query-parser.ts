@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { AdapterRequest } from '../web-api';
+import { AdapterRequest } from '../adapter-api';
 
 // Define Zod schemas for validation and parsing
 const SortSchema = z.string().optional().transform((value) => {

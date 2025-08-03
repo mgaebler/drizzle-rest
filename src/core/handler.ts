@@ -3,9 +3,9 @@ import { PgliteDatabase } from 'drizzle-orm/pglite';
 
 import { FrameworkAdapter } from '../adapters/framework-adapter';
 import { Logger } from '../utils/logger';
+import { AdapterRequest, AdapterResponse } from './adapter-api';
 import { OperationType } from './utils/hook-context';
 import { TableMetadata } from './utils/schema-inspector';
-import { AdapterRequest, AdapterResponse } from './web-api';
 
 /**
  * Framework-agnostic database type

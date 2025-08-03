@@ -1,4 +1,4 @@
-import { AdapterRequest, AdapterResponse } from '../core/web-api';
+import { AdapterRequest, AdapterResponse } from '../core/adapter-api';
 
 /**
  * Framework adapter interface for converting between framework-specific

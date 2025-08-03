@@ -1,7 +1,7 @@
+import { AdapterRequest, AdapterResponse, createDrizzleResponse } from '../adapter-api';
 import { CoreActionContext, CoreActionHandler } from '../handler';
 import { createCoreHookContext, OperationType } from '../hook-context';
 import { CoreErrorHandler } from '../utils/core-error-handler';
-import { AdapterRequest, AdapterResponse, createDrizzleResponse } from '../web-api';
 
 export interface ActionOptions {
     operationType: OperationType;

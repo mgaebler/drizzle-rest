@@ -1,6 +1,6 @@
 import { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 
-import { AdapterRequest, AdapterResponse } from '../core/web-api';
+import { AdapterRequest, AdapterResponse } from '../core/adapter-api';
 import { FrameworkAdapter } from './framework-adapter';
 
 /**

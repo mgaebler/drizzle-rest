@@ -11,11 +11,11 @@ import {
     coreReplaceAction,
     coreUpdateAction
 } from './actions';
+import { AdapterRequest, AdapterResponse } from './adapter-api';
 import { CoreActionContext, DrizzleDb, DrizzleRestHandler, RouteHandler } from './handler';
 import { OperationType } from './hook-context';
 import { CoreErrorHandler } from './utils/core-error-handler';
 import { SchemaInspector } from './utils/schema-inspector';
-import { AdapterRequest, AdapterResponse } from './web-api';
 
 interface TableHooks {
     beforeOperation?: (context: any) => Promise<void>;
