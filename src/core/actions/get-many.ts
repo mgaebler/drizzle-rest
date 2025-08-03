@@ -1,62 +1,14 @@
-import { CoreActionContext, CoreActionHandler } from '../handler';
-import { createCoreHookContext, OperationType } from '../hook-context';
-import { CoreErrorHandler } from '../utils/core-error-handler';
+import { CoreActionHandler } from '../handler';
+import { OperationType } from '../hook-context';
 import { CoreQueryParser } from '../utils/core-query-parser';
 import { QueryBuilder } from '../utils/query-builder';
-import { createDrizzleResponse, DrizzleRequest, DrizzleResponse } from '../web-api';
+import { ActionOptions, BaseAction } from './base-action';
 
-export const coreGetManyAction: CoreActionHandler = async (
-    request: DrizzleRequest,
-    context: CoreActionContext
-): Promise<DrizzleResponse> => {
-    const {
-        db,
-        table,
-        tableMetadata,
-        primaryKeyColumn,
-        columns,
-        schema,
-        tablesMetadataMap,
-        tableConfig,
-        logger
-    } = context;
-
-    const requestId = request.requestId;
-    const startTime = Date.now();
-
-    try {
-        logger.debug({
-            requestId,
-            table: tableMetadata.name,
-            query: request.query
-        }, 'Processing GET_MANY request');
+class GetManyAction extends BaseAction {
+    protected async executeCore(request: any, context: any): Promise<any> {
+        const { db, table, columns, schema, tablesMetadataMap, tableMetadata } = context;
 
         const params = CoreQueryParser.parseQueryParams(request);
-
-        // Execute beforeOperation hook
-        const hookContext = createCoreHookContext(
-            request,
-            OperationType.GET_MANY,
-            tableMetadata,
-            primaryKeyColumn,
-            columns,
-            { filters: params.filters }
-        );
-
-        if (tableConfig?.hooks?.beforeOperation) {
-            try {
-                await tableConfig.hooks.beforeOperation(hookContext);
-            } catch (hookError) {
-                logger.error({
-                    requestId,
-                    table: tableMetadata.name,
-                    duration: Date.now() - startTime,
-                    error: hookError
-                }, 'GET_MANY request failed in beforeOperation hook');
-
-                return CoreErrorHandler.handleError(hookError, 'beforeOperation', requestId);
-            }
-        }
 
         // Create QueryBuilder instance
         const queryBuilder = new QueryBuilder(
@@ -82,53 +34,39 @@ export const coreGetManyAction: CoreActionHandler = async (
             processedResults = await queryBuilder.applyEmbeds(processedResults, embedKeys);
         }
 
-        // Execute afterOperation hook for each result
-        if (tableConfig?.hooks?.afterOperation) {
-            try {
-                processedResults = await Promise.all(
-                    results.map((result: any) =>
-                        tableConfig.hooks!.afterOperation!(hookContext, result)
-                    )
-                );
-            } catch (hookError) {
-                logger.error({
-                    requestId,
-                    table: tableMetadata.name,
-                    duration: Date.now() - startTime,
-                    error: hookError
-                }, 'GET_MANY request failed in afterOperation hook');
+        return {
+            data: processedResults,
+            totalCount
+        };
+    }
 
-                return CoreErrorHandler.handleError(hookError, 'afterOperation', requestId);
-            }
+    protected createHookData(request: any): any {
+        const params = CoreQueryParser.parseQueryParams(request);
+        return { filters: params.filters };
+    }
+
+    // Override to add pagination headers
+    public async execute(request: any, context: any, options: ActionOptions): Promise<any> {
+        const response = await super.execute(request, context, options);
+
+        if (response.status === 200 && response.body?.totalCount !== undefined) {
+            response.headers = {
+                ...response.headers,
+                'X-Total-Count': response.body.totalCount.toString(),
+                'Access-Control-Expose-Headers': 'X-Total-Count'
+            };
+            // Return just the data, not the wrapper object
+            response.body = response.body.data;
         }
 
-        const duration = Date.now() - startTime;
-
-        logger.info({
-            requestId,
-            table: tableMetadata.name,
-            resultCount: processedResults.length,
-            totalCount,
-            duration
-        }, 'GET_MANY request completed successfully');
-
-        // Create response with pagination headers
-        const response = createDrizzleResponse(processedResults, 200, {
-            'X-Total-Count': totalCount.toString(),
-            'Access-Control-Expose-Headers': 'X-Total-Count'
-        });
-
         return response;
-
-    } catch (error: any) {
-        const duration = Date.now() - startTime;
-        logger.error({
-            requestId,
-            table: tableMetadata.name,
-            duration,
-            error: error.message
-        }, 'GET_MANY request failed');
-
-        return CoreErrorHandler.handleError(error, 'getMany', requestId);
     }
+}
+
+export const coreGetManyAction: CoreActionHandler = (request, context) => {
+    const action = new GetManyAction();
+    return action.execute(request, context, {
+        operationType: OperationType.GET_MANY,
+        operationName: 'GET_MANY'
+    });
 };
