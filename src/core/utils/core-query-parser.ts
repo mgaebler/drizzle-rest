@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { IAdapterRequest } from '../adapter-api';
+import { ParsedQueryParams } from '../types/query.types';
 
 // Define Zod schemas for validation and parsing
 const SortSchema = z.string().optional().transform((value) => {
@@ -37,19 +38,6 @@ const QueryParamsSchema = z.object({
     _sort: SortSchema,
     _embed: EmbedSchema,
 }).passthrough();
-
-export interface ParsedQueryParams {
-    pagination: {
-        page: number;
-        perPage: number;
-        start?: number;
-        end?: number;
-        limit?: number;
-    };
-    sort?: Array<{ column: string; order: 'asc' | 'desc' }>;
-    filters: Record<string, any>;
-    embed?: string[];
-}
 
 export class CoreQueryParser {
     private static readonly EXCLUDE_PARAMS = [

@@ -9,7 +9,7 @@ export enum OperationType {
     DELETE = 'DELETE'
 }
 
-export interface CoreHookContext {
+interface CoreHookContext {
     request: IAdapterRequest;           // Framework-agnostic request
     operation: OperationType;
     table: string;          // Table name

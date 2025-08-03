@@ -7,7 +7,7 @@ import { CoreDrizzleRestAdapter, ICoreDrizzleRestAdapterOptions } from './core/a
  * Configuration options for Express Drizzle REST adapter.
  * The 'adapter' is automatically provided and doesn't need to be specified.
  */
-export type ExpressDrizzleRestOptions = Omit<ICoreDrizzleRestAdapterOptions, 'adapter'>;
+type ExpressDrizzleRestOptions = Omit<ICoreDrizzleRestAdapterOptions, 'adapter'>;
 
 /**
  * Create an Express router with automatic REST API endpoints for your Drizzle schema.

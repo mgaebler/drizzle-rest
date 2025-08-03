@@ -10,7 +10,7 @@ export interface ActionOptions {
     statusCode?: number;
 }
 
-export interface HookData {
+interface HookData {
     record?: any;
     recordId?: string;
     filters?: any;

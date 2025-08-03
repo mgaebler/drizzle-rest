@@ -220,8 +220,8 @@ describe.skip('Hook System Integration Tests', () => {
                         afterOperation: async (context: HookContext, result: any) => {
                             if (context.req.user?.role !== 'admin') {
                                 // Remove sensitive data for non-admin users
-                                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                                const { phone, ...filteredResult } = result;
+
+                                const { ...filteredResult } = result;
                                 return filteredResult;
                             }
                             return result;
@@ -248,8 +248,8 @@ describe.skip('Hook System Integration Tests', () => {
                         afterOperation: async (context: HookContext, result: any) => {
                             if (context.req.user?.role !== 'admin') {
                                 // Remove sensitive data for non-admin users
-                                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                                const { phone, ...filteredResult } = result;
+
+                                const { ...filteredResult } = result;
                                 return filteredResult;
                             }
                             return result;

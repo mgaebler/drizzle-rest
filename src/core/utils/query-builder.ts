@@ -2,9 +2,9 @@ import { and, asc, desc } from 'drizzle-orm';
 import { PgTable } from 'drizzle-orm/pg-core';
 
 import { DrizzleDb } from '../handler.types';
+import { ParsedQueryParams } from '../types/query.types';
 import { EmbedBuilder } from './embed-builder';
 import { FilterBuilder } from './filter-builder';
-import { ParsedQueryParams } from './query-parser';
 import { TableMetadata } from './schema-inspector';
 
 export class QueryBuilder {

@@ -61,16 +61,6 @@ export function createAdapterResponse(
 }
 
 /**
- * Create a Web API Response from our internal format
- */
-export function toWebApiResponse(adapterResponse: IAdapterResponse): Response {
-    return new Response(JSON.stringify(adapterResponse.body), {
-        status: adapterResponse.status,
-        headers: adapterResponse.headers
-    });
-}
-
-/**
  * Parse Web API Request to our internal adapter format
  */
 export async function parseToAdapterRequest(
