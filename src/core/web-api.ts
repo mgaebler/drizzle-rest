@@ -25,9 +25,6 @@ export interface DrizzleRequest {
     /** Request body (parsed JSON) */
     body?: any;
 
-    /** User context from authentication middleware */
-    user?: any;
-
     /** Request ID for logging/tracing */
     requestId?: string;
 }
@@ -80,7 +77,6 @@ export function toWebApiResponse(drizzleResponse: DrizzleResponse): Response {
 export async function parseDrizzleRequest(
     request: Request,
     params: Record<string, string> = {},
-    user?: any,
     requestId?: string
 ): Promise<DrizzleRequest> {
     const url = new URL(request.url);
@@ -115,7 +111,6 @@ export async function parseDrizzleRequest(
         params,
         query,
         body,
-        user,
         requestId
     };
 }

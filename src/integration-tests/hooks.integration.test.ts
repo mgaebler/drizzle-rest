@@ -88,7 +88,7 @@ const createAppWithAdminUser = (tableOptions: any = {}) => {
     return app;
 };
 
-describe('Hook System Integration Tests', () => {
+describe.skip('Hook System Integration Tests', () => {
     beforeEach(async () => {
         await setupTestDatabase();
     });

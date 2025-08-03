@@ -5,5 +5,4 @@ export { CoreDrizzleRestAdapter, createCoreDrizzleRestAdapter } from './core/ada
 export type { DrizzleRequest, DrizzleResponse } from './core/web-api';
 
 // Framework-specific exports
-export type { ExpressDrizzleRestAdapterOptions } from './express';
 export { createExpressDrizzleRestAdapter } from './express';

@@ -30,7 +30,6 @@ export class ExpressAdapter implements FrameworkAdapter {
             params: params || req.params || {},
             query: req.query || {},
             body: req.body,
-            user: (req as any).user,
             requestId: (req as any).requestId
         };
     }
