@@ -1,4 +1,4 @@
-import { CoreActionHandler } from '../handler';
+import { ICoreActionHandler } from '../handler.types';
 import { OperationType } from '../hook-context';
 import { CoreQueryParser } from '../utils/core-query-parser';
 import { QueryBuilder } from '../utils/query-builder';
@@ -63,7 +63,7 @@ class GetManyAction extends BaseAction {
     }
 }
 
-export const coreGetManyAction: CoreActionHandler = (request, context) => {
+export const coreGetManyAction: ICoreActionHandler = (request, context) => {
     const action = new GetManyAction();
     return action.execute(request, context, {
         operationType: OperationType.GET_MANY,

@@ -1,10 +1,10 @@
 import { eq } from 'drizzle-orm';
 
-import { CoreActionHandler } from '../handler';
+import { ICoreActionHandler } from '../handler.types';
 import { OperationType } from '../hook-context';
 import { createActionHandler } from './base-action';
 
-export const coreDeleteAction: CoreActionHandler = createActionHandler(
+export const coreDeleteAction: ICoreActionHandler = createActionHandler(
     async (request, context) => {
         const { db, table, primaryKeyColumn, columns } = context;
         const id = request.params.id;

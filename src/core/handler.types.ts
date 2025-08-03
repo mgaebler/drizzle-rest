@@ -15,7 +15,7 @@ export type DrizzleDb = PgliteDatabase<any>;
 /**
  * Framework-agnostic action context
  */
-export interface CoreActionContext {
+export interface ICoreActionContext {
     db: DrizzleDb;
     table: PgTable;
     tableMetadata: TableMetadata;
@@ -37,24 +37,24 @@ export interface CoreActionContext {
 /**
  * Framework-agnostic action handler interface
  */
-export interface CoreActionHandler {
+export interface ICoreActionHandler {
     (
         request: AdapterRequest,
-        context: CoreActionContext
+        context: ICoreActionContext
     ): Promise<AdapterResponse>;
 }
 
 /**
  * Main framework-agnostic handler interface
  */
-export interface DrizzleRestHandler {
+export interface IDrizzleRestHandler {
     handle(request: AdapterRequest): Promise<AdapterResponse>;
 }
 
 /**
  * Route handler for a specific HTTP method and path
  */
-export interface RouteHandler {
+export interface IRouteHandler {
     method: string;
     path: string;
     handler: (request: AdapterRequest) => Promise<AdapterResponse>;

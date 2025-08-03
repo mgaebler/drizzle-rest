@@ -1,5 +1,5 @@
 import { AdapterRequest, AdapterResponse, createAdapterResponse } from '../adapter-api';
-import { CoreActionContext, CoreActionHandler } from '../handler';
+import { ICoreActionContext, ICoreActionHandler } from '../handler.types';
 import { createCoreHookContext, OperationType } from '../hook-context';
 import { CoreErrorHandler } from '../utils/core-error-handler';
 
@@ -22,7 +22,7 @@ export interface HookData {
 export abstract class BaseAction {
     protected abstract executeCore(
         request: AdapterRequest,
-        context: CoreActionContext
+        context: ICoreActionContext
     ): Promise<any>;
 
     protected createHookData(_request: AdapterRequest): HookData {
@@ -31,7 +31,7 @@ export abstract class BaseAction {
 
     public async execute(
         request: AdapterRequest,
-        context: CoreActionContext,
+        context: ICoreActionContext,
         options: ActionOptions
     ): Promise<AdapterResponse> {
         const { tableMetadata, logger } = context;
@@ -91,7 +91,7 @@ export abstract class BaseAction {
 
     private async executeBeforeHook(
         request: AdapterRequest,
-        context: CoreActionContext,
+        context: ICoreActionContext,
         operationType: OperationType,
         requestId: string,
         startTime: number,
@@ -127,7 +127,7 @@ export abstract class BaseAction {
 
     private async executeAfterHook(
         request: AdapterRequest,
-        context: CoreActionContext,
+        context: ICoreActionContext,
         operationType: OperationType,
         result: any,
         requestId: string,
@@ -257,12 +257,12 @@ export abstract class BaseAction {
  * Utility function for creating simple action handlers
  */
 export function createActionHandler(
-    executeCore: (request: AdapterRequest, context: CoreActionContext) => Promise<any>,
+    executeCore: (request: AdapterRequest, context: ICoreActionContext) => Promise<any>,
     options: ActionOptions,
     createHookData?: (request: AdapterRequest) => HookData
-): CoreActionHandler {
+): ICoreActionHandler {
     const action = new (class extends BaseAction {
-        protected async executeCore(request: AdapterRequest, context: CoreActionContext): Promise<any> {
+        protected async executeCore(request: AdapterRequest, context: ICoreActionContext): Promise<any> {
             return executeCore(request, context);
         }
 
@@ -271,6 +271,6 @@ export function createActionHandler(
         }
     })();
 
-    return (request: AdapterRequest, context: CoreActionContext) =>
+    return (request: AdapterRequest, context: ICoreActionContext) =>
         action.execute(request, context, options);
 }

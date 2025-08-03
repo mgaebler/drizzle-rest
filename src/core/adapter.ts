@@ -12,7 +12,7 @@ import {
     coreUpdateAction
 } from './actions';
 import { AdapterRequest, AdapterResponse } from './adapter-api';
-import { CoreActionContext, DrizzleDb, DrizzleRestHandler, RouteHandler } from './handler';
+import { DrizzleDb, ICoreActionContext, IDrizzleRestHandler, IRouteHandler } from './handler.types';
 import { OperationType } from './hook-context';
 import { CoreErrorHandler } from './utils/core-error-handler';
 import { SchemaInspector } from './utils/schema-inspector';
@@ -47,8 +47,8 @@ export interface CoreDrizzleRestAdapterOptions {
 /**
  * Core framework-agnostic Drizzle REST adapter
  */
-export class CoreDrizzleRestAdapter implements DrizzleRestHandler {
-    private routes: Map<string, RouteHandler> = new Map();
+export class CoreDrizzleRestAdapter implements IDrizzleRestHandler {
+    private routes: Map<string, IRouteHandler> = new Map();
     private options: CoreDrizzleRestAdapterOptions;
     private logger: Logger;
     private tablesMetadataMap: Map<string, any> = new Map();
@@ -112,7 +112,7 @@ export class CoreDrizzleRestAdapter implements DrizzleRestHandler {
             const tableConfig = tableOptions?.[tableMetadata.name];
 
             // Create action context
-            const createActionContext = (): CoreActionContext => ({
+            const createActionContext = (): ICoreActionContext => ({
                 db: this.options.db,
                 table,
                 tableMetadata,
@@ -259,7 +259,7 @@ export class CoreDrizzleRestAdapter implements DrizzleRestHandler {
         }
     }
 
-    private findMatchingRoute(request: AdapterRequest): RouteHandler | null {
+    private findMatchingRoute(request: AdapterRequest): IRouteHandler | null {
         const routeKey = `${request.method}:${this.normalizeUrlPath(request.url)}`;
 
         // Try exact match first

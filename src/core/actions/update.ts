@@ -1,11 +1,11 @@
 import { eq } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
 
-import { CoreActionHandler } from '../handler';
+import { ICoreActionHandler } from '../handler.types';
 import { OperationType } from '../hook-context';
 import { createActionHandler } from './base-action';
 
-export const coreUpdateAction: CoreActionHandler = createActionHandler(
+export const coreUpdateAction: ICoreActionHandler = createActionHandler(
     async (request, context) => {
         const { db, table, primaryKeyColumn, columns } = context;
         const id = request.params.id;
