@@ -1,8 +1,8 @@
 import { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 
-import { IAdapterRequest, IAdapterResponse } from '../core/adapter-api';
+import { IAdapterRequest, IAdapterResponse } from '../core/types/framework-adapter';
+import { IFrameworkAdapter } from '../core/types/framework-adapter';
 import { OperationType } from '../core/types/operation.types';
-import { IFrameworkAdapter } from './framework-adapter';
 
 export interface HookContext {
     req: ExpressRequest & { user?: any };           // Access to req.user from framework auth

@@ -1,7 +1,6 @@
 import { getTableColumns } from 'drizzle-orm';
 import { PgTable } from 'drizzle-orm/pg-core';
 
-import { IFrameworkAdapter } from '../adapters/framework-adapter';
 import { createLogger, Logger } from '../utils/logger';
 import {
     coreCreateAction,
@@ -11,7 +10,8 @@ import {
     coreReplaceAction,
     coreUpdateAction
 } from './actions';
-import { IAdapterRequest, IAdapterResponse } from './adapter-api';
+import { IAdapterRequest, IAdapterResponse } from './types/framework-adapter';
+import { IFrameworkAdapter } from './types/framework-adapter';
 import { DrizzleDb, ICoreActionContext, IDrizzleRestHandler, IRouteHandler } from './types/handler.types';
 import { OperationType } from './types/operation.types';
 import { CoreErrorHandler } from './utils/core-error-handler';

@@ -1,4 +1,4 @@
-import { IAdapterRequest } from './adapter-api';
+import { IAdapterRequest } from './types/framework-adapter';
 import { OperationType } from './types/operation.types';
 
 interface CoreHookContext {

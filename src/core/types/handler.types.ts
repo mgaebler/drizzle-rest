@@ -1,10 +1,10 @@
 import { PgTable } from 'drizzle-orm/pg-core';
 import { PgliteDatabase } from 'drizzle-orm/pglite';
 
-import { IFrameworkAdapter } from '../../adapters/framework-adapter';
 import { Logger } from '../../utils/logger';
-import { IAdapterRequest, IAdapterResponse } from '../adapter-api';
 import { TableMetadata } from '../utils/schema-inspector';
+import { IAdapterRequest, IAdapterResponse } from './framework-adapter';
+import { IFrameworkAdapter } from './framework-adapter';
 import { OperationType } from './operation.types';
 
 /**
