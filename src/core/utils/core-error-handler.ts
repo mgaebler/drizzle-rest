@@ -1,5 +1,5 @@
 import { defaultLogger, Logger } from '../../utils/logger';
-import { AdapterResponse, createDrizzleResponse } from '../adapter-api';
+import { AdapterResponse, createAdapterResponse } from '../adapter-api';
 
 export class CoreErrorHandler {
     private static logger: Logger = defaultLogger;
@@ -27,7 +27,7 @@ export class CoreErrorHandler {
             const errorMessage = typeof error === 'string' ? error : error.message || 'Hook execution failed';
 
             this.logger.warn(errorContext, `Hook error in ${operation}`);
-            return createDrizzleResponse({
+            return createAdapterResponse({
                 error: errorMessage,
                 requestId
             }, statusCode);
@@ -36,7 +36,7 @@ export class CoreErrorHandler {
         if (error.issues) {
             // Zod validation error
             this.logger.warn(errorContext, `Validation error in ${operation}`);
-            return createDrizzleResponse({
+            return createAdapterResponse({
                 error: 'Validation failed',
                 details: error.issues,
                 requestId
@@ -46,7 +46,7 @@ export class CoreErrorHandler {
         if (error.message?.includes('not found') || error.code === 'P2025') {
             // Not found error
             this.logger.info(errorContext, `Resource not found in ${operation}`);
-            return createDrizzleResponse({
+            return createAdapterResponse({
                 error: 'Not Found',
                 requestId
             }, 404);
@@ -54,7 +54,7 @@ export class CoreErrorHandler {
 
         // Generic server error
         this.logger.error(errorContext, `Server error in ${operation}`);
-        return createDrizzleResponse({
+        return createAdapterResponse({
             error: 'Internal Server Error',
             requestId
         }, 500);
@@ -66,7 +66,7 @@ export class CoreErrorHandler {
             message
         }, 'Resource not found');
 
-        return createDrizzleResponse({
+        return createAdapterResponse({
             error: message,
             requestId
         }, 404);
@@ -81,7 +81,7 @@ export class CoreErrorHandler {
             }
         }, 'Validation error occurred');
 
-        return createDrizzleResponse({
+        return createAdapterResponse({
             error: 'Validation failed',
             details: error.issues || error.message,
             requestId

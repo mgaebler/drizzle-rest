@@ -45,7 +45,7 @@ export interface AdapterResponse {
 /**
  * Convert Web API Response to our internal format
  */
-export function createDrizzleResponse(
+export function createAdapterResponse(
     body: any,
     status: number = 200,
     headers: Record<string, string> = {}
@@ -63,10 +63,10 @@ export function createDrizzleResponse(
 /**
  * Create a Web API Response from our internal format
  */
-export function toWebApiResponse(drizzleResponse: AdapterResponse): Response {
-    return new Response(JSON.stringify(drizzleResponse.body), {
-        status: drizzleResponse.status,
-        headers: drizzleResponse.headers
+export function toWebApiResponse(adapterResponse: AdapterResponse): Response {
+    return new Response(JSON.stringify(adapterResponse.body), {
+        status: adapterResponse.status,
+        headers: adapterResponse.headers
     });
 }
 

@@ -1,4 +1,4 @@
-import { AdapterRequest, AdapterResponse, createDrizzleResponse } from '../adapter-api';
+import { AdapterRequest, AdapterResponse, createAdapterResponse } from '../adapter-api';
 import { CoreActionContext, CoreActionHandler } from '../handler';
 import { createCoreHookContext, OperationType } from '../hook-context';
 import { CoreErrorHandler } from '../utils/core-error-handler';
@@ -82,7 +82,7 @@ export abstract class BaseAction {
             // Success logging
             this.logSuccess(logger, requestId, tableMetadata.name, operationName, startTime, id);
 
-            return createDrizzleResponse(afterHookResult.result, statusCode);
+            return createAdapterResponse(afterHookResult.result, statusCode);
 
         } catch (error: any) {
             return this.handleError(error, requestId, tableMetadata.name, operationName, startTime, id, logger);
