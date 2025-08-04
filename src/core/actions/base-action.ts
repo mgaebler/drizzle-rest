@@ -1,8 +1,8 @@
-import { createAdapterResponse } from '../adapter';
 import { createCoreHookContext } from '../hook-context';
 import type { IAdapterRequest, IAdapterResponse } from '../types/adapter.types';
 import { ICoreActionContext } from '../types/handler.types';
 import { CoreErrorHandler } from '../utils/error-handler';
+import { createAdapterResponse } from '../utils/response-helper';
 import { ActionOptions, ActionTypeEnum } from './action.types';
 
 /**
@@ -102,7 +102,7 @@ export abstract class BaseAction {
                 error: hookError
             }, `${actionType} request failed in beforeOperation hook`);
 
-            return CoreErrorHandler.handleError(hookError, 'beforeOperation', requestId);
+            return CoreErrorHandler.handleError(hookError, 'beforeOperation', logger, requestId);
         }
     }
 
@@ -150,7 +150,7 @@ export abstract class BaseAction {
 
             return {
                 result: null,
-                error: CoreErrorHandler.handleError(hookError, 'afterOperation', requestId)
+                error: CoreErrorHandler.handleError(hookError, 'afterOperation', logger, requestId)
             };
         }
     }
@@ -216,7 +216,7 @@ export abstract class BaseAction {
 
         logger.error(logData, `${action} request failed`);
 
-        return CoreErrorHandler.handleError(error, action.toLowerCase(), requestId);
+        return CoreErrorHandler.handleError(error, action.toLowerCase(), logger, requestId);
     }
 
     protected handleNotFound(requestId: string, tableName: string, action: ActionTypeEnum, startTime: number, id: string, logger: any): IAdapterResponse {
@@ -228,7 +228,7 @@ export abstract class BaseAction {
             duration
         }, `${action} request: record not found`);
 
-        return CoreErrorHandler.handleNotFound('Record not found', requestId);
+        return CoreErrorHandler.handleNotFound('Record not found', logger, requestId);
     }
 }
 

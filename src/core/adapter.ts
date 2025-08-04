@@ -57,9 +57,6 @@ export class CoreRestAdapter implements IRestHandler {
         this.options = options;
         this.logger = options.logger || createLogger();
 
-        // Set up logging
-        CoreErrorHandler.setLogger(this.logger);
-
         this.logger.info({
             tablesCount: Object.keys(options.schema).length,
             framework: options.adapter.name
@@ -219,7 +216,7 @@ export class CoreRestAdapter implements IRestHandler {
                     url: request.url
                 }, 'No matching route found');
 
-                return CoreErrorHandler.handleNotFound('Route not found', requestId);
+                return CoreErrorHandler.handleNotFound('Route not found', this.logger, requestId);
             }
 
             // Extract route parameters
@@ -255,7 +252,7 @@ export class CoreRestAdapter implements IRestHandler {
                 error: error.message
             }, 'Request failed');
 
-            return CoreErrorHandler.handleError(error, 'request', requestId);
+            return CoreErrorHandler.handleError(error, 'request', this.logger, requestId);
         }
     }
 
@@ -339,18 +336,6 @@ export class CoreRestAdapter implements IRestHandler {
  * Convert Web API Response to our internal format
  */
 
-export function createAdapterResponse(
-    body: any,
-    status: number = 200,
-    headers: Record<string, string> = {}
-): IAdapterResponse {
-    return {
-        status,
-        headers: {
-            'Content-Type': 'application/json',
-            ...headers
-        },
-        body
-    };
-}
+// Re-export for public API
+export { createAdapterResponse } from './utils/response-helper';
 

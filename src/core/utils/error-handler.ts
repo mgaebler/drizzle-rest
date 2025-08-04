@@ -1,15 +1,9 @@
-import { createAdapterResponse } from '../adapter';
-import { defaultLogger, Logger } from '../logger';
+import type { Logger } from '../logger';
 import type { IAdapterResponse } from '../types/adapter.types';
+import { createAdapterResponse } from './response-helper';
 
 export class CoreErrorHandler {
-    private static logger: Logger = defaultLogger;
-
-    static setLogger(logger: Logger): void {
-        this.logger = logger;
-    }
-
-    static handleError(error: any, action: string, requestId?: string): IAdapterResponse {
+    static handleError(error: any, action: string, logger: Logger, requestId?: string): IAdapterResponse {
         const errorContext = {
             action,
             requestId,
@@ -27,7 +21,7 @@ export class CoreErrorHandler {
             const statusCode = action === 'beforeOperation' ? 403 : 500;
             const errorMessage = typeof error === 'string' ? error : error.message || 'Hook execution failed';
 
-            this.logger.warn(errorContext, `Hook error in ${action}`);
+            logger.warn(errorContext, `Hook error in ${action}`);
             return createAdapterResponse({
                 error: errorMessage,
                 requestId
@@ -36,7 +30,7 @@ export class CoreErrorHandler {
 
         if (error.issues) {
             // Zod validation error
-            this.logger.warn(errorContext, `Validation error in ${action}`);
+            logger.warn(errorContext, `Validation error in ${action}`);
             return createAdapterResponse({
                 error: 'Validation failed',
                 details: error.issues,
@@ -46,7 +40,7 @@ export class CoreErrorHandler {
 
         if (error.message?.includes('not found') || error.code === 'P2025') {
             // Not found error
-            this.logger.info(errorContext, `Resource not found in ${action}`);
+            logger.info(errorContext, `Resource not found in ${action}`);
             return createAdapterResponse({
                 error: 'Not Found',
                 requestId
@@ -54,15 +48,15 @@ export class CoreErrorHandler {
         }
 
         // Generic server error
-        this.logger.error(errorContext, `Server error in ${action}`);
+        logger.error(errorContext, `Server error in ${action}`);
         return createAdapterResponse({
             error: 'Internal Server Error',
             requestId
         }, 500);
     }
 
-    static handleNotFound(message = 'Not Found', requestId?: string): IAdapterResponse {
-        this.logger.info({
+    static handleNotFound(message = 'Not Found', logger: Logger, requestId?: string): IAdapterResponse {
+        logger.info({
             requestId,
             message
         }, 'Resource not found');
@@ -73,8 +67,8 @@ export class CoreErrorHandler {
         }, 404);
     }
 
-    static handleValidationError(error: any, requestId?: string): IAdapterResponse {
-        this.logger.warn({
+    static handleValidationError(error: any, logger: Logger, requestId?: string): IAdapterResponse {
+        logger.warn({
             requestId,
             error: {
                 message: error.message,
