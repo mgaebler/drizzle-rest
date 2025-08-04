@@ -40,7 +40,7 @@
         "tsc": "tsc --noEmit",
         "unused-exports": "ts-unused-exports tsconfig.json --excludePathsFromReport=src/index.ts",
         "unused-exports:custom": "tsx scripts/find-unused-exports.ts",
-        "deps:graph": "depcruise --no-config --output-type mermaid src > dependencies.mmd"
+        "deps:graph": "depcruise --no-config --output-type mermaid --exclude node_modules src/core > dependencies.mmd"
     },
     "keywords": [
         "drizzle",
