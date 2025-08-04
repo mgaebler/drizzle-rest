@@ -12,13 +12,39 @@ import {
 import { ActionTypeEnum, ICoreActionContext } from './actions';
 import { createLogger, Logger } from './logger';
 import { IAdapterRequest, IAdapterResponse } from './types/adapter.types';
-import { DrizzleDb, IAdapterRestHandler as IRestHandler, IRouteHandler } from './types/handler.types';
+import { DrizzleDb, IRouteHandler } from './types/handler.types';
 import { createAdapterResponse } from './utils/response-helper';
 import { SchemaInspector } from './utils/schema-inspector';
 
-interface TableHooks {
+interface ITableHooks {
     beforeOperation?: (context: any) => Promise<void>;
     afterOperation?: (context: any, result: any) => Promise<any>;
+}
+
+export interface IFrameworkAdapter {
+    /**
+     * Framework name for identification
+     */
+    readonly name: string;
+
+    /**
+     * Convert framework-specific request to our internal format
+     */
+    parseRequest(frameworkReq: any, params?: Record<string, string>): Promise<IAdapterRequest>;
+
+    /**
+     * Send our internal response through the framework's response mechanism
+     */
+    sendResponse(response: IAdapterResponse, frameworkRes: any): Promise<void>;
+
+    /**
+     * Extract route parameters from framework-specific routing
+     */
+    extractParams?(frameworkReq: any): Record<string, string>;
+}
+
+interface IRestHandler {
+    handle(request: IAdapterRequest): Promise<IAdapterResponse>;
 }
 
 export interface ICoreRestAdapterOptions {
@@ -32,7 +58,7 @@ export interface ICoreRestAdapterOptions {
     tableOptions?: {
         [tableName: string]: {
             disabledEndpoints?: Array<ActionTypeEnum>;
-            hooks?: TableHooks;
+            hooks?: ITableHooks;
         }
     };
 
@@ -41,9 +67,39 @@ export interface ICoreRestAdapterOptions {
 }
 
 /**
- * Core framework-agnostic REST adapter
+ * Core framework-agnostic REST adapter base class
+ * Framework-specific adapters should extend this class and implement framework-specific concerns
+ *
+ * @example
+ * ```typescript
+ * // Example of creating a framework-specific adapter
+ * export class MyFrameworkAdapter extends CoreRestAdapter implements IFrameworkAdapter {
+ *     readonly name = 'my-framework';
+ *
+ *     constructor(options: ICoreRestAdapterOptions) {
+ *         super(options);
+ *     }
+ *
+ *     async parseRequest(frameworkReq: any): Promise<IAdapterRequest> {
+ *         // Convert framework request to standard format
+ *         return {
+ *             method: frameworkReq.method,
+ *             url: frameworkReq.url,
+ *             headers: frameworkReq.headers,
+ *             params: frameworkReq.params,
+ *             query: frameworkReq.query,
+ *             body: frameworkReq.body
+ *         };
+ *     }
+ *
+ *     async sendResponse(response: IAdapterResponse, frameworkRes: any): Promise<void> {
+ *         // Send response using framework's response mechanism
+ *         frameworkRes.status(response.status).json(response.body);
+ *     }
+ * }
+ * ```
  */
-export class CoreRestAdapter implements IRestHandler {
+export abstract class CoreRestAdapter implements IRestHandler {
     private routes: Map<string, IRouteHandler> = new Map();
     private options: ICoreRestAdapterOptions;
     private logger: Logger;
@@ -60,7 +116,35 @@ export class CoreRestAdapter implements IRestHandler {
         this.setupRoutes();
     }
 
-    private setupRoutes(): void {
+    /**
+     * Get all registered routes (for framework adapters to use)
+     */
+    protected getRoutes(): Map<string, IRouteHandler> {
+        return this.routes;
+    }
+
+    /**
+     * Get options (for framework adapters to use)
+     */
+    protected getOptions(): ICoreRestAdapterOptions {
+        return this.options;
+    }
+
+    /**
+     * Get logger (for framework adapters to use)
+     */
+    protected getLogger(): Logger {
+        return this.logger;
+    }
+
+    /**
+     * Get table metadata map (for framework adapters to use)
+     */
+    protected getTablesMetadataMap(): Map<string, any> {
+        return this.tablesMetadataMap;
+    }
+
+    protected setupRoutes(): void {
         const { schema, tableOptions } = this.options;
 
         // Use schema introspection
@@ -133,7 +217,7 @@ export class CoreRestAdapter implements IRestHandler {
     /**
      * Register CRUD routes for a specific table
      */
-    private registerTableRoutes(
+    protected registerTableRoutes(
         resourcePath: string,
         itemPath: string,
         actionContext: ICoreActionContext
@@ -273,7 +357,7 @@ export class CoreRestAdapter implements IRestHandler {
         }
     }
 
-    private findMatchingRoute(request: IAdapterRequest): IRouteHandler | null {
+    protected findMatchingRoute(request: IAdapterRequest): IRouteHandler | null {
         const routeKey = `${request.method}:${this.normalizeUrlPath(request.url)}`;
 
         // Try exact match first
@@ -295,7 +379,7 @@ export class CoreRestAdapter implements IRestHandler {
         return null;
     }
 
-    private normalizeUrlPath(url: string): string {
+    protected normalizeUrlPath(url: string): string {
         try {
             const urlObj = new URL(url, 'http://localhost');
             return urlObj.pathname;
@@ -305,7 +389,7 @@ export class CoreRestAdapter implements IRestHandler {
         }
     }
 
-    private matchesPattern(pattern: string, path: string): boolean {
+    protected matchesPattern(pattern: string, path: string): boolean {
         const patternParts = pattern.split('/');
         const pathParts = path.split('/');
 
@@ -330,7 +414,7 @@ export class CoreRestAdapter implements IRestHandler {
         return true;
     }
 
-    private extractRouteParams(pattern: string, url: string): Record<string, string> {
+    protected extractRouteParams(pattern: string, url: string): Record<string, string> {
         const params: Record<string, string> = {};
         const path = this.normalizeUrlPath(url);
 

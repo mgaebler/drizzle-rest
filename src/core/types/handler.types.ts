@@ -19,13 +19,6 @@ export interface ICoreActionHandler {
 }
 
 /**
- * Main framework-agnostic handler interface
- */
-export interface IAdapterRestHandler {
-    handle(request: IAdapterRequest): Promise<IAdapterResponse>;
-}
-
-/**
  * Route handler for a specific HTTP method and path
  */
 export interface IRouteHandler {

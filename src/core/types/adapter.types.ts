@@ -44,6 +44,11 @@ export interface IAdapterResponse {
  */
 export interface IFrameworkAdapter {
     /**
+     * Framework name for identification
+     */
+    readonly name: string;
+
+    /**
      * Convert framework-specific request to our internal format
      */
     parseRequest(frameworkReq: any, params?: Record<string, string>): Promise<IAdapterRequest>;
@@ -56,10 +61,5 @@ export interface IFrameworkAdapter {
     /**
      * Extract route parameters from framework-specific routing
      */
-    extractParams(frameworkReq: any): Record<string, string>;
-
-    /**
-     * Framework name for identification
-     */
-    readonly name: string;
+    extractParams?(frameworkReq: any): Record<string, string>;
 }

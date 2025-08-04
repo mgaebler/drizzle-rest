@@ -1,8 +1,8 @@
 import { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 
 import { ActionTypeEnum } from '../core/actions/action.types';
+import { CoreRestAdapter, ICoreRestAdapterOptions, IFrameworkAdapter } from '../core/adapter';
 import { IAdapterRequest, IAdapterResponse } from '../core/types/adapter.types';
-import { IFrameworkAdapter } from '../core/types/adapter.types';
 
 export interface HookContext {
     req: ExpressRequest & { user?: any };           // Access to req.user from framework auth
@@ -13,10 +13,42 @@ export interface HookContext {
 }
 
 /**
- * Express.js adapter for converting between Express req/res and our internal format
+ * Express.js adapter that extends CoreRestAdapter and implements framework-specific concerns
  */
-export class ExpressAdapter implements IFrameworkAdapter {
+export class ExpressAdapter extends CoreRestAdapter implements IFrameworkAdapter {
     readonly name = 'express';
+
+    constructor(options: ICoreRestAdapterOptions) {
+        super(options);
+    }
+
+    /**
+     * Create an Express route handler that uses this adapter
+     */
+    createExpressHandler() {
+        return async (req: ExpressRequest, res: ExpressResponse) => {
+            try {
+                // Parse the Express request into our internal format
+                const adapterRequest = await this.parseRequest(req);
+
+                // Handle the request using the core adapter
+                const adapterResponse = await this.handle(adapterRequest);
+
+                // Send the response back through Express
+                await this.sendResponse(adapterResponse, res);
+            } catch (error: any) {
+                this.getLogger().error({
+                    error: error.message,
+                    url: req.url,
+                    method: req.method
+                }, 'Express handler error');
+
+                res.status(500).json({
+                    error: 'Internal Server Error'
+                });
+            }
+        };
+    }
 
     async parseRequest(
         req: ExpressRequest,
