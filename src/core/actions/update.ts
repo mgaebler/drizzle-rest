@@ -1,12 +1,13 @@
 import { eq } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
 
-import { ICoreActionHandler } from '../types/handler.types';
+import type { IAdapterRequest } from '../types/adapter.types';
+import { ICoreActionContext, ICoreActionHandler } from '../types/handler.types';
 import { ActionTypeEnum } from './action.types';
-import { createActionHandler } from './createActionHandler';
+import { BaseAction } from './base-action';
 
-export const coreUpdateAction: ICoreActionHandler = createActionHandler(
-    async (request, context) => {
+class UpdateAction extends BaseAction {
+    protected async executeCore(request: IAdapterRequest, context: ICoreActionContext): Promise<any> {
         const { db, table, primaryKeyColumn, columns } = context;
         const id = request.params.id;
 
@@ -25,9 +26,13 @@ export const coreUpdateAction: ICoreActionHandler = createActionHandler(
         }
 
         return results[0];
-    },
-    {
+    }
+}
+
+export const coreUpdateAction: ICoreActionHandler = (request, context) => {
+    const action = new UpdateAction();
+    return action.execute(request, context, {
         actionType: ActionTypeEnum.UPDATE,
         includeId: true
-    }
-);
+    });
+};

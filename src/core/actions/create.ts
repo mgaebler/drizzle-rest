@@ -1,11 +1,12 @@
 import { createInsertSchema } from 'drizzle-zod';
 
-import { ICoreActionHandler } from '../types/handler.types';
+import type { IAdapterRequest } from '../types/adapter.types';
+import { ICoreActionContext, ICoreActionHandler } from '../types/handler.types';
 import { ActionTypeEnum } from './action.types';
-import { createActionHandler } from './createActionHandler';
+import { BaseAction } from './base-action';
 
-export const coreCreateAction: ICoreActionHandler = createActionHandler(
-    async (request, context) => {
+class CreateAction extends BaseAction {
+    protected async executeCore(request: IAdapterRequest, context: ICoreActionContext): Promise<any> {
         const { db, table } = context;
 
         // Validate body
@@ -20,9 +21,13 @@ export const coreCreateAction: ICoreActionHandler = createActionHandler(
         const insertResult = await db.insert(table).values(validatedBody).returning();
 
         return insertResult[0];
-    },
-    {
+    }
+}
+
+export const coreCreateAction: ICoreActionHandler = (request, context) => {
+    const action = new CreateAction();
+    return action.execute(request, context, {
         actionType: ActionTypeEnum.CREATE,
         statusCode: 201
-    }
-);
+    });
+};

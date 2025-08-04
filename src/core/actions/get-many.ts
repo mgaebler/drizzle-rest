@@ -1,12 +1,12 @@
-import { ICoreActionHandler } from '../types/handler.types';
+import type { IAdapterRequest, IAdapterResponse } from '../types/adapter.types';
+import { ICoreActionContext, ICoreActionHandler } from '../types/handler.types';
 import { QueryBuilder } from '../utils/query-builder';
 import { CoreQueryParser } from '../utils/query-parser';
-import { ActionTypeEnum } from './action.types';
-import { ActionOptions } from './action.types';
+import { ActionOptions, ActionTypeEnum } from './action.types';
 import { BaseAction } from './base-action';
 
 class GetManyAction extends BaseAction {
-    protected async executeCore(request: any, context: any): Promise<any> {
+    protected async executeCore(request: IAdapterRequest, context: ICoreActionContext): Promise<any> {
         const { db, table, columns, schema, tablesMetadataMap, tableMetadata } = context;
 
         const params = CoreQueryParser.parseQueryParams(request);
@@ -41,13 +41,8 @@ class GetManyAction extends BaseAction {
         };
     }
 
-    protected createHookData(_request: any): any {
-        // No hook-specific data needed for GET_MANY operations
-        return {};
-    }
-
     // Override to add pagination headers
-    public async execute(request: any, context: any, options: ActionOptions): Promise<any> {
+    public async execute(request: IAdapterRequest, context: ICoreActionContext, options: ActionOptions): Promise<IAdapterResponse> {
         const response = await super.execute(request, context, options);
 
         if (response.status === 200 && response.body?.totalCount !== undefined) {

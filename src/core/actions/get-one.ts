@@ -1,11 +1,12 @@
 import { eq } from 'drizzle-orm';
 
-import { ICoreActionHandler } from '../types/handler.types';
+import type { IAdapterRequest } from '../types/adapter.types';
+import { ICoreActionContext, ICoreActionHandler } from '../types/handler.types';
 import { ActionTypeEnum } from './action.types';
-import { createActionHandler } from './createActionHandler';
+import { BaseAction } from './base-action';
 
-export const coreGetOneAction: ICoreActionHandler = createActionHandler(
-    async (request, context) => {
+class GetOneAction extends BaseAction {
+    protected async executeCore(request: IAdapterRequest, context: ICoreActionContext): Promise<any> {
         const { db, table, primaryKeyColumn, columns } = context;
         const id = request.params.id;
 
@@ -21,9 +22,13 @@ export const coreGetOneAction: ICoreActionHandler = createActionHandler(
         }
 
         return results[0];
-    },
-    {
+    }
+}
+
+export const coreGetOneAction: ICoreActionHandler = (request, context) => {
+    const action = new GetOneAction();
+    return action.execute(request, context, {
         actionType: ActionTypeEnum.GET_ONE,
         includeId: true
-    }
-);
+    });
+};

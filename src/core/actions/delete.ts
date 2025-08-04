@@ -1,11 +1,12 @@
 import { eq } from 'drizzle-orm';
 
-import { ICoreActionHandler } from '../types/handler.types';
+import type { IAdapterRequest } from '../types/adapter.types';
+import { ICoreActionContext, ICoreActionHandler } from '../types/handler.types';
 import { ActionTypeEnum } from './action.types';
-import { createActionHandler } from './createActionHandler';
+import { BaseAction } from './base-action';
 
-export const coreDeleteAction: ICoreActionHandler = createActionHandler(
-    async (request, context) => {
+class DeleteAction extends BaseAction {
+    protected async executeCore(request: IAdapterRequest, context: ICoreActionContext): Promise<any> {
         const { db, table, primaryKeyColumn, columns } = context;
         const id = request.params.id;
 
@@ -20,10 +21,14 @@ export const coreDeleteAction: ICoreActionHandler = createActionHandler(
         }
 
         return null; // DELETE returns 204 No Content
-    },
-    {
+    }
+}
+
+export const coreDeleteAction: ICoreActionHandler = (request, context) => {
+    const action = new DeleteAction();
+    return action.execute(request, context, {
         actionType: ActionTypeEnum.DELETE,
         includeId: true,
         statusCode: 204
-    }
-);
+    });
+};
