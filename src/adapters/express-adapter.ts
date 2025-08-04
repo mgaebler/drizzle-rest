@@ -7,11 +7,11 @@ import { IFrameworkAdapter } from '../core/types/adapter.types';
 export interface HookContext {
     req: ExpressRequest & { user?: any };           // Access to req.user from framework auth
     res: ExpressResponse;          // Access to response object
-    operation: ActionTypeEnum;
+    action: ActionTypeEnum;
     table: string;          // Table name
-    record?: any;           // For CREATE/UPDATE operations
-    recordId?: string;      // For GET_ONE/UPDATE/DELETE operations
-    filters?: any;          // For GET_MANY operations
+    record?: any;           // For CREATE/UPDATE actions
+    recordId?: string;      // For GET_ONE/UPDATE/DELETE actions
+    filters?: any;          // For GET_MANY actions
     metadata: {
         tableName: string;
         primaryKey: string;
@@ -75,7 +75,7 @@ export class ExpressAdapter implements IFrameworkAdapter {
 export const createHookContext = (
     req: ExpressRequest,
     res: ExpressResponse,
-    operation: ActionTypeEnum,
+    action: ActionTypeEnum,
     tableMetadata: any,
     primaryKeyColumn: string,
     columns: any,
@@ -88,7 +88,7 @@ export const createHookContext = (
     return {
         req,
         res,
-        operation,
+        action: action,
         table: tableMetadata.name,
         filters: options.filters,
         record: options.record,

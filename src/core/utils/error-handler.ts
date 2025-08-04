@@ -9,9 +9,9 @@ export class CoreErrorHandler {
         this.logger = logger;
     }
 
-    static handleError(error: any, operation: string, requestId?: string): IAdapterResponse {
+    static handleError(error: any, action: string, requestId?: string): IAdapterResponse {
         const errorContext = {
-            operation,
+            action,
             requestId,
             error: {
                 message: error.message,
@@ -23,11 +23,11 @@ export class CoreErrorHandler {
         };
 
         // Handle hook-related authorization errors
-        if (operation === 'beforeOperation' || operation === 'afterOperation') {
-            const statusCode = operation === 'beforeOperation' ? 403 : 500;
+        if (action === 'beforeOperation' || action === 'afterOperation') {
+            const statusCode = action === 'beforeOperation' ? 403 : 500;
             const errorMessage = typeof error === 'string' ? error : error.message || 'Hook execution failed';
 
-            this.logger.warn(errorContext, `Hook error in ${operation}`);
+            this.logger.warn(errorContext, `Hook error in ${action}`);
             return createAdapterResponse({
                 error: errorMessage,
                 requestId
@@ -36,7 +36,7 @@ export class CoreErrorHandler {
 
         if (error.issues) {
             // Zod validation error
-            this.logger.warn(errorContext, `Validation error in ${operation}`);
+            this.logger.warn(errorContext, `Validation error in ${action}`);
             return createAdapterResponse({
                 error: 'Validation failed',
                 details: error.issues,
@@ -46,7 +46,7 @@ export class CoreErrorHandler {
 
         if (error.message?.includes('not found') || error.code === 'P2025') {
             // Not found error
-            this.logger.info(errorContext, `Resource not found in ${operation}`);
+            this.logger.info(errorContext, `Resource not found in ${action}`);
             return createAdapterResponse({
                 error: 'Not Found',
                 requestId
@@ -54,7 +54,7 @@ export class CoreErrorHandler {
         }
 
         // Generic server error
-        this.logger.error(errorContext, `Server error in ${operation}`);
+        this.logger.error(errorContext, `Server error in ${action}`);
         return createAdapterResponse({
             error: 'Internal Server Error',
             requestId

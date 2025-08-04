@@ -10,7 +10,7 @@ export const coreCreateAction: ICoreActionHandler = createActionHandler(
 
         // Validate body
         if (!request.body || Object.keys(request.body).length === 0) {
-            throw new Error('Request body is required for create operations');
+            throw new Error('Request body is required for create actions');
         }
 
         // Schema validation

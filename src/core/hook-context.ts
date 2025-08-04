@@ -5,9 +5,9 @@ interface CoreHookContext {
     request: IAdapterRequest;           // Framework-agnostic request
     action: ActionTypeEnum;
     table: string;          // Table name
-    record?: any;           // For CREATE/UPDATE operations
-    recordId?: string;      // For GET_ONE/UPDATE/DELETE operations
-    filters?: any;          // For GET_MANY operations
+    record?: any;           // For CREATE/UPDATE actions
+    recordId?: string;      // For GET_ONE/UPDATE/DELETE actions
+    filters?: any;          // For GET_MANY actions
     metadata: {
         tableName: string;
         primaryKey: string;
@@ -16,7 +16,7 @@ interface CoreHookContext {
 }
 
 /**
- * Helper function to create CoreHookContext objects for framework-agnostic operations
+ * Helper function to create CoreHookContext objects for framework-agnostic actions
  */
 export const createCoreHookContext = (
     request: IAdapterRequest,

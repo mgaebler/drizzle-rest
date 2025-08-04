@@ -94,7 +94,7 @@ describe.skip('Hook System Integration Tests', () => {
     });
 
     describe('beforeOperation hooks', () => {
-        it('should call beforeOperation hook before CREATE operation', async () => {
+        it('should call beforeOperation hook before CREATE action', async () => {
             const beforeOperationSpy = vi.fn();
 
             const app = createAppWithHooks({
@@ -114,7 +114,7 @@ describe.skip('Hook System Integration Tests', () => {
                     req: expect.objectContaining({
                         user: mockUser
                     }),
-                    operation: 'CREATE',
+                    action: 'CREATE',
                     table: 'users',
                     record: TEST_USERS.alice,
                     metadata: expect.objectContaining({
@@ -126,7 +126,7 @@ describe.skip('Hook System Integration Tests', () => {
             );
         });
 
-        it('should block operation when beforeOperation hook throws error', async () => {
+        it('should block action when beforeOperation hook throws error', async () => {
             const app = createAppWithHooks({
                 users: {
                     hooks: {
@@ -147,7 +147,7 @@ describe.skip('Hook System Integration Tests', () => {
     });
 
     describe('afterOperation hooks', () => {
-        it('should call afterOperation hook after CREATE operation', async () => {
+        it('should call afterOperation hook after CREATE action', async () => {
             const afterOperationSpy = vi.fn().mockImplementation((_context: HookContext, result: any) => result);
 
             const app = createAppWithHooks({
@@ -167,7 +167,7 @@ describe.skip('Hook System Integration Tests', () => {
                     req: expect.objectContaining({
                         user: mockUser
                     }),
-                    operation: 'CREATE',
+                    action: 'CREATE',
                     table: 'users',
                     record: TEST_USERS.alice,
                     metadata: expect.objectContaining({
@@ -188,7 +188,7 @@ describe.skip('Hook System Integration Tests', () => {
                 users: {
                     hooks: {
                         afterOperation: async (context: HookContext, result: any) => {
-                            if (context.operation === 'CREATE') {
+                            if (context.action === 'CREATE') {
                                 return {
                                     ...result,
                                     fullName: 'Modified Name',
@@ -273,8 +273,8 @@ describe.skip('Hook System Integration Tests', () => {
             return user?.permissions?.includes(permission) || false;
         };
 
-        // Helper function to get required permission for operation
-        const getRequiredPermission = (table: string, operation: string): string => {
+        // Helper function to get required permission for action
+        const getRequiredPermission = (table: string, action: string): string => {
             const actionMap: Record<string, string> = {
                 'CREATE': 'create',
                 'GET_ONE': 'read',
@@ -283,15 +283,15 @@ describe.skip('Hook System Integration Tests', () => {
                 'REPLACE': 'write',
                 'DELETE': 'delete'
             };
-            return `${table}:${actionMap[operation]}`;
+            return `${table}:${actionMap[action]}`;
         };
 
-        it('should allow user with correct permissions to perform operation', async () => {
+        it('should allow user with correct permissions to perform action', async () => {
             const app = createAppWithHooks({
                 users: {
                     hooks: {
                         beforeOperation: async (context: HookContext) => {
-                            const requiredPermission = getRequiredPermission(context.table, context.operation);
+                            const requiredPermission = getRequiredPermission(context.table, context.action);
                             if (!hasPermission(context.req.user, requiredPermission)) {
                                 throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
                             }
@@ -312,7 +312,7 @@ describe.skip('Hook System Integration Tests', () => {
                 users: {
                     hooks: {
                         beforeOperation: async (context: HookContext) => {
-                            const requiredPermission = getRequiredPermission(context.table, context.operation);
+                            const requiredPermission = getRequiredPermission(context.table, context.action);
                             if (!hasPermission(context.req.user, requiredPermission)) {
                                 throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
                             }
@@ -329,12 +329,12 @@ describe.skip('Hook System Integration Tests', () => {
             expect(res.body.error).toBe('Forbidden: Missing permission users:delete');
         });
 
-        it('should allow admin with full permissions to perform any operation', async () => {
+        it('should allow admin with full permissions to perform any action', async () => {
             const app = createAppWithAdminUser({
                 users: {
                     hooks: {
                         beforeOperation: async (context: HookContext) => {
-                            const requiredPermission = getRequiredPermission(context.table, context.operation);
+                            const requiredPermission = getRequiredPermission(context.table, context.action);
                             if (!hasPermission(context.req.user, requiredPermission)) {
                                 throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
                             }
@@ -364,7 +364,7 @@ describe.skip('Hook System Integration Tests', () => {
                 posts: {
                     hooks: {
                         beforeOperation: async (context: HookContext) => {
-                            const requiredPermission = getRequiredPermission(context.table, context.operation);
+                            const requiredPermission = getRequiredPermission(context.table, context.action);
                             if (!hasPermission(context.req.user, requiredPermission)) {
                                 throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
                             }
@@ -407,7 +407,7 @@ describe.skip('Hook System Integration Tests', () => {
                 posts: {
                     hooks: {
                         beforeOperation: async (context: HookContext) => {
-                            const requiredPermission = getRequiredPermission(context.table, context.operation);
+                            const requiredPermission = getRequiredPermission(context.table, context.action);
                             if (!hasPermission(context.req.user, requiredPermission)) {
                                 throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
                             }
@@ -417,7 +417,7 @@ describe.skip('Hook System Integration Tests', () => {
                 users: {
                     hooks: {
                         beforeOperation: async (context: HookContext) => {
-                            const requiredPermission = getRequiredPermission(context.table, context.operation);
+                            const requiredPermission = getRequiredPermission(context.table, context.action);
                             if (!hasPermission(context.req.user, requiredPermission)) {
                                 throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
                             }
@@ -508,7 +508,7 @@ describe.skip('Hook System Integration Tests', () => {
                             }
 
                             // Auto-set createdBy to current user
-                            if (context.operation === 'CREATE') {
+                            if (context.action === 'CREATE') {
                                 context.record.createdBy = context.req.user?.id;
                             }
                         }
@@ -552,7 +552,7 @@ describe.skip('Hook System Integration Tests', () => {
                             }
 
                             // Auto-set createdBy to current user
-                            if (context.operation === 'CREATE') {
+                            if (context.action === 'CREATE') {
                                 context.record.createdBy = context.req.user?.id;
                                 capturedRecord = context.record;
                             }
@@ -669,7 +669,7 @@ describe.skip('Hook System Integration Tests', () => {
                     hooks: {
                         beforeOperation: async (_context: HookContext) => {
                             executionOrder.push('beforeOperation');
-                            throw new Error('Before operation error');
+                            throw new Error('Before action error');
                         },
                         afterOperation: async (_context: HookContext, result: any) => {
                             executionOrder.push('afterOperation');

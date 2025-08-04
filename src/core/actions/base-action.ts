@@ -60,7 +60,7 @@ export abstract class BaseAction {
                 return beforeHookResult;
             }
 
-            // Execute core operation
+            // Execute core action
             const result = await this.executeCore(request, context);
 
             // Execute afterAction hook
@@ -110,7 +110,7 @@ export abstract class BaseAction {
 
         try {
             await tableConfig.hooks.beforeOperation(hookContext);
-            return null; // Success, continue with operation
+            return null; // Success, continue with action
         } catch (hookError) {
             logger.error({
                 requestId,
