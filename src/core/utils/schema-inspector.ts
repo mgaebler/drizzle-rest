@@ -7,7 +7,7 @@ type DrizzleSchema = Record<string, PgTable | unknown>;
 // Type for a Drizzle table column
 type DrizzleColumn = PgColumn<any, any, any>;
 
-export interface ColumnMetadata {
+interface ColumnMetadata {
     name: string;
     type: string;
     nullable: boolean;
