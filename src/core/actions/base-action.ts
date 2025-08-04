@@ -91,16 +91,14 @@ export abstract class BaseAction {
         requestId: string,
         startTime: number
     ): Promise<IAdapterResponse | null> {
-        const { tableMetadata, primaryKeyColumn, columns, tableConfig, logger } = context;
+        const { tableMetadata, tableConfig, logger } = context;
 
         if (!tableConfig?.hooks?.beforeOperation) return null;
 
         const hookContext = createCoreHookContext(
             request,
             actionType,
-            tableMetadata,
-            primaryKeyColumn,
-            columns
+            tableMetadata.name
         );
 
         try {
@@ -126,7 +124,7 @@ export abstract class BaseAction {
         requestId: string,
         startTime: number
     ): Promise<{ result: any; error?: IAdapterResponse }> {
-        const { tableMetadata, primaryKeyColumn, columns, tableConfig, logger } = context;
+        const { tableMetadata, tableConfig, logger } = context;
 
         if (!tableConfig?.hooks?.afterOperation) {
             return { result };
@@ -135,9 +133,7 @@ export abstract class BaseAction {
         const hookContext = createCoreHookContext(
             request,
             actionType,
-            tableMetadata,
-            primaryKeyColumn,
-            columns
+            tableMetadata.name
         );
 
         try {

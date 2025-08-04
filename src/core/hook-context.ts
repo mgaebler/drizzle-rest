@@ -4,7 +4,7 @@ import { IAdapterRequest } from './types/adapter.types';
 interface CoreHookContext {
     request: IAdapterRequest;           // Framework-agnostic request
     action: ActionTypeEnum;
-    table: string;          // Table name
+    tableName: string;          // Table name
     record?: any;           // For CREATE/UPDATE actions
 }
 
@@ -14,17 +14,13 @@ interface CoreHookContext {
 export const createCoreHookContext = (
     request: IAdapterRequest,
     action: ActionTypeEnum,
-    tableMetadata: any,
-    primaryKeyColumn: string,
-    columns: any,
-    options: {
-        record?: any;
-    } = {}
+    tableName: string,
+    record?: any
 ): CoreHookContext => {
     return {
         request,
         action,
-        table: tableMetadata.name,
-        record: options.record,
+        tableName,
+        record,
     };
 };
