@@ -1,13 +1,16 @@
-import { eq } from 'drizzle-orm';
-import { beforeEach,describe, expect, it } from 'vitest';
-
-import { db } from '@/db/connection';
-import * as schema from '@/db/schema.js';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import {
     apiRequest,
+    createTestComments,
+    createTestPosts,
+    createTestUser,
+    expectEmbeddedCommentsData,
+    expectEmbeddedUserData,
     expectSuccessResponse,
-    setupTestDatabase} from './test-helpers';
+    setupTestDatabase,
+    TEST_USERS
+} from './test-helpers';
 
 describe('JSON-Server Embedding', () => {
     beforeEach(async () => {
@@ -16,40 +19,17 @@ describe('JSON-Server Embedding', () => {
 
     describe('Basic Embedding Tests', () => {
         beforeEach(async () => {
-            // Create test user
-            const [user] = await db.insert(schema.users).values({
-                fullName: 'John Doe',
-                phone: '123-456-7890'
-            }).returning();
+            // Create test user using helper
+            const user = await createTestUser(TEST_USERS.alice);
 
-            // Create test posts for the user
-            await db.insert(schema.posts).values([
-                {
-                    title: 'First Post',
-                    content: 'This is the first post content',
-                    userId: user.id
-                },
-                {
-                    title: 'Second Post',
-                    content: 'This is the second post content',
-                    userId: user.id
-                }
-            ]);
+            // Create test posts using helper
+            const posts = await createTestPosts(user.id);
 
-            // Create test comments
-            const [post] = await db.select().from(schema.posts).where(eq(schema.posts.title, 'First Post'));
-            await db.insert(schema.comments).values([
-                {
-                    text: 'Great post!',
-                    postId: post.id,
-                    userId: user.id
-                },
-                {
-                    text: 'Very informative',
-                    postId: post.id,
-                    userId: user.id
-                }
-            ]);
+            // Create test comments for the first post
+            const firstPost = posts.find(post => post.title === 'First Post');
+            if (firstPost) {
+                await createTestComments(firstPost.id, user.id);
+            }
         });
 
         it('should embed user data in posts when using _embed=user', async () => {
@@ -64,12 +44,9 @@ describe('JSON-Server Embedding', () => {
                 expect(post).toHaveProperty('title');
                 expect(post).toHaveProperty('content');
                 expect(post).toHaveProperty('userId');
-                expect(post).toHaveProperty('user');
 
-                // Verify embedded user data structure
-                expect(post.user).toHaveProperty('id');
-                expect(post.user).toHaveProperty('fullName', 'John Doe');
-                expect(post.user).toHaveProperty('phone', '123-456-7890');
+                // Use helper to verify embedded user data
+                expectEmbeddedUserData(post, TEST_USERS.alice);
             });
         });
 
@@ -86,22 +63,9 @@ describe('JSON-Server Embedding', () => {
             expect(postWithComments).toBeDefined();
             expect(postWithoutComments).toBeDefined();
 
-            // Check embedded comments in first post
-            expect(postWithComments).toHaveProperty('comments');
-            expect(Array.isArray(postWithComments.comments)).toBe(true);
-            expect(postWithComments.comments).toHaveLength(2);
-
-            postWithComments.comments.forEach((comment: any) => {
-                expect(comment).toHaveProperty('id');
-                expect(comment).toHaveProperty('text');
-                expect(comment).toHaveProperty('postId', postWithComments.id);
-                expect(comment).toHaveProperty('userId');
-            });
-
-            // Check that second post has empty comments array
-            expect(postWithoutComments).toHaveProperty('comments');
-            expect(Array.isArray(postWithoutComments.comments)).toBe(true);
-            expect(postWithoutComments.comments).toHaveLength(0);
+            // Check embedded comments using helper
+            expectEmbeddedCommentsData(postWithComments, 2);
+            expectEmbeddedCommentsData(postWithoutComments, 0);
         });
     });
 });

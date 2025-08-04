@@ -81,6 +81,36 @@ export const createFilteringTestData = async () => {
     ]).returning();
 };
 
+export const createTestPosts = async (userId: number) => {
+    return await db.insert(schema.posts).values([
+        {
+            title: 'First Post',
+            content: 'This is the first post content',
+            userId
+        },
+        {
+            title: 'Second Post',
+            content: 'This is the second post content',
+            userId
+        }
+    ]).returning();
+};
+
+export const createTestComments = async (postId: number, userId: number) => {
+    return await db.insert(schema.comments).values([
+        {
+            text: 'Great post!',
+            postId,
+            userId
+        },
+        {
+            text: 'Very informative',
+            postId,
+            userId
+        }
+    ]).returning();
+};
+
 // Common assertion helpers
 export const expectSuccessResponse = (res: any, expectedStatus = 200) => {
     expect(res.statusCode).toEqual(expectedStatus);
@@ -106,6 +136,29 @@ export const expectFilterResults = (res: any, expectedLength: number, validator?
     expect(res.body).toHaveLength(expectedLength);
     if (validator) {
         expect(validator(res.body)).toBe(true);
+    }
+};
+
+// Embedding-specific assertion helpers
+export const expectEmbeddedUserData = (post: any, expectedUser: typeof TEST_USERS.alice) => {
+    expect(post).toHaveProperty('user');
+    expect(post.user).toHaveProperty('id');
+    expect(post.user).toHaveProperty('fullName', expectedUser.fullName);
+    expect(post.user).toHaveProperty('phone', expectedUser.phone);
+};
+
+export const expectEmbeddedCommentsData = (post: any, expectedCommentCount: number) => {
+    expect(post).toHaveProperty('comments');
+    expect(Array.isArray(post.comments)).toBe(true);
+    expect(post.comments).toHaveLength(expectedCommentCount);
+
+    if (expectedCommentCount > 0) {
+        post.comments.forEach((comment: any) => {
+            expect(comment).toHaveProperty('id');
+            expect(comment).toHaveProperty('text');
+            expect(comment).toHaveProperty('postId', post.id);
+            expect(comment).toHaveProperty('userId');
+        });
     }
 };
 
