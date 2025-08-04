@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { ParsedQueryParams } from '../types/query.types';
+import { ParsedQueryParams } from './query.types';
 
 // Define Zod schemas for validation and parsing
 const SortSchema = z.string().optional().transform((value) => {

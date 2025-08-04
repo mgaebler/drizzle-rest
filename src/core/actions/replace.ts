@@ -1,7 +1,8 @@
 import { eq } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
 
-import { ICoreActionContext, ICoreActionHandler } from '../types/handler.types';
+import { ICoreActionHandler } from '../types/handler.types';
+import { ICoreActionContext } from './action.types';
 import { ActionTypeEnum } from './action.types';
 import { BaseAction } from './base-action';
 

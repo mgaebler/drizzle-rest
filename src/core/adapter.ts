@@ -9,11 +9,11 @@ import {
     coreReplaceAction,
     coreUpdateAction
 } from './actions';
-import { ActionTypeEnum } from './actions/action.types';
+import { ActionTypeEnum, ICoreActionContext } from './actions';
 import { createLogger, Logger } from './logger';
 import { IAdapterRequest, IAdapterResponse } from './types/adapter.types';
 import { IFrameworkAdapter } from './types/adapter.types';
-import { DrizzleDb, IAdapterRestHandler as IRestHandler, ICoreActionContext, IRouteHandler } from './types/handler.types';
+import { DrizzleDb, IAdapterRestHandler as IRestHandler, IRouteHandler } from './types/handler.types';
 import { createAdapterResponse } from './utils/response-helper';
 import { SchemaInspector } from './utils/schema-inspector';
 
@@ -133,7 +133,7 @@ export class CoreRestAdapter implements IRestHandler {
         this.logger.info({
             tablesProcessed: tables.length,
             routesRegistered: this.routes.size
-        }, 'Core Drizzle REST Adapter initialization completed');
+        }, 'Core REST Adapter initialization completed');
     }
 
     /**
@@ -355,10 +355,4 @@ export class CoreRestAdapter implements IRestHandler {
         return params;
     }
 }
-/**
- * Convert Web API Response to our internal format
- */
-
-// Re-export for public API
-export { createAdapterResponse } from './utils/response-helper';
 

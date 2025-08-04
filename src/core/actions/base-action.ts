@@ -1,7 +1,7 @@
 import { createCoreHookContext } from '../hook-context';
 import type { IAdapterRequest, IAdapterResponse } from '../types/adapter.types';
-import { ICoreActionContext } from '../types/handler.types';
 import { createAdapterResponse } from '../utils/response-helper';
+import { ICoreActionContext } from './action.types';
 import { ActionOptions, ActionTypeEnum } from './action.types';
 
 /**

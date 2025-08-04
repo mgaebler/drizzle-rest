@@ -1,38 +1,12 @@
-import { PgTable } from 'drizzle-orm/pg-core';
 import { PgliteDatabase } from 'drizzle-orm/pglite';
 
-import { ActionTypeEnum } from '../actions/action.types';
-import { Logger } from '../logger';
-import { TableMetadata } from '../utils/schema-inspector';
+import { ICoreActionContext } from '../actions/action.types';
 import { IAdapterRequest, IAdapterResponse } from './adapter.types';
-import { IFrameworkAdapter } from './adapter.types';
 
 /**
  * Framework-agnostic database type
  */
 export type DrizzleDb = PgliteDatabase<any>;
-
-/**
- * Framework-agnostic action context
- */
-export interface ICoreActionContext {
-    db: DrizzleDb;
-    table: PgTable;
-    tableMetadata: TableMetadata;
-    primaryKeyColumn: string;
-    columns: Record<string, any>;
-    schema: Record<string, PgTable | any>;
-    tablesMetadataMap: Map<string, any>;
-    tableConfig?: {
-        disabledEndpoints?: Array<ActionTypeEnum>;
-        hooks?: {
-            beforeOperation?: (context: any) => Promise<void>;
-            afterOperation?: (context: any, result: any) => Promise<any>;
-        };
-    };
-    logger: Logger;
-    adapter: IFrameworkAdapter;
-}
 
 /**
  * Framework-agnostic action handler interface
