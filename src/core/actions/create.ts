@@ -10,13 +10,13 @@ class CreateAction extends BaseAction {
         const { db, table } = context;
 
         // Validate body
-        if (!request.body || Object.keys(request.body).length === 0) {
+        if (!this.body || Object.keys(this.body).length === 0) {
             throw new Error('Request body is required for create actions');
         }
 
         // Schema validation
         const insertSchema = createInsertSchema(table);
-        const validatedBody = insertSchema.parse(request.body);
+        const validatedBody = insertSchema.parse(this.body);
 
         const insertResult = await db.insert(table).values(validatedBody).returning();
 

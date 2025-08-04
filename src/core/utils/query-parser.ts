@@ -1,6 +1,5 @@
 import { z } from 'zod';
 
-import { IAdapterRequest } from '../types/adapter.types';
 import { ParsedQueryParams } from '../types/query.types';
 
 // Define Zod schemas for validation and parsing
@@ -44,68 +43,29 @@ export class CoreQueryParser {
         '_page', '_per_page', '_start', '_end', '_limit', '_sort', '_embed'
     ];
 
-    static parseQueryParams(request: IAdapterRequest): ParsedQueryParams {
-        try {
-            // Parse and validate using Zod
-            const parsed = QueryParamsSchema.parse(request.query);
+    static parseQueryParams(query: Record<string, any>): ParsedQueryParams {
+        // Parse and validate using Zod
+        const parsed = QueryParamsSchema.parse(query);
 
-            // Extract filters (all params except the special ones)
-            const filters: Record<string, any> = {};
-            for (const [key, value] of Object.entries(parsed)) {
-                if (!this.EXCLUDE_PARAMS.includes(key) && value !== undefined && value !== null) {
-                    filters[key] = value;
-                }
-            }
-
-            return {
-                pagination: {
-                    page: parsed._page,
-                    perPage: parsed._per_page,
-                    start: parsed._start,
-                    end: parsed._end,
-                    limit: parsed._limit,
-                },
-                sort: parsed._sort,
-                filters,
-                embed: parsed._embed,
-            };
-        } catch (error) {
-            // Fallback to basic parsing if validation fails
-            console.warn('Query validation failed, using fallback parsing:', error);
-            return this.fallbackParse(request);
-        }
-    }
-
-    private static fallbackParse(request: IAdapterRequest): ParsedQueryParams {
-        const query = request.query || {};
-
-        // Basic pagination
-        const page = parseInt(query._page) || 1;
-        const perPage = parseInt(query._per_page) || 10;
-
-        // Basic sorting
-        let sort: Array<{ column: string; order: 'asc' | 'desc' }> | undefined;
-        if (query._sort) {
-            const sortStr = Array.isArray(query._sort) ? query._sort[0] : query._sort;
-            sort = [{
-                column: sortStr.startsWith('-') ? sortStr.substring(1) : sortStr,
-                order: sortStr.startsWith('-') ? 'desc' : 'asc'
-            }];
-        }
-
-        // Extract filters
+        // Extract filters (all params except the special ones)
         const filters: Record<string, any> = {};
-        for (const [key, value] of Object.entries(query)) {
+        for (const [key, value] of Object.entries(parsed)) {
             if (!this.EXCLUDE_PARAMS.includes(key) && value !== undefined && value !== null) {
                 filters[key] = value;
             }
         }
 
         return {
-            pagination: { page, perPage },
-            sort,
+            pagination: {
+                page: parsed._page,
+                perPage: parsed._per_page,
+                start: parsed._start,
+                end: parsed._end,
+                limit: parsed._limit,
+            },
+            sort: parsed._sort,
             filters,
-            embed: query._embed ? String(query._embed).split(',') : undefined,
+            embed: parsed._embed,
         };
     }
 }

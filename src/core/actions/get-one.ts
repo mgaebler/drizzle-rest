@@ -8,7 +8,7 @@ import { BaseAction } from './base-action';
 class GetOneAction extends BaseAction {
     protected async executeCore(request: IAdapterRequest, context: ICoreActionContext): Promise<any> {
         const { db, table, primaryKeyColumn, columns } = context;
-        const id = request.params.id;
+        const id = this.params.id;
 
         const primaryKeyCol = columns[primaryKeyColumn];
         const results = await db

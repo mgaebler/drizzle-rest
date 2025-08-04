@@ -9,6 +9,13 @@ import { ActionOptions, ActionTypeEnum } from './action.types';
  * Base class providing common action patterns
  */
 export abstract class BaseAction {
+    /** Parsed request parameters (e.g., route params like :id) */
+    protected params: Record<string, any> = {};
+    /** Parsed query parameters from URL search params */
+    protected query: Record<string, any> = {};
+    /** Parsed request body */
+    protected body: any = null;
+
     protected abstract executeCore(
         request: IAdapterRequest,
         context: ICoreActionContext
@@ -22,9 +29,14 @@ export abstract class BaseAction {
         const { tableMetadata, logger } = context;
         const { actionType, includeId = false, statusCode = 200 } = options;
 
+        // Parse request data and make available to subclasses
+        this.params = request.params || {};
+        this.query = request.query || {};
+        this.body = request.body || null;
+
         const requestId = request.requestId || 'unknown';
         const startTime = Date.now();
-        const id = includeId ? request.params.id : undefined;
+        const id = includeId ? this.params.id : undefined;
 
         try {
             // Initial logging
@@ -169,8 +181,8 @@ export abstract class BaseAction {
         };
 
         if (id) logData.id = id;
-        if (request.body) logData.bodyKeys = Object.keys(request.body);
-        if (request.query && Object.keys(request.query).length > 0) logData.query = request.query;
+        if (this.body) logData.bodyKeys = Object.keys(this.body);
+        if (this.query && Object.keys(this.query).length > 0) logData.query = this.query;
 
         logger.debug(logData, `Processing ${action} request`);
     }

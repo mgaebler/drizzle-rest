@@ -9,10 +9,10 @@ import { BaseAction } from './base-action';
 class UpdateAction extends BaseAction {
     protected async executeCore(request: IAdapterRequest, context: ICoreActionContext): Promise<any> {
         const { db, table, primaryKeyColumn, columns } = context;
-        const id = request.params.id;
+        const id = this.params.id;
 
         const insertSchema = createInsertSchema(table);
-        const validatedBody = insertSchema.partial().parse(request.body);
+        const validatedBody = insertSchema.partial().parse(this.body);
 
         const primaryKeyCol = columns[primaryKeyColumn];
         const results = await db

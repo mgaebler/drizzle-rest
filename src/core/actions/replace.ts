@@ -9,11 +9,11 @@ import { BaseAction } from './base-action';
 class ReplaceAction extends BaseAction {
     protected async executeCore(request: IAdapterRequest, context: ICoreActionContext): Promise<any> {
         const { db, table, primaryKeyColumn, columns } = context;
-        const id = request.params.id;
+        const id = this.params.id;
 
         const insertSchema = createInsertSchema(table);
         // For PUT, we need the full object (not partial)
-        const validatedBody = insertSchema.parse(request.body);
+        const validatedBody = insertSchema.parse(this.body);
 
         const primaryKeyCol = columns[primaryKeyColumn];
         const results = await db
