@@ -29,6 +29,5 @@ export const coreUpdateAction: ICoreActionHandler = createActionHandler(
     {
         actionType: ActionTypeEnum.UPDATE,
         includeId: true
-    },
-    (request) => ({ record: request.body, recordId: request.params.id })
+    }
 );

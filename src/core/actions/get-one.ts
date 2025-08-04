@@ -25,6 +25,5 @@ export const coreGetOneAction: ICoreActionHandler = createActionHandler(
     {
         actionType: ActionTypeEnum.GET_ONE,
         includeId: true
-    },
-    (request) => ({ recordId: request.params.id })
+    }
 );

@@ -10,13 +10,6 @@ export interface HookContext {
     action: ActionTypeEnum;
     table: string;          // Table name
     record?: any;           // For CREATE/UPDATE actions
-    recordId?: string;      // For GET_ONE/UPDATE/DELETE actions
-    filters?: any;          // For GET_MANY actions
-    metadata: {
-        tableName: string;
-        primaryKey: string;
-        columns: string[];
-    };
 }
 
 /**
@@ -80,9 +73,7 @@ export const createHookContext = (
     primaryKeyColumn: string,
     columns: any,
     options: {
-        filters?: any;
         record?: any;
-        recordId?: string;
     } = {}
 ): HookContext => {
     return {
@@ -90,13 +81,6 @@ export const createHookContext = (
         res,
         action: action,
         table: tableMetadata.name,
-        filters: options.filters,
         record: options.record,
-        recordId: options.recordId,
-        metadata: {
-            tableName: tableMetadata.name,
-            primaryKey: primaryKeyColumn,
-            columns: Object.keys(columns)
-        }
     };
 };

@@ -30,6 +30,5 @@ export const coreReplaceAction: ICoreActionHandler = createActionHandler(
     {
         actionType: ActionTypeEnum.REPLACE,
         includeId: true
-    },
-    (request) => ({ record: request.body, recordId: request.params.id })
+    }
 );

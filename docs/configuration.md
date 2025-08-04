@@ -37,13 +37,6 @@ interface HookContext {
   operation: 'GET_MANY' | 'GET_ONE' | 'CREATE' | 'UPDATE' | 'REPLACE' | 'DELETE';
   table: string;          // Table name
   record?: any;           // For CREATE/UPDATE operations
-  recordId?: string;      // For GET_ONE/UPDATE/DELETE operations
-  filters?: any;          // For GET_MANY operations
-  metadata: {
-    tableName: string;
-    primaryKey: string;
-    columns: string[];
-  };
 }
 ```
 
@@ -88,15 +81,15 @@ const drizzleApiRouter = createDrizzleRestAdapter({
       hooks: {
         beforeOperation: async (context) => {
           const { user } = context.req;
-          const { operation, recordId } = context;
+          const { operation } = context;
 
           // Role-based authorization
           if (operation === 'DELETE' && user.role !== 'admin') {
             throw new Error('Forbidden: Only admins can delete users');
           }
 
-          // Record-level authorization
-          if (operation === 'UPDATE' && user.role !== 'admin' && user.id !== recordId) {
+          // Record-level authorization - extract ID from request params
+          if (operation === 'UPDATE' && user.role !== 'admin' && user.id !== context.req.params.id) {
             throw new Error('Forbidden: Can only update own profile');
           }
         },

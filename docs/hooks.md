@@ -46,13 +46,6 @@ interface HookContext {
   operation: OperationType;          // 'CREATE', 'GET_ONE', 'GET_MANY', 'UPDATE', 'REPLACE', 'DELETE'
   table: string;                     // Table name
   record?: any;                      // Record data (CREATE/UPDATE operations)
-  recordId?: string;                 // Record ID (GET_ONE/UPDATE/DELETE operations)
-  filters?: any;                     // Query filters (GET_MANY operations)
-  metadata: {
-    tableName: string;
-    primaryKey: string;
-    columns: string[];
-  };
 }
 ```
 
@@ -71,8 +64,8 @@ beforeOperation: async (context) => {
     throw new Error('Forbidden: Only admins can delete records');
   }
 
-  // Resource ownership check
-  if (context.operation === 'UPDATE' && context.recordId !== user.id && user.role !== 'admin') {
+  // Resource ownership check - extract ID from request params
+  if (context.operation === 'UPDATE' && context.req.params.id !== user.id && user.role !== 'admin') {
     throw new Error('Forbidden: Can only update own records');
   }
 }

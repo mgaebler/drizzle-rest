@@ -3,9 +3,9 @@ flowchart LR
 subgraph 0["src"]
 subgraph 1["core"]
 subgraph 2["actions"]
-3["base-action.ts"]
-9["create.ts"]
-A["operation.types.ts"]
+3["action.types.ts"]
+4["base-action.ts"]
+A["create.ts"]
 B["delete.ts"]
 C["get-many.ts"]
 H["get-one.ts"]
@@ -13,19 +13,18 @@ I["index.ts"]
 J["replace.ts"]
 K["update.ts"]
 end
-4["adapter-api.ts"]
-5["hook-context.ts"]
-subgraph 6["utils"]
-7["error-handler.ts"]
+5["adapter-api.ts"]
+6["hook-context.ts"]
+subgraph 7["utils"]
+8["error-handler.ts"]
 D["query-builder.ts"]
 E["embed-builder.ts"]
 F["filter-builder.ts"]
 G["query-parser.ts"]
 M["schema-inspector.ts"]
-R["primary-key-utils.ts"]
-S["schema-inspector.test.ts"]
+R["schema-inspector.test.ts"]
 end
-8["logger.ts"]
+9["logger.ts"]
 L["adapter.ts"]
 subgraph N["types"]
 O["adapter.types.ts"]
@@ -34,42 +33,43 @@ Q["query.types.ts"]
 end
 end
 end
-subgraph T["@"]
-subgraph U["db"]
-V["schema"]
+subgraph S["@"]
+subgraph T["db"]
+U["schema"]
 end
 end
-3-->4
-3-->5
-3-->7
-7-->4
-7-->8
-9-->3
-9-->A
+4-->5
+4-->6
+4-->8
+8-->5
+8-->9
+A-->3
+A-->4
 B-->3
-B-->A
+B-->4
 C-->D
 C-->G
 C-->3
-C-->A
+C-->4
 D-->E
 D-->F
 H-->3
-H-->A
-I-->9
+H-->4
+I-->3
+I-->A
 I-->B
 I-->C
 I-->H
 I-->J
 I-->K
 J-->3
-J-->A
+J-->4
 K-->3
-K-->A
+K-->4
 L-->I
-L-->A
+L-->3
+L-->9
 L-->8
-L-->7
 L-->M
-S-->M
-S-->V
+R-->M
+R-->U

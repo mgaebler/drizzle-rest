@@ -40,9 +40,9 @@ class GetManyAction extends BaseAction {
         };
     }
 
-    protected createHookData(request: any): any {
-        const params = CoreQueryParser.parseQueryParams(request);
-        return { filters: params.filters };
+    protected createHookData(_request: any): any {
+        // No hook-specific data needed for GET_MANY operations
+        return {};
     }
 
     // Override to add pagination headers

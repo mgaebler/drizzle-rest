@@ -116,12 +116,7 @@ describe.skip('Hook System Integration Tests', () => {
                     }),
                     action: 'CREATE',
                     table: 'users',
-                    record: TEST_USERS.alice,
-                    metadata: expect.objectContaining({
-                        tableName: 'users',
-                        primaryKey: 'id',
-                        columns: expect.arrayContaining(['id', 'fullName', 'phone'])
-                    })
+                    record: TEST_USERS.alice
                 })
             );
         });
@@ -169,11 +164,7 @@ describe.skip('Hook System Integration Tests', () => {
                     }),
                     action: 'CREATE',
                     table: 'users',
-                    record: TEST_USERS.alice,
-                    metadata: expect.objectContaining({
-                        tableName: 'users',
-                        primaryKey: 'id'
-                    })
+                    record: TEST_USERS.alice
                 }),
                 expect.objectContaining({
                     id: expect.any(Number),

@@ -11,12 +11,6 @@ export interface ActionOptions {
     statusCode?: number;
 }
 
-interface HookData {
-    record?: any;
-    recordId?: string;
-    filters?: any;
-}
-
 /**
  * Base class providing common action patterns
  */
@@ -25,10 +19,6 @@ export abstract class BaseAction {
         request: IAdapterRequest,
         context: ICoreActionContext
     ): Promise<any>;
-
-    protected createHookData(_request: IAdapterRequest): HookData {
-        return {};
-    }
 
     public async execute(
         request: IAdapterRequest,
@@ -104,8 +94,7 @@ export abstract class BaseAction {
             actionType,
             tableMetadata,
             primaryKeyColumn,
-            columns,
-            this.createHookData(request)
+            columns
         );
 
         try {
@@ -142,8 +131,7 @@ export abstract class BaseAction {
             actionType,
             tableMetadata,
             primaryKeyColumn,
-            columns,
-            this.createHookData(request)
+            columns
         );
 
         try {
@@ -255,16 +243,11 @@ export abstract class BaseAction {
  */
 export function createActionHandler(
     executeCore: (request: IAdapterRequest, context: ICoreActionContext) => Promise<any>,
-    options: ActionOptions,
-    createHookData?: (request: IAdapterRequest) => HookData
+    options: ActionOptions
 ): ICoreActionHandler {
     const action = new (class extends BaseAction {
         protected async executeCore(request: IAdapterRequest, context: ICoreActionContext): Promise<any> {
             return executeCore(request, context);
-        }
-
-        protected createHookData(_request: IAdapterRequest): HookData {
-            return createHookData ? createHookData(_request) : {};
         }
     })();
 

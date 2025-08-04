@@ -25,6 +25,5 @@ export const coreDeleteAction: ICoreActionHandler = createActionHandler(
         actionType: ActionTypeEnum.DELETE,
         includeId: true,
         statusCode: 204
-    },
-    (request) => ({ recordId: request.params.id })
+    }
 );

@@ -31,15 +31,15 @@ const drizzleApiRouter = createDrizzleRestAdapter({
       hooks: {
         beforeOperation: async (context) => {
           const { user } = context.req; // From framework auth
-          const { operation, recordId } = context;
+          const { operation } = context;
 
           // Role-based authorization
           if (operation === 'DELETE' && user.role !== 'admin') {
             throw new Error('Forbidden: Only admins can delete users');
           }
 
-          // Record-level authorization
-          if (operation === 'UPDATE' && user.role !== 'admin' && user.id !== recordId) {
+          // Record-level authorization - extract ID from request params
+          if (operation === 'UPDATE' && user.role !== 'admin' && user.id !== context.req.params.id) {
             throw new Error('Forbidden: Can only update own profile');
           }
         },
