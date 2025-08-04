@@ -1,8 +1,8 @@
 import { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 
+import { OperationTypeEnum } from '../core/actions/operation.types';
 import { IAdapterRequest, IAdapterResponse } from '../core/types/adapter.types';
 import { IFrameworkAdapter } from '../core/types/adapter.types';
-import { OperationTypeEnum } from '../core/types/operation.types';
 
 export interface HookContext {
     req: ExpressRequest & { user?: any };           // Access to req.user from framework auth

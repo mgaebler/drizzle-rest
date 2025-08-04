@@ -2,8 +2,8 @@ import { createAdapterResponse } from '../adapter-api';
 import { createCoreHookContext } from '../hook-context';
 import type { IAdapterRequest, IAdapterResponse } from '../types/adapter.types';
 import { ICoreActionContext, ICoreActionHandler } from '../types/handler.types';
-import { OperationTypeEnum } from '../types/operation.types';
 import { CoreErrorHandler } from '../utils/error-handler';
+import { OperationTypeEnum } from './operation.types';
 
 export interface ActionOptions {
     operationType: OperationTypeEnum;

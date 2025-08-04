@@ -1,11 +1,11 @@
 import { PgTable } from 'drizzle-orm/pg-core';
 import { PgliteDatabase } from 'drizzle-orm/pglite';
 
+import { OperationTypeEnum } from '../actions/operation.types';
 import { Logger } from '../logger';
 import { TableMetadata } from '../utils/schema-inspector';
 import { IAdapterRequest, IAdapterResponse } from './adapter.types';
 import { IFrameworkAdapter } from './adapter.types';
-import { OperationTypeEnum } from './operation.types';
 
 /**
  * Framework-agnostic database type

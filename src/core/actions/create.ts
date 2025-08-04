@@ -1,8 +1,8 @@
 import { createInsertSchema } from 'drizzle-zod';
 
 import { ICoreActionHandler } from '../types/handler.types';
-import { OperationTypeEnum } from '../types/operation.types';
 import { createActionHandler } from './base-action';
+import { OperationTypeEnum } from './operation.types';
 
 export const coreCreateAction: ICoreActionHandler = createActionHandler(
     async (request, context) => {

@@ -9,11 +9,11 @@ import {
     coreReplaceAction,
     coreUpdateAction
 } from './actions';
+import { OperationTypeEnum } from './actions/operation.types';
 import { createLogger, Logger } from './logger';
 import { IAdapterRequest, IAdapterResponse } from './types/adapter.types';
 import { IFrameworkAdapter } from './types/adapter.types';
 import { DrizzleDb, IAdapterRestHandler as IRestHandler, ICoreActionContext, IRouteHandler } from './types/handler.types';
-import { OperationTypeEnum } from './types/operation.types';
 import { CoreErrorHandler } from './utils/error-handler';
 import { SchemaInspector } from './utils/schema-inspector';
 

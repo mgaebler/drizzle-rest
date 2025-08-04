@@ -1,5 +1,5 @@
+import { OperationTypeEnum } from './actions/operation.types';
 import { IAdapterRequest } from './types/adapter.types';
-import { OperationTypeEnum } from './types/operation.types';
 
 interface CoreHookContext {
     request: IAdapterRequest;           // Framework-agnostic request
