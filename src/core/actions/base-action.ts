@@ -17,7 +17,6 @@ export abstract class BaseAction {
     protected body: any = null;
 
     protected abstract executeCore(
-        request: IAdapterRequest,
         context: ICoreActionContext
     ): Promise<any>;
 
@@ -57,7 +56,7 @@ export abstract class BaseAction {
             }
 
             // Execute core action
-            const result = await this.executeCore(request, context);
+            const result = await this.executeCore(context);
 
             // Execute afterAction hook
             const afterHookResult = await this.executeAfterHook(

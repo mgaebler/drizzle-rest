@@ -6,7 +6,9 @@ export enum ActionTypeEnum {
     UPDATE = 'UPDATE',
     REPLACE = 'REPLACE',
     DELETE = 'DELETE'
-} export interface ActionOptions {
+}
+
+export interface ActionOptions {
     actionType: ActionTypeEnum;
     includeId?: boolean;
     statusCode?: number;

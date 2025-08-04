@@ -1,12 +1,11 @@
 import { createInsertSchema } from 'drizzle-zod';
 
-import type { IAdapterRequest } from '../types/adapter.types';
 import { ICoreActionContext, ICoreActionHandler } from '../types/handler.types';
 import { ActionTypeEnum } from './action.types';
 import { BaseAction } from './base-action';
 
 class CreateAction extends BaseAction {
-    protected async executeCore(request: IAdapterRequest, context: ICoreActionContext): Promise<any> {
+    protected async executeCore(context: ICoreActionContext): Promise<any> {
         const { db, table } = context;
 
         // Validate body

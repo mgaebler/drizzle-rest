@@ -6,7 +6,7 @@ import { ActionOptions, ActionTypeEnum } from './action.types';
 import { BaseAction } from './base-action';
 
 class GetManyAction extends BaseAction {
-    protected async executeCore(request: IAdapterRequest, context: ICoreActionContext): Promise<any> {
+    protected async executeCore(context: ICoreActionContext): Promise<any> {
         const { db, table, columns, schema, tablesMetadataMap, tableMetadata } = context;
 
         const params = CoreQueryParser.parseQueryParams(this.query);
