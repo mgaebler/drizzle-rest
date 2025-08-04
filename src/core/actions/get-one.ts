@@ -9,6 +9,10 @@ class GetOneAction extends BaseAction {
         const { db, table, primaryKeyColumn, columns } = context;
         const id = this.params.id;
 
+        if (!id) {
+            return this.createBadRequestError('ID parameter is required', { action: 'get-one' });
+        }
+
         const primaryKeyCol = columns[primaryKeyColumn];
         const results = await db
             .select()
@@ -17,7 +21,7 @@ class GetOneAction extends BaseAction {
             .limit(1);
 
         if (results.length === 0) {
-            throw new Error('Record not found');
+            return this.createNotFoundError('Record not found', { action: 'get-one', id });
         }
 
         return results[0];

@@ -10,22 +10,34 @@ class ReplaceAction extends BaseAction {
         const { db, table, primaryKeyColumn, columns } = context;
         const id = this.params.id;
 
-        const insertSchema = createInsertSchema(table);
-        // For PUT, we need the full object (not partial)
-        const validatedBody = insertSchema.parse(this.body);
-
-        const primaryKeyCol = columns[primaryKeyColumn];
-        const results = await db
-            .update(table)
-            .set(validatedBody)
-            .where(eq(primaryKeyCol, id))
-            .returning();
-
-        if (results.length === 0) {
-            throw new Error('Record not found');
+        if (!id) {
+            return this.createBadRequestError('ID parameter is required', { action: 'replace' });
         }
 
-        return results[0];
+        if (!this.body || Object.keys(this.body).length === 0) {
+            return this.createBadRequestError('Request body is required for replace actions', { action: 'replace', id });
+        }
+
+        try {
+            const insertSchema = createInsertSchema(table);
+            // For PUT, we need the full object (not partial)
+            const validatedBody = insertSchema.parse(this.body);
+
+            const primaryKeyCol = columns[primaryKeyColumn];
+            const results = await db
+                .update(table)
+                .set(validatedBody)
+                .where(eq(primaryKeyCol, id))
+                .returning();
+
+            if (results.length === 0) {
+                return this.createNotFoundError('Record not found', { action: 'replace', id });
+            }
+
+            return results[0];
+        } catch (error: any) {
+            return this.handleValidationError(error, { action: 'replace', id });
+        }
     }
 }
 

@@ -1,12 +1,25 @@
 import { createCoreHookContext } from '../hook-context';
 import type { IAdapterRequest, IAdapterResponse } from '../types/adapter.types';
 import { ICoreActionContext } from '../types/handler.types';
-import { CoreErrorHandler } from '../utils/error-handler';
 import { createAdapterResponse } from '../utils/response-helper';
 import { ActionOptions, ActionTypeEnum } from './action.types';
 
 /**
- * Base class providing common action patterns
+ * Base class providing common action patterns and error handling abstractions
+ *
+ * Error Handling Philosophy:
+ * - Errors are handled close to their execution context for better debugging
+ * - Consistent error response structure across all actions
+ * - Proper logging with contextual information
+ * - Type-specific error handling (validation, not found, conflicts, etc.)
+ *
+ * Available Error Abstractions:
+ * - createNotFoundError(): For 404 responses with contextual logging
+ * - createValidationError(): For 400 validation errors with Zod integration
+ * - createBadRequestError(): For 400 client errors with custom messages
+ * - createConflictError(): For 409 conflict errors (e.g., duplicates)
+ * - createInternalError(): For 500 server errors with detailed logging
+ * - handleValidationError(): Smart handler for validation and DB constraint errors
  */
 export abstract class BaseAction {
     /** Parsed request parameters (e.g., route params like :id) */
@@ -15,10 +28,18 @@ export abstract class BaseAction {
     protected query: Record<string, any> = {};
     /** Parsed request body */
     protected body: any = null;
+    /** Current request ID for tracking and logging */
+    protected requestId: string = 'unknown';
+    /** Current action context for error handling */
+    protected currentContext: ICoreActionContext | null = null;
 
     protected abstract executeCore(
         context: ICoreActionContext
     ): Promise<any>;
+
+    protected getCurrentRequestId(): string {
+        return this.requestId;
+    }
 
     public async execute(
         request: IAdapterRequest,
@@ -32,6 +53,8 @@ export abstract class BaseAction {
         this.params = request.params || {};
         this.query = request.query || {};
         this.body = request.body || null;
+        this.requestId = request.requestId || 'unknown';
+        this.currentContext = context;
 
         const requestId = request.requestId || 'unknown';
         const startTime = Date.now();
@@ -57,6 +80,11 @@ export abstract class BaseAction {
 
             // Execute core action
             const result = await this.executeCore(context);
+
+            // Check if the result is already an error response (when action handles its own errors)
+            if (result && typeof result === 'object' && 'status' in result && result.status >= 400) {
+                return result;
+            }
 
             // Execute afterAction hook
             const afterHookResult = await this.executeAfterHook(
@@ -103,15 +131,29 @@ export abstract class BaseAction {
         try {
             await tableConfig.hooks.beforeOperation(hookContext);
             return null; // Success, continue with action
-        } catch (hookError) {
+        } catch (hookError: any) {
+            const duration = Date.now() - startTime;
+
             logger.error({
                 requestId,
                 table: tableMetadata.name,
-                duration: Date.now() - startTime,
-                error: hookError
+                duration,
+                hook: 'beforeOperation',
+                error: {
+                    message: hookError.message || hookError,
+                    ...(process.env.NODE_ENV === 'development' && { stack: hookError.stack })
+                }
             }, `${actionType} request failed in beforeOperation hook`);
 
-            return CoreErrorHandler.handleError(hookError, 'beforeOperation', logger, requestId);
+            // Hook errors during beforeOperation are typically authorization/validation issues
+            const statusCode = 403; // Forbidden
+            const errorMessage = typeof hookError === 'string' ? hookError :
+                hookError.message || 'Authorization failed in beforeOperation hook';
+
+            return createAdapterResponse({
+                error: errorMessage,
+                requestId
+            }, statusCode);
         }
     }
 
@@ -147,17 +189,31 @@ export abstract class BaseAction {
                 const processedResult = await tableConfig.hooks.afterOperation(hookContext, result);
                 return { result: processedResult };
             }
-        } catch (hookError) {
+        } catch (hookError: any) {
+            const duration = Date.now() - startTime;
+
             logger.error({
                 requestId,
                 table: tableMetadata.name,
-                duration: Date.now() - startTime,
-                error: hookError
+                duration,
+                hook: 'afterOperation',
+                error: {
+                    message: hookError.message || hookError,
+                    ...(process.env.NODE_ENV === 'development' && { stack: hookError.stack })
+                }
             }, `${actionType} request failed in afterOperation hook`);
+
+            // Hook errors during afterOperation are typically processing issues
+            const statusCode = 500; // Internal Server Error
+            const errorMessage = typeof hookError === 'string' ? hookError :
+                hookError.message || 'Processing failed in afterOperation hook';
 
             return {
                 result: null,
-                error: CoreErrorHandler.handleError(hookError, 'afterOperation', logger, requestId)
+                error: createAdapterResponse({
+                    error: errorMessage,
+                    requestId
+                }, statusCode)
             };
         }
     }
@@ -216,26 +272,130 @@ export abstract class BaseAction {
             requestId,
             table: tableName,
             duration,
-            error: error.message
+            action,
+            error: {
+                message: error.message,
+                code: error.code,
+                ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
+            }
         };
 
         if (id) logData.id = id;
 
-        logger.error(logData, `${action} request failed`);
+        logger.error(logData, `Unexpected error in ${action} request`);
 
-        return CoreErrorHandler.handleError(error, action.toLowerCase(), logger, requestId);
+        // This should only handle truly unexpected errors now
+        // Most specific errors should be handled in the individual actions
+        return createAdapterResponse({
+            error: 'Internal Server Error',
+            requestId
+        }, 500);
     }
 
-    protected handleNotFound(requestId: string, tableName: string, action: ActionTypeEnum, startTime: number, id: string, logger: any): IAdapterResponse {
-        const duration = Date.now() - startTime;
-        logger.info({
-            requestId,
-            table: tableName,
-            id,
-            duration
-        }, `${action} request: record not found`);
+    // Error handling abstractions for actions
+    protected createNotFoundError(message = 'Record not found', context?: any): IAdapterResponse {
+        const { tableMetadata, logger } = this.currentContext!;
 
-        return CoreErrorHandler.handleNotFound('Record not found', logger, requestId);
+        logger.info({
+            requestId: this.requestId,
+            table: tableMetadata.name,
+            ...context
+        }, message);
+
+        return createAdapterResponse({
+            error: message,
+            requestId: this.requestId
+        }, 404);
+    }
+
+    protected createValidationError(error: any, context?: any): IAdapterResponse {
+        const { tableMetadata, logger } = this.currentContext!;
+
+        logger.warn({
+            requestId: this.requestId,
+            table: tableMetadata.name,
+            validationIssues: error.issues,
+            ...context
+        }, 'Validation failed');
+
+        return createAdapterResponse({
+            error: 'Validation failed',
+            details: error.issues,
+            requestId: this.requestId
+        }, 400);
+    }
+
+    protected createBadRequestError(message: string, context?: any): IAdapterResponse {
+        const { tableMetadata, logger } = this.currentContext!;
+
+        logger.warn({
+            requestId: this.requestId,
+            table: tableMetadata.name,
+            ...context
+        }, message);
+
+        return createAdapterResponse({
+            error: message,
+            requestId: this.requestId
+        }, 400);
+    }
+
+    protected createInternalError(error: any, message = 'Internal Server Error', context?: any): IAdapterResponse {
+        const { tableMetadata, logger } = this.currentContext!;
+
+        logger.error({
+            requestId: this.requestId,
+            table: tableMetadata.name,
+            error: {
+                message: error.message,
+                code: error.code,
+                ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
+            },
+            ...context
+        }, message);
+
+        return createAdapterResponse({
+            error: message,
+            requestId: this.requestId
+        }, 500);
+    }
+
+    protected createConflictError(message: string, context?: any): IAdapterResponse {
+        const { tableMetadata, logger } = this.currentContext!;
+
+        logger.warn({
+            requestId: this.requestId,
+            table: tableMetadata.name,
+            ...context
+        }, message);
+
+        return createAdapterResponse({
+            error: message,
+            requestId: this.requestId
+        }, 409);
+    }
+
+    // Helper method to handle validation errors with consistent structure
+    protected handleValidationError(error: any, context?: any): IAdapterResponse {
+        if (error.issues) {
+            return this.createValidationError(error, context);
+        }
+
+        // Handle database constraint errors
+        if (error.code === '23505') { // PostgreSQL unique constraint violation
+            return this.createConflictError('A record with this value already exists', context);
+        }
+
+        if (error.code === '23503') { // PostgreSQL foreign key constraint violation
+            return this.createBadRequestError('Referenced record does not exist', context);
+        }
+
+        if (error.code === '23514') { // PostgreSQL check constraint violation
+            return this.createBadRequestError('Data does not meet validation requirements', context);
+        }
+
+        // Re-throw unknown errors to be handled by base class
+        throw error;
     }
 }
 

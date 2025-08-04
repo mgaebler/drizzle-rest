@@ -9,6 +9,10 @@ class DeleteAction extends BaseAction {
         const { db, table, primaryKeyColumn, columns } = context;
         const id = this.params.id;
 
+        if (!id) {
+            return this.createBadRequestError('ID parameter is required', { action: 'delete' });
+        }
+
         const primaryKeyCol = columns[primaryKeyColumn];
         const result = await db
             .delete(table)
@@ -16,7 +20,7 @@ class DeleteAction extends BaseAction {
             .returning();
 
         if (result.length === 0) {
-            throw new Error('Record not found');
+            return this.createNotFoundError('Record not found', { action: 'delete', id });
         }
 
         return null; // DELETE returns 204 No Content

@@ -13,4 +13,3 @@ export interface ActionOptions {
     includeId?: boolean;
     statusCode?: number;
 }
-

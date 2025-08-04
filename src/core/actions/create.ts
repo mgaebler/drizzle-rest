@@ -8,18 +8,22 @@ class CreateAction extends BaseAction {
     protected async executeCore(context: ICoreActionContext): Promise<any> {
         const { db, table } = context;
 
-        // Validate body
+        // Validate body presence
         if (!this.body || Object.keys(this.body).length === 0) {
-            throw new Error('Request body is required for create actions');
+            return this.createBadRequestError('Request body is required for create actions', { action: 'create' });
         }
 
-        // Schema validation
-        const insertSchema = createInsertSchema(table);
-        const validatedBody = insertSchema.parse(this.body);
+        try {
+            // Schema validation
+            const insertSchema = createInsertSchema(table);
+            const validatedBody = insertSchema.parse(this.body);
 
-        const insertResult = await db.insert(table).values(validatedBody).returning();
+            const insertResult = await db.insert(table).values(validatedBody).returning();
 
-        return insertResult[0];
+            return insertResult[0];
+        } catch (error: any) {
+            return this.handleValidationError(error, { action: 'create' });
+        }
     }
 }
 

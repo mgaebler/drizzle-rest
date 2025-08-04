@@ -10,21 +10,33 @@ class UpdateAction extends BaseAction {
         const { db, table, primaryKeyColumn, columns } = context;
         const id = this.params.id;
 
-        const insertSchema = createInsertSchema(table);
-        const validatedBody = insertSchema.partial().parse(this.body);
-
-        const primaryKeyCol = columns[primaryKeyColumn];
-        const results = await db
-            .update(table)
-            .set(validatedBody)
-            .where(eq(primaryKeyCol, id))
-            .returning();
-
-        if (results.length === 0) {
-            throw new Error('Record not found');
+        if (!id) {
+            return this.createBadRequestError('ID parameter is required', { action: 'update' });
         }
 
-        return results[0];
+        if (!this.body || Object.keys(this.body).length === 0) {
+            return this.createBadRequestError('Request body is required for update actions', { action: 'update', id });
+        }
+
+        try {
+            const insertSchema = createInsertSchema(table);
+            const validatedBody = insertSchema.partial().parse(this.body);
+
+            const primaryKeyCol = columns[primaryKeyColumn];
+            const results = await db
+                .update(table)
+                .set(validatedBody)
+                .where(eq(primaryKeyCol, id))
+                .returning();
+
+            if (results.length === 0) {
+                return this.createNotFoundError('Record not found', { action: 'update', id });
+            }
+
+            return results[0];
+        } catch (error: any) {
+            return this.handleValidationError(error, { action: 'update', id });
+        }
     }
 }
 

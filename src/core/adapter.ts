@@ -14,7 +14,7 @@ import { createLogger, Logger } from './logger';
 import { IAdapterRequest, IAdapterResponse } from './types/adapter.types';
 import { IFrameworkAdapter } from './types/adapter.types';
 import { DrizzleDb, IAdapterRestHandler as IRestHandler, ICoreActionContext, IRouteHandler } from './types/handler.types';
-import { CoreErrorHandler } from './utils/error-handler';
+import { createAdapterResponse } from './utils/response-helper';
 import { SchemaInspector } from './utils/schema-inspector';
 
 interface TableHooks {
@@ -229,7 +229,10 @@ export class CoreRestAdapter implements IRestHandler {
                     url: request.url
                 }, 'No matching route found');
 
-                return CoreErrorHandler.handleNotFound('Route not found', this.logger, requestId);
+                return createAdapterResponse({
+                    error: 'Route not found',
+                    requestId
+                }, 404);
             }
 
             // Extract route parameters
@@ -262,10 +265,17 @@ export class CoreRestAdapter implements IRestHandler {
                 method: request.method,
                 url: request.url,
                 duration: Date.now() - startTime,
-                error: error.message
-            }, 'Request failed');
+                error: {
+                    message: error.message,
+                    code: error.code,
+                    ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
+                }
+            }, 'Unexpected request error');
 
-            return CoreErrorHandler.handleError(error, 'request', this.logger, requestId);
+            return createAdapterResponse({
+                error: 'Internal Server Error',
+                requestId
+            }, 500);
         }
     }
 
