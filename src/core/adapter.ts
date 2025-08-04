@@ -292,6 +292,13 @@ export abstract class CoreRestAdapter implements IRestHandler {
         }
     }
 
+    /**
+     * Handles an incoming adapter request by matching it to a route, extracting parameters,
+     * executing the corresponding handler, and returning a response.
+     *
+     * @param request The incoming adapter request to process.
+     * @returns A promise that resolves to an adapter response.
+     */
     async handle(request: IAdapterRequest): Promise<IAdapterResponse> {
         const requestId = request.requestId || Math.random().toString(36).substring(7);
         const startTime = Date.now();

@@ -1,16 +1,10 @@
 import { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 
-import { ActionTypeEnum } from '../core/actions/action.types';
 import { CoreRestAdapter, ICoreRestAdapterOptions, IFrameworkAdapter } from '../core/adapter';
 import { IAdapterRequest, IAdapterResponse } from '../core/types/adapter.types';
 
-export interface HookContext {
-    req: ExpressRequest & { user?: any };           // Access to req.user from framework auth
-    res: ExpressResponse;          // Access to response object
-    action: ActionTypeEnum;
-    table: string;          // Table name
-    record?: any;           // For CREATE/UPDATE actions
-}
+// Re-export for convenience
+export type { HookContext } from './express-types';
 
 /**
  * Express.js adapter that extends CoreRestAdapter and implements framework-specific concerns
@@ -50,10 +44,7 @@ export class ExpressAdapter extends CoreRestAdapter implements IFrameworkAdapter
         };
     }
 
-    async parseRequest(
-        req: ExpressRequest,
-        params: Record<string, string> = {}
-    ): Promise<IAdapterRequest> {
+    async parseRequest(req: ExpressRequest): Promise<IAdapterRequest> {
         // Convert Express headers to plain object
         const headers: Record<string, string> = {};
         Object.entries(req.headers).forEach(([key, value]) => {
@@ -68,10 +59,10 @@ export class ExpressAdapter extends CoreRestAdapter implements IFrameworkAdapter
             method: req.method,
             url: req.url, // Use req.url instead of originalUrl to get path relative to mounted router
             headers,
-            params: params || req.params || {},
+            params: req.params || {},
             query: req.query || {},
             body: req.body,
-            requestId: (req as any).requestId
+            requestId: req.headers['x-request-id'] as string
         };
     }
 
@@ -86,9 +77,5 @@ export class ExpressAdapter extends CoreRestAdapter implements IFrameworkAdapter
 
         // Send response
         res.status(response.status).json(response.body);
-    }
-
-    extractParams(req: ExpressRequest): Record<string, string> {
-        return req.params || {};
     }
 }
