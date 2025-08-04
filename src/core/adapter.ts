@@ -109,7 +109,7 @@ export class CoreRestAdapter implements IRestHandler {
             const tableConfig = tableOptions?.[tableMetadata.name];
 
             // Create action context
-            const createActionContext = (): ICoreActionContext => ({
+            const actionContext: ICoreActionContext = {
                 db: this.options.db,
                 table,
                 tableMetadata,
@@ -120,85 +120,98 @@ export class CoreRestAdapter implements IRestHandler {
                 tableConfig,
                 logger: this.logger,
                 adapter: this.options.adapter
-            });
+            };
 
-            // GET /<table-name> (GET_MANY)
-            if (!tableConfig?.disabledEndpoints?.includes(ActionTypeEnum.GET_MANY)) {
-                this.routes.set(`GET:${resourcePath}`, {
-                    method: 'GET',
-                    path: resourcePath,
-                    handler: async (request) => {
-                        const context = createActionContext();
-                        return coreGetManyAction(request, context);
-                    }
-                });
-            }
-
-            // POST /<table-name> (CREATE)
-            if (!tableConfig?.disabledEndpoints?.includes(ActionTypeEnum.CREATE)) {
-                this.routes.set(`POST:${resourcePath}`, {
-                    method: 'POST',
-                    path: resourcePath,
-                    handler: async (request) => {
-                        const context = createActionContext();
-                        return coreCreateAction(request, context);
-                    }
-                });
-            }
-
-            // GET /<table-name>/:id (GET_ONE)
-            if (!tableConfig?.disabledEndpoints?.includes(ActionTypeEnum.GET_ONE)) {
-                this.routes.set(`GET:${itemPath}`, {
-                    method: 'GET',
-                    path: itemPath,
-                    handler: async (request) => {
-                        const context = createActionContext();
-                        return coreGetOneAction(request, context);
-                    }
-                });
-            }
-
-            // PATCH /<table-name>/:id (UPDATE)
-            if (!tableConfig?.disabledEndpoints?.includes(ActionTypeEnum.UPDATE)) {
-                this.routes.set(`PATCH:${itemPath}`, {
-                    method: 'PATCH',
-                    path: itemPath,
-                    handler: async (request) => {
-                        const context = createActionContext();
-                        return coreUpdateAction(request, context);
-                    }
-                });
-            }
-
-            // PUT /<table-name>/:id (REPLACE)
-            if (!tableConfig?.disabledEndpoints?.includes(ActionTypeEnum.REPLACE)) {
-                this.routes.set(`PUT:${itemPath}`, {
-                    method: 'PUT',
-                    path: itemPath,
-                    handler: async (request) => {
-                        const context = createActionContext();
-                        return coreReplaceAction(request, context);
-                    }
-                });
-            }
-
-            // DELETE /<table-name>/:id (DELETE)
-            if (!tableConfig?.disabledEndpoints?.includes(ActionTypeEnum.DELETE)) {
-                this.routes.set(`DELETE:${itemPath}`, {
-                    method: 'DELETE',
-                    path: itemPath,
-                    handler: async (request) => {
-                        const context = createActionContext();
-                        return coreDeleteAction(request, context);
-                    }
-                });
-            }
+            // Register CRUD routes for this table
+            this.registerTableRoutes(
+                resourcePath,
+                itemPath,
+                actionContext
+            );
         });
 
         this.logger.info({
             tablesProcessed: tables.length,
             routesRegistered: this.routes.size
         }, 'Core Drizzle REST Adapter initialization completed');
+    }
+
+    /**
+     * Register CRUD routes for a specific table
+     */
+    private registerTableRoutes(
+        resourcePath: string,
+        itemPath: string,
+        actionContext: ICoreActionContext
+    ): void {
+        // Get table configuration from context
+        const tableConfig = actionContext.tableConfig;
+
+        // GET /<table-name> (GET_MANY)
+        if (!tableConfig?.disabledEndpoints?.includes(ActionTypeEnum.GET_MANY)) {
+            this.routes.set(`GET:${resourcePath}`, {
+                method: 'GET',
+                path: resourcePath,
+                handler: async (request) => {
+                    return coreGetManyAction(request, actionContext);
+                }
+            });
+        }
+
+        // POST /<table-name> (CREATE)
+        if (!tableConfig?.disabledEndpoints?.includes(ActionTypeEnum.CREATE)) {
+            this.routes.set(`POST:${resourcePath}`, {
+                method: 'POST',
+                path: resourcePath,
+                handler: async (request) => {
+                    return coreCreateAction(request, actionContext);
+                }
+            });
+        }
+
+        // GET /<table-name>/:id (GET_ONE)
+        if (!tableConfig?.disabledEndpoints?.includes(ActionTypeEnum.GET_ONE)) {
+            this.routes.set(`GET:${itemPath}`, {
+                method: 'GET',
+                path: itemPath,
+                handler: async (request) => {
+                    return coreGetOneAction(request, actionContext);
+                }
+            });
+        }
+
+        // PATCH /<table-name>/:id (UPDATE)
+        if (!tableConfig?.disabledEndpoints?.includes(ActionTypeEnum.UPDATE)) {
+            this.routes.set(`PATCH:${itemPath}`, {
+                method: 'PATCH',
+                path: itemPath,
+                handler: async (request) => {
+                    return coreUpdateAction(request, actionContext);
+                }
+            });
+        }
+
+        // PUT /<table-name>/:id (REPLACE)
+        if (!tableConfig?.disabledEndpoints?.includes(ActionTypeEnum.REPLACE)) {
+            this.routes.set(`PUT:${itemPath}`, {
+                method: 'PUT',
+                path: itemPath,
+                handler: async (request) => {
+                    return coreReplaceAction(request, actionContext);
+                }
+            });
+        }
+
+        // DELETE /<table-name>/:id (DELETE)
+        if (!tableConfig?.disabledEndpoints?.includes(ActionTypeEnum.DELETE)) {
+            this.routes.set(`DELETE:${itemPath}`, {
+                method: 'DELETE',
+                path: itemPath,
+                handler: async (request) => {
+                    return coreDeleteAction(request, actionContext);
+                }
+            });
+        }
     }
 
     async handle(request: IAdapterRequest): Promise<IAdapterResponse> {
