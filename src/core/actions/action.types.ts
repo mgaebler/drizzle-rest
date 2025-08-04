@@ -1,5 +1,5 @@
 
-export enum OperationTypeEnum {
+export enum ActionTypeEnum {
     GET_MANY = 'GET_MANY',
     GET_ONE = 'GET_ONE',
     CREATE = 'CREATE',

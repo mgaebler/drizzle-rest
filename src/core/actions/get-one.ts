@@ -1,8 +1,8 @@
 import { eq } from 'drizzle-orm';
 
 import { ICoreActionHandler } from '../types/handler.types';
+import { ActionTypeEnum } from './action.types';
 import { createActionHandler } from './base-action';
-import { OperationTypeEnum } from './operation.types';
 
 export const coreGetOneAction: ICoreActionHandler = createActionHandler(
     async (request, context) => {
@@ -23,7 +23,7 @@ export const coreGetOneAction: ICoreActionHandler = createActionHandler(
         return results[0];
     },
     {
-        operationType: OperationTypeEnum.GET_ONE,
+        actionType: ActionTypeEnum.GET_ONE,
         includeId: true
     },
     (request) => ({ recordId: request.params.id })

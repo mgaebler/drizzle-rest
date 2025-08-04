@@ -1,13 +1,13 @@
 import { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 
-import { OperationTypeEnum } from '../core/actions/operation.types';
+import { ActionTypeEnum } from '../core/actions/action.types';
 import { IAdapterRequest, IAdapterResponse } from '../core/types/adapter.types';
 import { IFrameworkAdapter } from '../core/types/adapter.types';
 
 export interface HookContext {
     req: ExpressRequest & { user?: any };           // Access to req.user from framework auth
     res: ExpressResponse;          // Access to response object
-    operation: OperationTypeEnum;
+    operation: ActionTypeEnum;
     table: string;          // Table name
     record?: any;           // For CREATE/UPDATE operations
     recordId?: string;      // For GET_ONE/UPDATE/DELETE operations
@@ -75,7 +75,7 @@ export class ExpressAdapter implements IFrameworkAdapter {
 export const createHookContext = (
     req: ExpressRequest,
     res: ExpressResponse,
-    operation: OperationTypeEnum,
+    operation: ActionTypeEnum,
     tableMetadata: any,
     primaryKeyColumn: string,
     columns: any,

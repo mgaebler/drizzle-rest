@@ -1,22 +1,28 @@
 import { createInsertSchema } from 'drizzle-zod';
 
 import { ICoreActionHandler } from '../types/handler.types';
+import { ActionTypeEnum } from './action.types';
 import { createActionHandler } from './base-action';
-import { OperationTypeEnum } from './operation.types';
 
 export const coreCreateAction: ICoreActionHandler = createActionHandler(
     async (request, context) => {
         const { db, table } = context;
 
+        // Validate body
+        if (!request.body || Object.keys(request.body).length === 0) {
+            throw new Error('Request body is required for create operations');
+        }
+
+        // Schema validation
         const insertSchema = createInsertSchema(table);
         const validatedBody = insertSchema.parse(request.body);
 
-        const result = await db.insert(table).values(validatedBody).returning();
-        return (result as any[])[0];
+        const insertResult = await db.insert(table).values(validatedBody).returning();
+
+        return insertResult[0];
     },
     {
-        operationType: OperationTypeEnum.CREATE,
+        actionType: ActionTypeEnum.CREATE,
         statusCode: 201
-    },
-    (request) => ({ record: request.body })
+    }
 );

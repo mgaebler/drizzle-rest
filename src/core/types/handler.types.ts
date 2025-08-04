@@ -1,7 +1,7 @@
 import { PgTable } from 'drizzle-orm/pg-core';
 import { PgliteDatabase } from 'drizzle-orm/pglite';
 
-import { OperationTypeEnum } from '../actions/operation.types';
+import { ActionTypeEnum } from '../actions/action.types';
 import { Logger } from '../logger';
 import { TableMetadata } from '../utils/schema-inspector';
 import { IAdapterRequest, IAdapterResponse } from './adapter.types';
@@ -24,7 +24,7 @@ export interface ICoreActionContext {
     schema: Record<string, PgTable | any>;
     tablesMetadataMap: Map<string, any>;
     tableConfig?: {
-        disabledEndpoints?: Array<OperationTypeEnum>;
+        disabledEndpoints?: Array<ActionTypeEnum>;
         hooks?: {
             beforeOperation?: (context: any) => Promise<void>;
             afterOperation?: (context: any, result: any) => Promise<any>;

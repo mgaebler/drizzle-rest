@@ -9,7 +9,7 @@ import {
     coreReplaceAction,
     coreUpdateAction
 } from './actions';
-import { OperationTypeEnum } from './actions/operation.types';
+import { ActionTypeEnum } from './actions/action.types';
 import { createLogger, Logger } from './logger';
 import { IAdapterRequest, IAdapterResponse } from './types/adapter.types';
 import { IFrameworkAdapter } from './types/adapter.types';
@@ -32,7 +32,7 @@ export interface ICoreRestAdapterOptions {
     /** Detailed configuration per table. */
     tableOptions?: {
         [tableName: string]: {
-            disabledEndpoints?: Array<OperationTypeEnum>;
+            disabledEndpoints?: Array<ActionTypeEnum>;
             hooks?: TableHooks;
         }
     };
@@ -126,7 +126,7 @@ export class CoreRestAdapter implements IRestHandler {
             });
 
             // GET /<table-name> (GET_MANY)
-            if (!tableConfig?.disabledEndpoints?.includes(OperationTypeEnum.GET_MANY)) {
+            if (!tableConfig?.disabledEndpoints?.includes(ActionTypeEnum.GET_MANY)) {
                 this.routes.set(`GET:${resourcePath}`, {
                     method: 'GET',
                     path: resourcePath,
@@ -138,7 +138,7 @@ export class CoreRestAdapter implements IRestHandler {
             }
 
             // POST /<table-name> (CREATE)
-            if (!tableConfig?.disabledEndpoints?.includes(OperationTypeEnum.CREATE)) {
+            if (!tableConfig?.disabledEndpoints?.includes(ActionTypeEnum.CREATE)) {
                 this.routes.set(`POST:${resourcePath}`, {
                     method: 'POST',
                     path: resourcePath,
@@ -150,7 +150,7 @@ export class CoreRestAdapter implements IRestHandler {
             }
 
             // GET /<table-name>/:id (GET_ONE)
-            if (!tableConfig?.disabledEndpoints?.includes(OperationTypeEnum.GET_ONE)) {
+            if (!tableConfig?.disabledEndpoints?.includes(ActionTypeEnum.GET_ONE)) {
                 this.routes.set(`GET:${itemPath}`, {
                     method: 'GET',
                     path: itemPath,
@@ -162,7 +162,7 @@ export class CoreRestAdapter implements IRestHandler {
             }
 
             // PATCH /<table-name>/:id (UPDATE)
-            if (!tableConfig?.disabledEndpoints?.includes(OperationTypeEnum.UPDATE)) {
+            if (!tableConfig?.disabledEndpoints?.includes(ActionTypeEnum.UPDATE)) {
                 this.routes.set(`PATCH:${itemPath}`, {
                     method: 'PATCH',
                     path: itemPath,
@@ -174,7 +174,7 @@ export class CoreRestAdapter implements IRestHandler {
             }
 
             // PUT /<table-name>/:id (REPLACE)
-            if (!tableConfig?.disabledEndpoints?.includes(OperationTypeEnum.REPLACE)) {
+            if (!tableConfig?.disabledEndpoints?.includes(ActionTypeEnum.REPLACE)) {
                 this.routes.set(`PUT:${itemPath}`, {
                     method: 'PUT',
                     path: itemPath,
@@ -186,7 +186,7 @@ export class CoreRestAdapter implements IRestHandler {
             }
 
             // DELETE /<table-name>/:id (DELETE)
-            if (!tableConfig?.disabledEndpoints?.includes(OperationTypeEnum.DELETE)) {
+            if (!tableConfig?.disabledEndpoints?.includes(ActionTypeEnum.DELETE)) {
                 this.routes.set(`DELETE:${itemPath}`, {
                     method: 'DELETE',
                     path: itemPath,

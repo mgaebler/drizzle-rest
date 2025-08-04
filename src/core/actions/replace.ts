@@ -2,8 +2,8 @@ import { eq } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
 
 import { ICoreActionHandler } from '../types/handler.types';
+import { ActionTypeEnum } from './action.types';
 import { createActionHandler } from './base-action';
-import { OperationTypeEnum } from './operation.types';
 
 export const coreReplaceAction: ICoreActionHandler = createActionHandler(
     async (request, context) => {
@@ -28,7 +28,7 @@ export const coreReplaceAction: ICoreActionHandler = createActionHandler(
         return results[0];
     },
     {
-        operationType: OperationTypeEnum.REPLACE,
+        actionType: ActionTypeEnum.REPLACE,
         includeId: true
     },
     (request) => ({ record: request.body, recordId: request.params.id })

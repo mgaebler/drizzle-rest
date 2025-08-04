@@ -1,8 +1,8 @@
 import { ICoreActionHandler } from '../types/handler.types';
 import { QueryBuilder } from '../utils/query-builder';
 import { CoreQueryParser } from '../utils/query-parser';
+import { ActionTypeEnum } from './action.types';
 import { ActionOptions, BaseAction } from './base-action';
-import { OperationTypeEnum } from './operation.types';
 
 class GetManyAction extends BaseAction {
     protected async executeCore(request: any, context: any): Promise<any> {
@@ -66,6 +66,6 @@ class GetManyAction extends BaseAction {
 export const coreGetManyAction: ICoreActionHandler = (request, context) => {
     const action = new GetManyAction();
     return action.execute(request, context, {
-        operationType: OperationTypeEnum.GET_MANY
+        actionType: ActionTypeEnum.GET_MANY
     });
 };

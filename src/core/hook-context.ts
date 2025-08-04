@@ -1,9 +1,9 @@
-import { OperationTypeEnum } from './actions/operation.types';
+import { ActionTypeEnum } from './actions/action.types';
 import { IAdapterRequest } from './types/adapter.types';
 
 interface CoreHookContext {
     request: IAdapterRequest;           // Framework-agnostic request
-    operation: OperationTypeEnum;
+    action: ActionTypeEnum;
     table: string;          // Table name
     record?: any;           // For CREATE/UPDATE operations
     recordId?: string;      // For GET_ONE/UPDATE/DELETE operations
@@ -20,7 +20,7 @@ interface CoreHookContext {
  */
 export const createCoreHookContext = (
     request: IAdapterRequest,
-    operation: OperationTypeEnum,
+    action: ActionTypeEnum,
     tableMetadata: any,
     primaryKeyColumn: string,
     columns: any,
@@ -32,7 +32,7 @@ export const createCoreHookContext = (
 ): CoreHookContext => {
     return {
         request,
-        operation,
+        action,
         table: tableMetadata.name,
         filters: options.filters,
         record: options.record,
