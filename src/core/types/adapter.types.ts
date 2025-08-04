@@ -51,15 +51,10 @@ export interface IFrameworkAdapter {
     /**
      * Convert framework-specific request to our internal format
      */
-    parseRequest(frameworkReq: any, params?: Record<string, string>): Promise<IAdapterRequest>;
+    parseRequest(frameworkReq: any): Promise<IAdapterRequest>;
 
     /**
      * Send our internal response through the framework's response mechanism
      */
     sendResponse(response: IAdapterResponse, frameworkRes: any): Promise<void>;
-
-    /**
-     * Extract route parameters from framework-specific routing
-     */
-    extractParams?(frameworkReq: any): Record<string, string>;
 }

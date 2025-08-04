@@ -30,17 +30,12 @@ export interface IFrameworkAdapter {
     /**
      * Convert framework-specific request to our internal format
      */
-    parseRequest(frameworkReq: any, params?: Record<string, string>): Promise<IAdapterRequest>;
+    parseRequest(frameworkReq: any): Promise<IAdapterRequest>;
 
     /**
      * Send our internal response through the framework's response mechanism
      */
     sendResponse(response: IAdapterResponse, frameworkRes: any): Promise<void>;
-
-    /**
-     * Extract route parameters from framework-specific routing
-     */
-    extractParams?(frameworkReq: any): Record<string, string>;
 }
 
 interface IRestHandler {
@@ -117,31 +112,10 @@ export abstract class CoreRestAdapter implements IRestHandler {
     }
 
     /**
-     * Get all registered routes (for framework adapters to use)
-     */
-    protected getRoutes(): Map<string, IRouteHandler> {
-        return this.routes;
-    }
-
-    /**
-     * Get options (for framework adapters to use)
-     */
-    protected getOptions(): ICoreRestAdapterOptions {
-        return this.options;
-    }
-
-    /**
      * Get logger (for framework adapters to use)
      */
     protected getLogger(): Logger {
         return this.logger;
-    }
-
-    /**
-     * Get table metadata map (for framework adapters to use)
-     */
-    protected getTablesMetadataMap(): Map<string, any> {
-        return this.tablesMetadataMap;
     }
 
     protected setupRoutes(): void {

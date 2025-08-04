@@ -47,13 +47,13 @@ export class MyFrameworkAdapter extends CoreRestAdapter implements IFrameworkAda
         super(options);
     }
 
-    async parseRequest(frameworkReq: any, params?: Record<string, string>): Promise<IAdapterRequest> {
+    async parseRequest(frameworkReq: any): Promise<IAdapterRequest> {
         // Convert your framework's request object to the standard format
         return {
             method: frameworkReq.method,
             url: frameworkReq.url,
             headers: frameworkReq.headers || {},
-            params: params || frameworkReq.params || {},
+            params: frameworkReq.params || {},
             query: frameworkReq.query || {},
             body: frameworkReq.body,
             requestId: frameworkReq.id || Math.random().toString(36).substring(7)
@@ -67,11 +67,6 @@ export class MyFrameworkAdapter extends CoreRestAdapter implements IFrameworkAda
         });
 
         frameworkRes.status(response.status).json(response.body);
-    }
-
-    extractParams?(frameworkReq: any): Record<string, string> {
-        // Optional: Extract route parameters from your framework's request
-        return frameworkReq.params || {};
     }
 
     createHandler() {
@@ -94,10 +89,7 @@ export class MyFrameworkAdapter extends CoreRestAdapter implements IFrameworkAda
 
 When extending `CoreRestAdapter`, you have access to these protected methods:
 
-- `getRoutes()` - Get all registered routes
-- `getOptions()` - Get the adapter options
 - `getLogger()` - Get the logger instance
-- `getTablesMetadataMap()` - Get table metadata
 - `setupRoutes()` - Set up all routes (called automatically)
 - `registerTableRoutes()` - Register routes for a specific table
 - `findMatchingRoute()` - Find a route that matches a request
