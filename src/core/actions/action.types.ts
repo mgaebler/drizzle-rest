@@ -1,7 +1,6 @@
 import { PgTable } from 'drizzle-orm/pg-core';
 
 import { Logger } from '../logger';
-import { IFrameworkAdapter } from '../types/adapter.types';
 import { DrizzleDb } from '../types/handler.types';
 import { TableMetadata } from '../utils/schema-inspector';
 
@@ -38,6 +37,5 @@ export interface ICoreActionContext {
         };
     };
     logger: Logger;
-    adapter: IFrameworkAdapter;
 }
 

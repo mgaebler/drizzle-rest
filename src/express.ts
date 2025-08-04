@@ -5,17 +5,13 @@ import { CoreRestAdapter, ICoreRestAdapterOptions } from './core/adapter';
 
 /**
  * Configuration options for Express Drizzle REST adapter.
- * The 'adapter' is automatically provided and doesn't need to be specified.
  */
-type ExpressDrizzleRestOptions = Omit<ICoreRestAdapterOptions, 'adapter'>;
+type ExpressDrizzleRestOptions = ICoreRestAdapterOptions;
 
 /**
  * Create an Express router with automatic REST API endpoints for your Drizzle schema.
  *
- * The framework adapter is automatically configured for Express - you only need to
- * provide your database, schema, and any optional configuration.
- *
- * @param options - Database, schema, and configuration options (adapter is auto-provided)
+ * @param options - Database, schema, and configuration options
  * @returns Express router with REST endpoints
  */
 export const createExpressDrizzleRestAdapter = (
@@ -26,13 +22,7 @@ export const createExpressDrizzleRestAdapter = (
     // Automatically create the Express framework adapter
     const adapter = new ExpressAdapter();
 
-    // Combine user options with the auto-provided Express adapter
-    const coreOptions: ICoreRestAdapterOptions = {
-        ...options,
-        adapter
-    };
-
-    const coreAdapter = new CoreRestAdapter(coreOptions);
+    const coreAdapter = new CoreRestAdapter(options);
 
     // Register Express routes for each route the core adapter handles
     // This approach avoids the issue with router.use('*', ...) normalizing paths to '/'

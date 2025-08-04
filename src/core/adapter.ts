@@ -12,7 +12,6 @@ import {
 import { ActionTypeEnum, ICoreActionContext } from './actions';
 import { createLogger, Logger } from './logger';
 import { IAdapterRequest, IAdapterResponse } from './types/adapter.types';
-import { IFrameworkAdapter } from './types/adapter.types';
 import { DrizzleDb, IAdapterRestHandler as IRestHandler, IRouteHandler } from './types/handler.types';
 import { createAdapterResponse } from './utils/response-helper';
 import { SchemaInspector } from './utils/schema-inspector';
@@ -39,9 +38,6 @@ export interface ICoreRestAdapterOptions {
 
     /** Logger instance to use (create with createLogger() if needed) */
     logger?: Logger;
-
-    /** Framework adapter for handling requests/responses */
-    adapter: IFrameworkAdapter;
 }
 
 /**
@@ -58,8 +54,7 @@ export class CoreRestAdapter implements IRestHandler {
         this.logger = options.logger || createLogger();
 
         this.logger.info({
-            tablesCount: Object.keys(options.schema).length,
-            framework: options.adapter.name
+            tablesCount: Object.keys(options.schema).length
         }, 'Initializing Core REST Adapter');
 
         this.setupRoutes();
@@ -118,8 +113,7 @@ export class CoreRestAdapter implements IRestHandler {
                 schema: this.options.schema,
                 tablesMetadataMap: this.tablesMetadataMap,
                 tableConfig,
-                logger: this.logger,
-                adapter: this.options.adapter
+                logger: this.logger
             };
 
             // Register CRUD routes for this table

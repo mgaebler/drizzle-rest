@@ -60,27 +60,3 @@ export class ExpressAdapter implements IFrameworkAdapter {
         return req.params || {};
     }
 }
-
-/**
- * Helper function to create HookContext objects
- * Eliminates code duplication across route handlers
- */
-export const createHookContext = (
-    req: ExpressRequest,
-    res: ExpressResponse,
-    action: ActionTypeEnum,
-    tableMetadata: any,
-    primaryKeyColumn: string,
-    columns: any,
-    options: {
-        record?: any;
-    } = {}
-): HookContext => {
-    return {
-        req,
-        res,
-        action: action,
-        table: tableMetadata.name,
-        record: options.record,
-    };
-};
