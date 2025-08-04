@@ -3,7 +3,7 @@ import { createInsertSchema } from 'drizzle-zod';
 
 import { ICoreActionHandler } from '../types/handler.types';
 import { ActionTypeEnum } from './action.types';
-import { createActionHandler } from './base-action';
+import { createActionHandler } from './createActionHandler';
 
 export const coreUpdateAction: ICoreActionHandler = createActionHandler(
     async (request, context) => {

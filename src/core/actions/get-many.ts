@@ -2,7 +2,8 @@ import { ICoreActionHandler } from '../types/handler.types';
 import { QueryBuilder } from '../utils/query-builder';
 import { CoreQueryParser } from '../utils/query-parser';
 import { ActionTypeEnum } from './action.types';
-import { ActionOptions, BaseAction } from './base-action';
+import { ActionOptions } from './action.types';
+import { BaseAction } from './base-action';
 
 class GetManyAction extends BaseAction {
     protected async executeCore(request: any, context: any): Promise<any> {

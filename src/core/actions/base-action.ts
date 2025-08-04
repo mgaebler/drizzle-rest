@@ -1,15 +1,9 @@
-import { createAdapterResponse } from '../adapter-api';
+import { createAdapterResponse } from '../adapter';
 import { createCoreHookContext } from '../hook-context';
 import type { IAdapterRequest, IAdapterResponse } from '../types/adapter.types';
-import { ICoreActionContext, ICoreActionHandler } from '../types/handler.types';
+import { ICoreActionContext } from '../types/handler.types';
 import { CoreErrorHandler } from '../utils/error-handler';
-import { ActionTypeEnum } from './action.types';
-
-export interface ActionOptions {
-    actionType: ActionTypeEnum;
-    includeId?: boolean;
-    statusCode?: number;
-}
+import { ActionOptions, ActionTypeEnum } from './action.types';
 
 /**
  * Base class providing common action patterns
@@ -238,19 +232,3 @@ export abstract class BaseAction {
     }
 }
 
-/**
- * Utility function for creating simple action handlers
- */
-export function createActionHandler(
-    executeCore: (request: IAdapterRequest, context: ICoreActionContext) => Promise<any>,
-    options: ActionOptions
-): ICoreActionHandler {
-    const action = new (class extends BaseAction {
-        protected async executeCore(request: IAdapterRequest, context: ICoreActionContext): Promise<any> {
-            return executeCore(request, context);
-        }
-    })();
-
-    return (request: IAdapterRequest, context: ICoreActionContext) =>
-        action.execute(request, context, options);
-}

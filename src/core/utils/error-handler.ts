@@ -1,4 +1,4 @@
-import { createAdapterResponse } from '../adapter-api';
+import { createAdapterResponse } from '../adapter';
 import { defaultLogger, Logger } from '../logger';
 import type { IAdapterResponse } from '../types/adapter.types';
 
