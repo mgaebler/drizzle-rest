@@ -17,7 +17,7 @@ export enum ActionTypeEnum {
  * Table action context containing database and table configuration data
  * Used internally by the adapter before merging with request data
  */
-export interface ITableActionContext {
+export interface ICoreTableContext {
     // Database and table configuration
     db: DrizzleDb;
     table: PgTable;
@@ -40,7 +40,7 @@ export interface ITableActionContext {
  * Unified action context containing all data needed to handle actions
  * Combines request data with database/table configuration
  */
-export interface ICoreActionContext extends ITableActionContext {
+export interface ICoreRequestContext extends ICoreTableContext {
     // Request data
     params: Record<string, string>;
     query: Record<string, any>;

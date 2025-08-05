@@ -1,7 +1,7 @@
 import { ICoreActionHandler } from '../types/handler.types';
 import { QueryBuilder } from '../utils/query-builder';
 import { CoreQueryParser } from '../utils/query-parser';
-import { ICoreActionContext } from './action.types';
+import { ICoreRequestContext } from './action.types';
 import { ActionTypeEnum } from './action.types';
 import { BaseAction } from './base-action';
 
@@ -18,7 +18,7 @@ class GetManyAction extends BaseAction {
         return false;
     }
 
-    protected async executeCore(context: ICoreActionContext): Promise<any> {
+    protected async executeCore(context: ICoreRequestContext): Promise<any> {
         const { db, table, columns, schema, tablesMetadataMap, tableMetadata } = context;
 
         const params = CoreQueryParser.parseQueryParams(this.query);

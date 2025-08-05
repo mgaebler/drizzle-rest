@@ -2,7 +2,7 @@ import { eq } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
 
 import { ICoreActionHandler } from '../types/handler.types';
-import { ICoreActionContext } from './action.types';
+import { ICoreRequestContext } from './action.types';
 import { ActionTypeEnum } from './action.types';
 import { BaseAction } from './base-action';
 
@@ -19,7 +19,7 @@ class ReplaceAction extends BaseAction {
         return true;
     }
 
-    protected async executeCore(context: ICoreActionContext): Promise<any> {
+    protected async executeCore(context: ICoreRequestContext): Promise<any> {
         const { db, table, primaryKeyColumn, columns } = context;
         const id = this.params.id;
 

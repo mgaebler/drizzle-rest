@@ -1,7 +1,7 @@
 import { createCoreHookContext } from '../hook-context';
 import type { IAdapterResponse } from '../types/adapter.types';
 import { createAdapterResponse } from '../utils/response-helper';
-import { ICoreActionContext } from './action.types';
+import { ICoreRequestContext } from './action.types';
 import { ActionTypeEnum } from './action.types';
 
 /**
@@ -31,10 +31,10 @@ export abstract class BaseAction {
     /** Current request ID for tracking and logging */
     protected requestId: string = 'unknown';
     /** Current action context for error handling */
-    protected currentContext: ICoreActionContext | null = null;
+    protected currentContext: ICoreRequestContext | null = null;
 
     protected abstract executeCore(
-        context: ICoreActionContext
+        context: ICoreRequestContext
     ): Promise<any>;
 
     /** Get the action type for this specific action */
@@ -51,7 +51,7 @@ export abstract class BaseAction {
     }
 
     public async execute(
-        context: ICoreActionContext
+        context: ICoreRequestContext
     ): Promise<Response> {
         const { tableMetadata, logger } = context;
         const actionType = this.getActionType();
@@ -129,7 +129,7 @@ export abstract class BaseAction {
     }
 
     private async executeBeforeHook(
-        context: ICoreActionContext,
+        context: ICoreRequestContext,
         actionType: ActionTypeEnum,
         requestId: string,
         startTime: number
@@ -139,7 +139,6 @@ export abstract class BaseAction {
         if (!tableConfig?.hooks?.beforeOperation) return null;
 
         const hookContext = createCoreHookContext(
-
             actionType,
             tableMetadata.name
         );
@@ -174,7 +173,7 @@ export abstract class BaseAction {
     }
 
     private async executeAfterHook(
-        context: ICoreActionContext,
+        context: ICoreRequestContext,
         actionType: ActionTypeEnum,
         result: any,
         requestId: string,
@@ -239,7 +238,7 @@ export abstract class BaseAction {
         requestId: string,
         tableName: string,
         action: ActionTypeEnum,
-        context: ICoreActionContext,
+        context: ICoreRequestContext,
         id?: string
     ): void {
         const logData: any = {

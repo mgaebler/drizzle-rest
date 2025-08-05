@@ -1,6 +1,6 @@
 import { PgliteDatabase } from 'drizzle-orm/pglite';
 
-import { ICoreActionContext, ITableActionContext } from '../actions/action.types';
+import { ICoreRequestContext, ICoreTableContext } from '../actions/action.types';
 
 /**
  * Framework-agnostic database type
@@ -12,7 +12,7 @@ export type DrizzleDb = PgliteDatabase<any>;
  * Unified interface for both action handlers and route handlers
  */
 export interface ICoreActionHandler {
-    (context: ICoreActionContext): Promise<Response>;
+    (context: ICoreRequestContext): Promise<Response>;
 }
 
 /**
@@ -23,5 +23,5 @@ export interface IRouteHandler {
     method: string;
     path: string;
     actionHandler: ICoreActionHandler;
-    tableContext: ITableActionContext;
+    tableContext: ICoreTableContext;
 }
