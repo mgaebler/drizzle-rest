@@ -263,26 +263,25 @@ export abstract class CoreRestAdapter implements IRestHandler {
      * @returns A promise that resolves to a Web API Response.
      */
     async handle(request: Request): Promise<Response> {
-        const requestId = request.headers.get('x-request-id') || Math.random().toString(36).substring(7);
         const startTime = Date.now();
 
-        try {
-            // Create request context by parsing the request
-            const requestContext = await this.createRequestContext(request, requestId);
+        // Create request context by parsing the request
+        const requestContext = await this.createRequestContext(request);
 
+        try {
             // Find matching route
             const route = this.findMatchingRoute(requestContext);
 
             if (!route) {
                 this.logger.warn({
-                    requestId,
-                    method: request.method,
-                    url: request.url
+                    requestId: requestContext.requestId,
+                    method: requestContext.method,
+                    url: requestContext.url
                 }, 'No matching route found');
 
                 return new Response(JSON.stringify({
                     error: 'Route not found',
-                    requestId
+                    requestId: requestContext.requestId
                 }), {
                     status: 404,
                     headers: { 'Content-Type': 'application/json' }
@@ -294,8 +293,8 @@ export abstract class CoreRestAdapter implements IRestHandler {
             requestContext.params = { ...requestContext.params, ...params };
 
             this.logger.debug({
-                requestId,
-                method: request.method,
+                requestId: requestContext.requestId,
+                method: requestContext.method,
                 path: route.path,
                 params: requestContext.params
             }, 'Processing request');
@@ -304,8 +303,8 @@ export abstract class CoreRestAdapter implements IRestHandler {
             const response = await route.actionHandler(requestContext);
 
             this.logger.info({
-                requestId,
-                method: request.method,
+                requestId: requestContext.requestId,
+                method: requestContext.method,
                 path: route.path,
                 status: response.status,
                 duration: Date.now() - startTime
@@ -316,9 +315,9 @@ export abstract class CoreRestAdapter implements IRestHandler {
 
         } catch (error: any) {
             this.logger.error({
-                requestId,
-                method: request.method,
-                url: request.url,
+                requestId: requestContext.requestId,
+                method: requestContext.method,
+                url: requestContext.url,
                 duration: Date.now() - startTime,
                 error: {
                     message: error.message,
@@ -329,7 +328,7 @@ export abstract class CoreRestAdapter implements IRestHandler {
 
             return new Response(JSON.stringify({
                 error: 'Internal Server Error',
-                requestId
+                requestId: requestContext.requestId
             }), {
                 status: 500,
                 headers: { 'Content-Type': 'application/json' }
@@ -341,7 +340,9 @@ export abstract class CoreRestAdapter implements IRestHandler {
      * Create request context from pure Web API Request
      * From now on the request context will be used instead of the request object directly
      */
-    protected async createRequestContext(request: Request, requestId: string): Promise<IRequestContext> {
+    protected async createRequestContext(request: Request): Promise<IRequestContext> {
+        // Generate request ID from header or create a new one
+        const requestId = request.headers.get('x-request-id') || Math.random().toString(36).substring(7);
         // Parse URL for query parameters
         const url = new URL(request.url);
         const query: Record<string, any> = {};
