@@ -42,7 +42,6 @@ export interface ITableActionContext {
  */
 export interface ICoreActionContext extends ITableActionContext {
     // Request data
-    request: Request;
     params: Record<string, string>;
     query: Record<string, any>;
     requestId: string;

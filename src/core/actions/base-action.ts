@@ -139,7 +139,7 @@ export abstract class BaseAction {
         if (!tableConfig?.hooks?.beforeOperation) return null;
 
         const hookContext = createCoreHookContext(
-            context.request,
+
             actionType,
             tableMetadata.name
         );
@@ -186,8 +186,9 @@ export abstract class BaseAction {
             return { result };
         }
 
+        // TODO: Fix hook context creation - request property removed from ICoreActionContext
         const hookContext = createCoreHookContext(
-            context.request,
+
             actionType,
             tableMetadata.name
         );
