@@ -1,75 +1,111 @@
 flowchart LR
 
 subgraph 0["src"]
-subgraph 1["core"]
-subgraph 2["actions"]
-3["action.types.ts"]
-4["base-action.ts"]
-A["create.ts"]
-B["delete.ts"]
-C["get-many.ts"]
-H["get-one.ts"]
-I["index.ts"]
-J["replace.ts"]
-K["update.ts"]
+subgraph 1["adapters"]
+2["express-adapter.ts"]
 end
-5["adapter-api.ts"]
-6["hook-context.ts"]
-subgraph 7["utils"]
-8["error-handler.ts"]
-D["query-builder.ts"]
-E["embed-builder.ts"]
-F["filter-builder.ts"]
-G["query-parser.ts"]
-M["schema-inspector.ts"]
-R["schema-inspector.test.ts"]
+subgraph 3["core"]
+4["adapter.ts"]
+subgraph 5["actions"]
+6["index.ts"]
+7["action.types.ts"]
+8["create.ts"]
+9["base-action.ts"]
+D["delete.ts"]
+E["get-many.ts"]
+J["get-one.ts"]
+K["replace.ts"]
+L["update.ts"]
 end
-9["logger.ts"]
-L["adapter.ts"]
-subgraph N["types"]
-O["adapter.types.ts"]
-P["handler.types.ts"]
-Q["query.types.ts"]
+A["hook-context.ts"]
+subgraph B["utils"]
+C["response-helper.ts"]
+F["query-builder.ts"]
+G["embed-builder.ts"]
+H["filter-builder.ts"]
+I["query-parser.ts"]
+N["schema-inspector.ts"]
+R["query.types.ts"]
+S["schema-inspector.test.ts"]
 end
-end
-end
-subgraph S["@"]
-subgraph T["db"]
-U["schema"]
+M["logger.ts"]
+subgraph O["types"]
+P["adapter.types.ts"]
+Q["handler.types.ts"]
 end
 end
-4-->5
+subgraph W["db"]
+X["connection.ts"]
+Y["schema.ts"]
+end
+Z["express.ts"]
+10["index.ts"]
+subgraph 11["integration-tests"]
+12["crud.integration.test.ts"]
+13["test-helpers.ts"]
+18["embedding.integration.test.ts"]
+19["filtering.integration.test.ts"]
+1A["hooks.integration.test.ts"]
+1B["http-methods.integration.test.ts"]
+1C["pagination.integration.test.ts"]
+1D["sorting.integration.test.ts"]
+end
+end
+subgraph T["@"]
+subgraph U["db"]
+V["schema"]
+16["connection"]
+17["schema.js"]
+end
+subgraph 14["core"]
+15["logger"]
+end
+end
+2-->4
 4-->6
-4-->8
-8-->5
+4-->M
+4-->C
+4-->N
+6-->7
+6-->8
+6-->D
+6-->E
+6-->J
+6-->K
+6-->L
+8-->7
 8-->9
-A-->3
-A-->4
-B-->3
-B-->4
-C-->D
-C-->G
-C-->3
-C-->4
-D-->E
-D-->F
-H-->3
-H-->4
-I-->3
-I-->A
-I-->B
-I-->C
-I-->H
-I-->J
-I-->K
-J-->3
-J-->4
-K-->3
-K-->4
-L-->I
-L-->3
+9-->A
+9-->C
+D-->7
+D-->9
+E-->F
+E-->I
+E-->7
+E-->9
+F-->G
+F-->H
+J-->7
+J-->9
+K-->7
+K-->9
+L-->7
 L-->9
-L-->8
-L-->M
-R-->M
-R-->U
+S-->N
+S-->V
+Z-->2
+10-->Z
+12-->13
+13-->Z
+13-->15
+13-->16
+13-->17
+18-->13
+19-->13
+1A-->Z
+1A-->13
+1A-->16
+1A-->17
+1B-->13
+1C-->13
+1D-->13
