@@ -17,6 +17,7 @@ export type IAdapterResponse = Response;
 export interface IRequestContext {
     method: string;
     url: string;
+    pathname: string;
     headers: Headers;
     params: Record<string, string>;
     query: Record<string, any>;

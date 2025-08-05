@@ -79,13 +79,8 @@ export interface ICoreRestAdapterOptions {
  *             body: frameworkReq.body ? JSON.stringify(frameworkReq.body) : undefined
  *         });
  *
- *         // Extend with routing properties
- *         const adapterRequest = nativeRequest as IAdapterRequest;
- *         adapterRequest.params = frameworkReq.params;
- *         adapterRequest.query = frameworkReq.query;
- *         adapterRequest.parsedBody = frameworkReq.body;
- *
- *         return adapterRequest;
+ *         return nativeRequest;
+ *     }
  *     }
  *
  *     async sendResponse(response: IAdapterResponse, frameworkRes: any): Promise<void> {
@@ -288,9 +283,8 @@ export abstract class CoreRestAdapter implements IRestHandler {
                 });
             }
 
-            // Extract route parameters and update context
-            const params = this.extractRouteParams(route.path, request.url);
-            requestContext.params = { ...requestContext.params, ...params };
+            // Extract route parameters from the URL pattern match
+            requestContext.params = this.extractRouteParams(route.path, requestContext.pathname);
 
             this.logger.debug({
                 requestId: requestContext.requestId,
@@ -343,7 +337,8 @@ export abstract class CoreRestAdapter implements IRestHandler {
     protected async createRequestContext(request: Request): Promise<IRequestContext> {
         // Generate request ID from header or create a new one
         const requestId = request.headers.get('x-request-id') || Math.random().toString(36).substring(7);
-        // Parse URL for query parameters
+
+        // Parse URL for query parameters using native URLSearchParams
         const url = new URL(request.url);
         const query: Record<string, any> = {};
 
@@ -378,8 +373,9 @@ export abstract class CoreRestAdapter implements IRestHandler {
         return {
             method: request.method,
             url: request.url,
+            pathname: url.pathname,
             headers: request.headers,
-            params: {}, // Will be populated by route matching
+            params: {}, // Will be populated during route matching
             query,
             requestId,
             parsedBody
@@ -387,7 +383,7 @@ export abstract class CoreRestAdapter implements IRestHandler {
     }
 
     protected findMatchingRoute(context: IRequestContext): IRouteHandler | null {
-        const routeKey = `${context.method}:${this.normalizeUrlPath(context.url)}`;
+        const routeKey = `${context.method}:${context.pathname}`;
 
         // Try exact match first
         const exactMatch = this.routes.get(routeKey);
@@ -399,23 +395,13 @@ export abstract class CoreRestAdapter implements IRestHandler {
         for (const [key, route] of this.routes) {
             if (key.startsWith(`${context.method}:`)) {
                 const pattern = key.substring(context.method.length + 1);
-                if (this.matchesPattern(pattern, this.normalizeUrlPath(context.url))) {
+                if (this.matchesPattern(pattern, context.pathname)) {
                     return route;
                 }
             }
         }
 
         return null;
-    }
-
-    protected normalizeUrlPath(url: string): string {
-        try {
-            const urlObj = new URL(url, 'http://localhost');
-            return urlObj.pathname;
-        } catch {
-            // If URL parsing fails, assume it's already a path
-            return url.split('?')[0];
-        }
     }
 
     protected matchesPattern(pattern: string, path: string): boolean {
@@ -443,12 +429,11 @@ export abstract class CoreRestAdapter implements IRestHandler {
         return true;
     }
 
-    protected extractRouteParams(pattern: string, url: string): Record<string, string> {
+    protected extractRouteParams(pattern: string, pathname: string): Record<string, string> {
         const params: Record<string, string> = {};
-        const path = this.normalizeUrlPath(url);
 
         const patternParts = pattern.split('/');
-        const pathParts = path.split('/');
+        const pathParts = pathname.split('/');
 
         for (let i = 0; i < patternParts.length; i++) {
             const patternPart = patternParts[i];
