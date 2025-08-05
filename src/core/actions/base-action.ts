@@ -1,4 +1,4 @@
-import { createCoreHookContext } from '../hook-context';
+import { createCoreHookContext } from '../hooks';
 import type { IAdapterResponse } from '../types/adapter.types';
 import { createAdapterResponse } from '../utils/response-helper';
 import { ICoreRequestContext } from './action.types';
@@ -71,7 +71,7 @@ export abstract class BaseAction {
 
         try {
             // Initial logging
-            this.logStart(logger, requestId, tableMetadata.name, actionType, context, id);
+            this.logStart(logger, requestId, tableMetadata.name, actionType, id);
 
             // Execute beforeAction hook
             const beforeHookResult = await this.executeBeforeHook(
@@ -185,9 +185,7 @@ export abstract class BaseAction {
             return { result };
         }
 
-        // TODO: Fix hook context creation - request property removed from ICoreActionContext
         const hookContext = createCoreHookContext(
-
             actionType,
             tableMetadata.name
         );
@@ -233,12 +231,15 @@ export abstract class BaseAction {
         }
     }
 
+    /**
+     * Logging helpers
+     */
+
     protected logStart(
         logger: any,
         requestId: string,
         tableName: string,
         action: ActionTypeEnum,
-        context: ICoreRequestContext,
         id?: string
     ): void {
         const logData: any = {
@@ -272,6 +273,10 @@ export abstract class BaseAction {
 
         logger.info(logData, `${action} request completed successfully`);
     }
+
+    /**
+     * Centralized error handling
+     */
 
     private handleError(
         error: any,
