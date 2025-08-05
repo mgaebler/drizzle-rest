@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm';
 
 import { ICoreActionHandler } from '../types/handler.types';
-import { ICoreRequestContext } from './action.types';
+import { ICoreTableContext } from './action.types';
 import { ActionTypeEnum } from './action.types';
 import { BaseAction } from './base-action';
 
@@ -18,8 +18,8 @@ class DeleteAction extends BaseAction {
         return true;
     }
 
-    protected async executeCore(context: ICoreRequestContext): Promise<any> {
-        const { db, table, primaryKeyColumn, columns } = context;
+    protected async runDatabaseQuery(tableContext: ICoreTableContext): Promise<any> {
+        const { db, table, primaryKeyColumn, columns } = tableContext;
         const id = this.params.id;
 
         if (!id) {
@@ -40,7 +40,7 @@ class DeleteAction extends BaseAction {
     }
 }
 
-export const coreDeleteAction: ICoreActionHandler = (context) => {
+export const coreDeleteAction: ICoreActionHandler = (tableContext, requestContext) => {
     const action = new DeleteAction();
-    return action.execute(context);
+    return action.execute(tableContext, requestContext);
 };

@@ -1,7 +1,7 @@
 import { createCoreHookContext } from '../hooks';
-import type { IAdapterResponse } from '../types/adapter.types';
+import type { IAdapterResponse, IRequestContext } from '../types/adapter.types';
 import { createAdapterResponse } from '../utils/response-helper';
-import { ICoreRequestContext } from './action.types';
+import { ICoreRequestContext, ICoreTableContext } from './action.types';
 import { ActionTypeEnum } from './action.types';
 
 /**
@@ -33,8 +33,8 @@ export abstract class BaseAction {
     /** Current action context for error handling */
     protected currentContext: ICoreRequestContext | null = null;
 
-    protected abstract executeCore(
-        context: ICoreRequestContext
+    protected abstract runDatabaseQuery(
+        tableContext: ICoreTableContext
     ): Promise<any>;
 
     /** Get the action type for this specific action */
@@ -51,21 +51,25 @@ export abstract class BaseAction {
     }
 
     public async execute(
-        context: ICoreRequestContext
+        tableContext: ICoreTableContext,
+        requestContext: IRequestContext
     ): Promise<Response> {
-        const { tableMetadata, logger } = context;
+        const { tableMetadata, logger } = tableContext;
         const actionType = this.getActionType();
         const statusCode = this.getStatusCode();
         const includeId = this.requiresId();
 
         // Parse request data and make available to subclasses
-        this.params = context.params || {};
-        this.query = context.query || {};
-        this.body = context.parsedBody || null;
-        this.requestId = context.requestId || 'unknown';
-        this.currentContext = context;
+        this.params = requestContext.params || {};
+        this.query = requestContext.query || {};
+        this.body = requestContext.parsedBody || null;
+        this.requestId = requestContext.requestId || 'unknown';
 
-        const requestId = context.requestId || 'unknown';
+        // Create unified context for backwards compatibility with hooks and error handling
+        const unifiedContext = { ...tableContext, ...requestContext };
+        this.currentContext = unifiedContext;
+
+        const requestId = requestContext.requestId || 'unknown';
         const startTime = Date.now();
         const id = includeId ? this.params.id : undefined;
 
@@ -75,7 +79,7 @@ export abstract class BaseAction {
 
             // Execute beforeAction hook
             const beforeHookResult = await this.executeBeforeHook(
-                context,
+                unifiedContext,
                 actionType,
                 requestId,
                 startTime
@@ -86,8 +90,8 @@ export abstract class BaseAction {
                 return beforeHookResult;
             }
 
-            // Execute core action
-            const result = await this.executeCore(context);
+            // Execute core action with table context only (request data available via instance variables)
+            const result = await this.runDatabaseQuery(tableContext);
 
             // Check if the result is already an error response (when action handles its own errors)
             if (result && typeof result === 'object' && 'status' in result && result.status >= 400) {
@@ -96,7 +100,7 @@ export abstract class BaseAction {
 
             // Execute afterAction hook
             const afterHookResult = await this.executeAfterHook(
-                context,
+                unifiedContext,
                 actionType,
                 result,
                 requestId,

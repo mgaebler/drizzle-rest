@@ -1,6 +1,7 @@
 import { PgliteDatabase } from 'drizzle-orm/pglite';
 
-import { ICoreRequestContext, ICoreTableContext } from '../actions/action.types';
+import { ICoreTableContext } from '../actions/action.types';
+import { IRequestContext } from './adapter.types';
 
 /**
  * Framework-agnostic database type
@@ -12,16 +13,22 @@ export type DrizzleDb = PgliteDatabase<any>;
  * Unified interface for both action handlers and route handlers
  */
 export interface ICoreActionHandler {
-    (context: ICoreRequestContext): Promise<Response>;
+    (tableContext: ICoreTableContext, requestContext: IRequestContext): Promise<Response>;
+}
+
+/**
+ * Bound action handler that only needs request context
+ */
+export interface IBoundActionHandler {
+    (requestContext: IRequestContext): Promise<Response>;
 }
 
 /**
  * Route handler for a specific HTTP method and path
- * Contains both the action handler and the table context needed to create unified context
+ * Contains the bound action handler that has the table context already injected
  */
 export interface IRouteHandler {
     method: string;
     path: string;
-    actionHandler: ICoreActionHandler;
-    tableContext: ICoreTableContext;
+    actionHandler: IBoundActionHandler;
 }

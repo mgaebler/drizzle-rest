@@ -2,7 +2,7 @@ import { eq } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
 
 import { ICoreActionHandler } from '../types/handler.types';
-import { ICoreRequestContext } from './action.types';
+import { ICoreTableContext } from './action.types';
 import { ActionTypeEnum } from './action.types';
 import { BaseAction } from './base-action';
 
@@ -19,8 +19,8 @@ class UpdateAction extends BaseAction {
         return true;
     }
 
-    protected async executeCore(context: ICoreRequestContext): Promise<any> {
-        const { db, table, primaryKeyColumn, columns } = context;
+    protected async runDatabaseQuery(tableContext: ICoreTableContext): Promise<any> {
+        const { db, table, primaryKeyColumn, columns } = tableContext;
         const id = this.params.id;
 
         if (!id) {
@@ -53,7 +53,7 @@ class UpdateAction extends BaseAction {
     }
 }
 
-export const coreUpdateAction: ICoreActionHandler = (context) => {
+export const coreUpdateAction: ICoreActionHandler = (tableContext, requestContext) => {
     const action = new UpdateAction();
-    return action.execute(context);
+    return action.execute(tableContext, requestContext);
 };

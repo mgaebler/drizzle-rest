@@ -205,8 +205,7 @@ export abstract class CoreRestAdapter implements IRestHandler {
             this.routes.set(`GET:${resourcePath}`, {
                 method: 'GET',
                 path: resourcePath,
-                actionHandler: coreGetManyAction,
-                tableContext: tableContext
+                actionHandler: (requestContext) => coreGetManyAction(tableContext, requestContext)
             });
         }
 
@@ -215,8 +214,7 @@ export abstract class CoreRestAdapter implements IRestHandler {
             this.routes.set(`POST:${resourcePath}`, {
                 method: 'POST',
                 path: resourcePath,
-                actionHandler: coreCreateAction,
-                tableContext: tableContext
+                actionHandler: (requestContext) => coreCreateAction(tableContext, requestContext)
             });
         }
 
@@ -225,8 +223,7 @@ export abstract class CoreRestAdapter implements IRestHandler {
             this.routes.set(`GET:${itemPath}`, {
                 method: 'GET',
                 path: itemPath,
-                actionHandler: coreGetOneAction,
-                tableContext: tableContext
+                actionHandler: (requestContext) => coreGetOneAction(tableContext, requestContext)
             });
         }
 
@@ -235,8 +232,7 @@ export abstract class CoreRestAdapter implements IRestHandler {
             this.routes.set(`PATCH:${itemPath}`, {
                 method: 'PATCH',
                 path: itemPath,
-                actionHandler: coreUpdateAction,
-                tableContext: tableContext
+                actionHandler: (requestContext) => coreUpdateAction(tableContext, requestContext)
             });
         }
 
@@ -245,8 +241,7 @@ export abstract class CoreRestAdapter implements IRestHandler {
             this.routes.set(`PUT:${itemPath}`, {
                 method: 'PUT',
                 path: itemPath,
-                actionHandler: coreReplaceAction,
-                tableContext: tableContext
+                actionHandler: (requestContext) => coreReplaceAction(tableContext, requestContext)
             });
         }
 
@@ -255,8 +250,7 @@ export abstract class CoreRestAdapter implements IRestHandler {
             this.routes.set(`DELETE:${itemPath}`, {
                 method: 'DELETE',
                 path: itemPath,
-                actionHandler: coreDeleteAction,
-                tableContext: tableContext
+                actionHandler: (requestContext) => coreDeleteAction(tableContext, requestContext)
             });
         }
     }
@@ -306,11 +300,8 @@ export abstract class CoreRestAdapter implements IRestHandler {
                 params: requestContext.params
             }, 'Processing request');
 
-            // Create unified context by merging table context with request context
-            const unifiedContext = { ...route.tableContext, ...requestContext };
-
-            // Execute the action handler with the unified context
-            const response = await route.actionHandler(unifiedContext);
+            // Execute the action handler with the request context (table context is already bound)
+            const response = await route.actionHandler(requestContext);
 
             this.logger.info({
                 requestId,

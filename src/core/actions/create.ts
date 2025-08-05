@@ -1,7 +1,7 @@
 import { createInsertSchema } from 'drizzle-zod';
 
 import { ICoreActionHandler } from '../types/handler.types';
-import { ICoreRequestContext } from './action.types';
+import { ICoreTableContext } from './action.types';
 import { ActionTypeEnum } from './action.types';
 import { BaseAction } from './base-action';
 
@@ -18,8 +18,8 @@ class CreateAction extends BaseAction {
         return false;
     }
 
-    protected async executeCore(context: ICoreRequestContext): Promise<any> {
-        const { db, table } = context;
+    protected async runDatabaseQuery(tableContext: ICoreTableContext): Promise<any> {
+        const { db, table } = tableContext;
 
         // Validate body presence
         if (!this.body || Object.keys(this.body).length === 0) {
@@ -40,7 +40,7 @@ class CreateAction extends BaseAction {
     }
 }
 
-export const coreCreateAction: ICoreActionHandler = (context) => {
+export const coreCreateAction: ICoreActionHandler = (tableContext, requestContext) => {
     const action = new CreateAction();
-    return action.execute(context);
+    return action.execute(tableContext, requestContext);
 };
