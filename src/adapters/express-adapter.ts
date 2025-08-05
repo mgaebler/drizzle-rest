@@ -3,9 +3,6 @@ import { Request as ExpressRequest, Response as ExpressResponse } from 'express'
 import { CoreRestAdapter, ICoreRestAdapterOptions, IFrameworkAdapter } from '../core/adapter';
 import { IAdapterRequest, IAdapterResponse } from '../core/types/adapter.types';
 
-// Re-export for convenience
-export type { HookContext } from './express-types';
-
 /**
  * Express.js adapter that extends CoreRestAdapter and implements framework-specific concerns
  */

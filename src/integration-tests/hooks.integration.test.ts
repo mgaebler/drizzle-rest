@@ -2,7 +2,6 @@ import express from 'express';
 import request from 'supertest';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { HookContext } from '@/adapters/express-adapter';
 import { db } from '@/db/connection';
 import * as schema from '@/db/schema.js';
 
@@ -125,7 +124,7 @@ describe.skip('Hook System Integration Tests', () => {
             const app = createAppWithHooks({
                 users: {
                     hooks: {
-                        beforeOperation: async (_context: HookContext) => {
+                        beforeOperation: async (_context: any) => {
                             throw new Error('Forbidden: Cannot create users');
                         }
                     }
@@ -143,7 +142,7 @@ describe.skip('Hook System Integration Tests', () => {
 
     describe('afterOperation hooks', () => {
         it('should call afterOperation hook after CREATE action', async () => {
-            const afterOperationSpy = vi.fn().mockImplementation((_context: HookContext, result: any) => result);
+            const afterOperationSpy = vi.fn().mockImplementation((_context: any, result: any) => result);
 
             const app = createAppWithHooks({
                 users: {
@@ -178,7 +177,7 @@ describe.skip('Hook System Integration Tests', () => {
             const app = createAppWithHooks({
                 users: {
                     hooks: {
-                        afterOperation: async (context: HookContext, result: any) => {
+                        afterOperation: async (context: any, result: any) => {
                             if (context.action === 'CREATE') {
                                 return {
                                     ...result,
@@ -208,7 +207,7 @@ describe.skip('Hook System Integration Tests', () => {
             const app = createAppWithHooks({
                 users: {
                     hooks: {
-                        afterOperation: async (context: HookContext, result: any) => {
+                        afterOperation: async (context: any, result: any) => {
                             if (context.req.user?.role !== 'admin') {
                                 // Remove sensitive data for non-admin users
 
@@ -236,7 +235,7 @@ describe.skip('Hook System Integration Tests', () => {
             const app = createAppWithAdminUser({
                 users: {
                     hooks: {
-                        afterOperation: async (context: HookContext, result: any) => {
+                        afterOperation: async (context: any, result: any) => {
                             if (context.req.user?.role !== 'admin') {
                                 // Remove sensitive data for non-admin users
 
@@ -281,7 +280,7 @@ describe.skip('Hook System Integration Tests', () => {
             const app = createAppWithHooks({
                 users: {
                     hooks: {
-                        beforeOperation: async (context: HookContext) => {
+                        beforeOperation: async (context: any) => {
                             const requiredPermission = getRequiredPermission(context.table, context.action);
                             if (!hasPermission(context.req.user, requiredPermission)) {
                                 throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
@@ -302,7 +301,7 @@ describe.skip('Hook System Integration Tests', () => {
             const app = createAppWithHooks({
                 users: {
                     hooks: {
-                        beforeOperation: async (context: HookContext) => {
+                        beforeOperation: async (context: any) => {
                             const requiredPermission = getRequiredPermission(context.table, context.action);
                             if (!hasPermission(context.req.user, requiredPermission)) {
                                 throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
@@ -324,7 +323,7 @@ describe.skip('Hook System Integration Tests', () => {
             const app = createAppWithAdminUser({
                 users: {
                     hooks: {
-                        beforeOperation: async (context: HookContext) => {
+                        beforeOperation: async (context: any) => {
                             const requiredPermission = getRequiredPermission(context.table, context.action);
                             if (!hasPermission(context.req.user, requiredPermission)) {
                                 throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
@@ -354,7 +353,7 @@ describe.skip('Hook System Integration Tests', () => {
             const drizzleApiRouter = createExpressDrizzleRestAdapter(createTestAdapterOptions({
                 posts: {
                     hooks: {
-                        beforeOperation: async (context: HookContext) => {
+                        beforeOperation: async (context: any) => {
                             const requiredPermission = getRequiredPermission(context.table, context.action);
                             if (!hasPermission(context.req.user, requiredPermission)) {
                                 throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
@@ -397,7 +396,7 @@ describe.skip('Hook System Integration Tests', () => {
             const drizzleApiRouter = createExpressDrizzleRestAdapter(createTestAdapterOptions({
                 posts: {
                     hooks: {
-                        beforeOperation: async (context: HookContext) => {
+                        beforeOperation: async (context: any) => {
                             const requiredPermission = getRequiredPermission(context.table, context.action);
                             if (!hasPermission(context.req.user, requiredPermission)) {
                                 throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
@@ -407,7 +406,7 @@ describe.skip('Hook System Integration Tests', () => {
                 },
                 users: {
                     hooks: {
-                        beforeOperation: async (context: HookContext) => {
+                        beforeOperation: async (context: any) => {
                             const requiredPermission = getRequiredPermission(context.table, context.action);
                             if (!hasPermission(context.req.user, requiredPermission)) {
                                 throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
@@ -447,7 +446,7 @@ describe.skip('Hook System Integration Tests', () => {
             const app = createAppWithAdminUser({
                 users: {
                     hooks: {
-                        beforeOperation: async (context: HookContext) => {
+                        beforeOperation: async (context: any) => {
                             const requiredPermission = `${context.table}:delete`;
                             if (!context.req.user.permissions?.includes(requiredPermission)) {
                                 throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
@@ -470,7 +469,7 @@ describe.skip('Hook System Integration Tests', () => {
             const app = createAppWithHooks({
                 users: {
                     hooks: {
-                        beforeOperation: async (context: HookContext) => {
+                        beforeOperation: async (context: any) => {
                             const requiredPermission = `${context.table}:delete`;
                             if (!context.req.user.permissions?.includes(requiredPermission)) {
                                 throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
@@ -491,7 +490,7 @@ describe.skip('Hook System Integration Tests', () => {
             const app = createAppWithHooks({
                 users: {
                     hooks: {
-                        beforeOperation: async (context: HookContext) => {
+                        beforeOperation: async (context: any) => {
                             // Check permissions first
                             const requiredPermission = `${context.table}:create`;
                             if (!context.req.user.permissions?.includes(requiredPermission)) {
@@ -535,7 +534,7 @@ describe.skip('Hook System Integration Tests', () => {
             const drizzleApiRouter = createExpressDrizzleRestAdapter(createTestAdapterOptions({
                 users: {
                     hooks: {
-                        beforeOperation: async (context: HookContext) => {
+                        beforeOperation: async (context: any) => {
                             // Check permissions first
                             const requiredPermission = `${context.table}:create`;
                             if (!context.req.user.permissions?.includes(requiredPermission)) {
@@ -571,7 +570,7 @@ describe.skip('Hook System Integration Tests', () => {
             const app = createAppWithHooks({
                 users: {
                     hooks: {
-                        beforeOperation: async (_context: HookContext) => {
+                        beforeOperation: async (_context: any) => {
                             await new Promise(resolve => setTimeout(resolve, 10));
                             throw new Error('Async error in beforeOperation');
                         }
@@ -591,7 +590,7 @@ describe.skip('Hook System Integration Tests', () => {
             const app = createAppWithHooks({
                 users: {
                     hooks: {
-                        afterOperation: async (_context: HookContext, _result: any) => {
+                        afterOperation: async (_context: any, _result: any) => {
                             await new Promise(resolve => setTimeout(resolve, 10));
                             throw new Error('Async error in afterOperation');
                         }
@@ -611,7 +610,7 @@ describe.skip('Hook System Integration Tests', () => {
             const app = createAppWithHooks({
                 users: {
                     hooks: {
-                        beforeOperation: async (_context: HookContext) => {
+                        beforeOperation: async (_context: any) => {
                             throw 'String error';
                         }
                     }
@@ -634,10 +633,10 @@ describe.skip('Hook System Integration Tests', () => {
             const app = createAppWithHooks({
                 users: {
                     hooks: {
-                        beforeOperation: async (_context: HookContext) => {
+                        beforeOperation: async (_context: any) => {
                             executionOrder.push('beforeOperation');
                         },
-                        afterOperation: async (_context: HookContext, result: any) => {
+                        afterOperation: async (_context: any, result: any) => {
                             executionOrder.push('afterOperation');
                             return result;
                         }
@@ -658,11 +657,11 @@ describe.skip('Hook System Integration Tests', () => {
             const app = createAppWithHooks({
                 users: {
                     hooks: {
-                        beforeOperation: async (_context: HookContext) => {
+                        beforeOperation: async (_context: any) => {
                             executionOrder.push('beforeOperation');
                             throw new Error('Before action error');
                         },
-                        afterOperation: async (_context: HookContext, result: any) => {
+                        afterOperation: async (_context: any, result: any) => {
                             executionOrder.push('afterOperation');
                             return result;
                         }
