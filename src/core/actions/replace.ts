@@ -19,7 +19,7 @@ class ReplaceAction extends BaseAction {
         return true;
     }
 
-    protected async runDatabaseQuery(tableContext: ICoreTableContext): Promise<any> {
+    protected async runDatabaseQuery(tableContext: ICoreTableContext) {
         const { db, table, primaryKeyColumn, columns } = tableContext;
         const id = this.params.id;
 

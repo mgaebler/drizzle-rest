@@ -18,7 +18,7 @@ class GetManyAction extends BaseAction {
         return false;
     }
 
-    protected async runDatabaseQuery(tableContext: ICoreTableContext): Promise<any> {
+    protected async runDatabaseQuery(tableContext: ICoreTableContext) {
         const { db, table, columns, schema, tablesMetadataMap, tableMetadata } = tableContext;
 
         const params = CoreQueryParser.parseQueryParams(this.query);

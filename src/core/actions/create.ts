@@ -18,7 +18,7 @@ class CreateAction extends BaseAction {
         return false;
     }
 
-    protected async runDatabaseQuery(tableContext: ICoreTableContext): Promise<any> {
+    protected async runDatabaseQuery(tableContext: ICoreTableContext) {
         const { db, table } = tableContext;
 
         // Validate body presence
