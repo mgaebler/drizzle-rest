@@ -2,7 +2,7 @@ import { createCoreHookContext } from '../hook-context';
 import type { IAdapterResponse } from '../types/adapter.types';
 import { createAdapterResponse } from '../utils/response-helper';
 import { ICoreActionContext } from './action.types';
-import { ActionOptions, ActionTypeEnum } from './action.types';
+import { ActionTypeEnum } from './action.types';
 
 /**
  * Base class providing common action patterns and error handling abstractions
@@ -37,16 +37,26 @@ export abstract class BaseAction {
         context: ICoreActionContext
     ): Promise<any>;
 
+    /** Get the action type for this specific action */
+    protected abstract getActionType(): ActionTypeEnum;
+
+    /** Get the HTTP status code for this specific action */
+    protected abstract getStatusCode(): number;
+
+    /** Whether this action requires an ID parameter */
+    protected abstract requiresId(): boolean;
+
     protected getCurrentRequestId(): string {
         return this.requestId;
     }
 
     public async execute(
-        context: ICoreActionContext,
-        options: ActionOptions
+        context: ICoreActionContext
     ): Promise<Response> {
         const { tableMetadata, logger } = context;
-        const { actionType, includeId = false, statusCode = 200 } = options;
+        const actionType = this.getActionType();
+        const statusCode = this.getStatusCode();
+        const includeId = this.requiresId();
 
         // Parse request data and make available to subclasses
         this.params = context.params || {};

@@ -7,6 +7,18 @@ import { ActionTypeEnum } from './action.types';
 import { BaseAction } from './base-action';
 
 class UpdateAction extends BaseAction {
+    protected getActionType(): ActionTypeEnum {
+        return ActionTypeEnum.UPDATE;
+    }
+
+    protected getStatusCode(): number {
+        return 200;
+    }
+
+    protected requiresId(): boolean {
+        return true;
+    }
+
     protected async executeCore(context: ICoreActionContext): Promise<any> {
         const { db, table, primaryKeyColumn, columns } = context;
         const id = this.params.id;
@@ -43,8 +55,5 @@ class UpdateAction extends BaseAction {
 
 export const coreUpdateAction: ICoreActionHandler = (context) => {
     const action = new UpdateAction();
-    return action.execute(context, {
-        actionType: ActionTypeEnum.UPDATE,
-        includeId: true
-    });
+    return action.execute(context);
 };

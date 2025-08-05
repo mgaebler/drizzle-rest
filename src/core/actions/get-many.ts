@@ -6,6 +6,18 @@ import { ActionTypeEnum } from './action.types';
 import { BaseAction } from './base-action';
 
 class GetManyAction extends BaseAction {
+    protected getActionType(): ActionTypeEnum {
+        return ActionTypeEnum.GET_MANY;
+    }
+
+    protected getStatusCode(): number {
+        return 200;
+    }
+
+    protected requiresId(): boolean {
+        return false;
+    }
+
     protected async executeCore(context: ICoreActionContext): Promise<any> {
         const { db, table, columns, schema, tablesMetadataMap, tableMetadata } = context;
 
@@ -44,7 +56,5 @@ class GetManyAction extends BaseAction {
 
 export const coreGetManyAction: ICoreActionHandler = (context) => {
     const action = new GetManyAction();
-    return action.execute(context, {
-        actionType: ActionTypeEnum.GET_MANY
-    });
+    return action.execute(context);
 };

@@ -13,11 +13,7 @@ export enum ActionTypeEnum {
     DELETE = 'DELETE'
 }
 
-export interface ActionOptions {
-    actionType: ActionTypeEnum;
-    includeId?: boolean;
-    statusCode?: number;
-}/**
+/**
  * Table action context containing database and table configuration data
  * Used internally by the adapter before merging with request data
  */

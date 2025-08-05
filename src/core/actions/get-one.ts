@@ -6,6 +6,18 @@ import { ActionTypeEnum } from './action.types';
 import { BaseAction } from './base-action';
 
 class GetOneAction extends BaseAction {
+    protected getActionType(): ActionTypeEnum {
+        return ActionTypeEnum.GET_ONE;
+    }
+
+    protected getStatusCode(): number {
+        return 200;
+    }
+
+    protected requiresId(): boolean {
+        return true;
+    }
+
     protected async executeCore(context: ICoreActionContext): Promise<any> {
         const { db, table, primaryKeyColumn, columns } = context;
         const id = this.params.id;
@@ -31,8 +43,5 @@ class GetOneAction extends BaseAction {
 
 export const coreGetOneAction: ICoreActionHandler = (context) => {
     const action = new GetOneAction();
-    return action.execute(context, {
-        actionType: ActionTypeEnum.GET_ONE,
-        includeId: true
-    });
+    return action.execute(context);
 };

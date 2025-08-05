@@ -7,6 +7,18 @@ import { ActionTypeEnum } from './action.types';
 import { BaseAction } from './base-action';
 
 class ReplaceAction extends BaseAction {
+    protected getActionType(): ActionTypeEnum {
+        return ActionTypeEnum.REPLACE;
+    }
+
+    protected getStatusCode(): number {
+        return 200;
+    }
+
+    protected requiresId(): boolean {
+        return true;
+    }
+
     protected async executeCore(context: ICoreActionContext): Promise<any> {
         const { db, table, primaryKeyColumn, columns } = context;
         const id = this.params.id;
@@ -44,8 +56,5 @@ class ReplaceAction extends BaseAction {
 
 export const coreReplaceAction: ICoreActionHandler = (context) => {
     const action = new ReplaceAction();
-    return action.execute(context, {
-        actionType: ActionTypeEnum.REPLACE,
-        includeId: true
-    });
+    return action.execute(context);
 };

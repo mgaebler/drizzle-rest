@@ -6,6 +6,18 @@ import { ActionTypeEnum } from './action.types';
 import { BaseAction } from './base-action';
 
 class CreateAction extends BaseAction {
+    protected getActionType(): ActionTypeEnum {
+        return ActionTypeEnum.CREATE;
+    }
+
+    protected getStatusCode(): number {
+        return 201;
+    }
+
+    protected requiresId(): boolean {
+        return false;
+    }
+
     protected async executeCore(context: ICoreActionContext): Promise<any> {
         const { db, table } = context;
 
@@ -30,8 +42,5 @@ class CreateAction extends BaseAction {
 
 export const coreCreateAction: ICoreActionHandler = (context) => {
     const action = new CreateAction();
-    return action.execute(context, {
-        actionType: ActionTypeEnum.CREATE,
-        statusCode: 201
-    });
+    return action.execute(context);
 };

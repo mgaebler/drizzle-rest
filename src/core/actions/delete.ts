@@ -6,6 +6,18 @@ import { ActionTypeEnum } from './action.types';
 import { BaseAction } from './base-action';
 
 class DeleteAction extends BaseAction {
+    protected getActionType(): ActionTypeEnum {
+        return ActionTypeEnum.DELETE;
+    }
+
+    protected getStatusCode(): number {
+        return 204;
+    }
+
+    protected requiresId(): boolean {
+        return true;
+    }
+
     protected async executeCore(context: ICoreActionContext): Promise<any> {
         const { db, table, primaryKeyColumn, columns } = context;
         const id = this.params.id;
@@ -30,8 +42,5 @@ class DeleteAction extends BaseAction {
 
 export const coreDeleteAction: ICoreActionHandler = (context) => {
     const action = new DeleteAction();
-    return action.execute(context, {
-        actionType: ActionTypeEnum.DELETE,
-        includeId: true
-    });
+    return action.execute(context);
 };
