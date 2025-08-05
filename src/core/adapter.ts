@@ -299,18 +299,7 @@ export abstract class CoreRestAdapter implements IRestHandler {
         const query = parseQueryParamsFromUrl(request.url);
 
         // Parse body if present
-        let parsedBody: any = null;
-        if (request.method !== 'GET' && request.method !== 'HEAD') {
-            const contentType = request.headers.get('content-type');
-            if (contentType?.includes('application/json')) {
-                try {
-                    const text = await request.text();
-                    parsedBody = text ? JSON.parse(text) : null;
-                } catch {
-                    // Invalid JSON, leave as null
-                }
-            }
-        }
+        const parsedBody = await this.parseRequestBody(request);
 
         return {
             method: request.method,
@@ -322,6 +311,28 @@ export abstract class CoreRestAdapter implements IRestHandler {
             requestId,
             parsedBody
         };
+    }
+
+    /**
+     * Parse request body for non-GET/HEAD requests
+     */
+    protected async parseRequestBody(request: Request): Promise<any> {
+        if (request.method === 'GET' || request.method === 'HEAD') {
+            return null;
+        }
+
+        const contentType = request.headers.get('content-type');
+        if (contentType?.includes('application/json')) {
+            try {
+                const text = await request.text();
+                return text ? JSON.parse(text) : null;
+            } catch (error: any) {
+                this.logger.warn({ error: error.message }, 'Invalid JSON in request body');
+                return null;
+            }
+        }
+
+        return null;
     }
 
     protected findMatchingRoute(context: IRequestContext): IRouteHandler | null {
