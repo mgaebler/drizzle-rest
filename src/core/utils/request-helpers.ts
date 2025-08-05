@@ -66,6 +66,39 @@ export function getSearchParams(request: IAdapterRequest): URLSearchParams {
 }
 
 /**
+ * Convert URLSearchParams to a plain object with support for multiple values
+ * Handles arrays when the same parameter appears multiple times
+ */
+export function parseQueryParams(searchParams: URLSearchParams): Record<string, any> {
+    const query: Record<string, any> = {};
+
+    // Group all values by key
+    const paramGroups = new Map<string, string[]>();
+
+    for (const [key, value] of searchParams) {
+        if (!paramGroups.has(key)) {
+            paramGroups.set(key, []);
+        }
+        paramGroups.get(key)!.push(value);
+    }
+
+    // Convert to final object format
+    for (const [key, values] of paramGroups) {
+        query[key] = values.length === 1 ? values[0] : values;
+    }
+
+    return query;
+}
+
+/**
+ * Parse query parameters from a URL string
+ */
+export function parseQueryParamsFromUrl(url: string): Record<string, any> {
+    const urlObj = new URL(url);
+    return parseQueryParams(urlObj.searchParams);
+}
+
+/**
  * Create a simplified request context object for logging (removing sensitive headers)
  */
 export function sanitizeRequestForLogging(context: IRequestContext): any {

@@ -13,6 +13,7 @@ import { ActionTypeEnum, ITableActionContext } from './actions';
 import { createLogger, Logger } from './logger';
 import { IRequestContext } from './types/adapter.types';
 import { DrizzleDb, IRouteHandler } from './types/handler.types';
+import { parseQueryParamsFromUrl } from './utils/request-helpers';
 import { SchemaInspector } from './utils/schema-inspector';
 
 // Re-export for convenience
@@ -293,23 +294,9 @@ export abstract class CoreRestAdapter implements IRestHandler {
         // Generate request ID from header or create a new one
         const requestId = request.headers.get('x-request-id') || Math.random().toString(36).substring(7);
 
-        // Parse URL for query parameters using native URLSearchParams
+        // Parse URL and query parameters using utility function
         const url = new URL(request.url);
-        const query: Record<string, any> = {};
-
-        // Convert URLSearchParams to plain object
-        url.searchParams.forEach((value, key) => {
-            if (query[key]) {
-                // Handle multiple values for same key
-                if (Array.isArray(query[key])) {
-                    query[key].push(value);
-                } else {
-                    query[key] = [query[key], value];
-                }
-            } else {
-                query[key] = value;
-            }
-        });
+        const query = parseQueryParamsFromUrl(request.url);
 
         // Parse body if present
         let parsedBody: any = null;
