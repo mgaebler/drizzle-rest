@@ -1,4 +1,5 @@
 import { createCoreHookContext } from '../hooks';
+import { Logger } from '../logger';
 import type { IAdapterResponse, IRequestContext } from '../types/adapter.types';
 import { createAdapterResponse } from '../utils/response-helper';
 import { ICoreRequestContext, ICoreTableContext } from './action.types';
@@ -30,8 +31,14 @@ export abstract class BaseAction {
     protected body: any = null;
     /** Current request ID for tracking and logging */
     protected requestId: string = 'unknown';
+    /** Current logger instance */
+    protected logger: Logger;
     /** Current action context for error handling */
     protected currentContext: ICoreRequestContext | null = null;
+
+    constructor(logger: Logger) {
+        this.logger = logger;
+    }
 
     protected abstract runDatabaseQuery(
         tableContext: ICoreTableContext
@@ -54,7 +61,7 @@ export abstract class BaseAction {
         tableContext: ICoreTableContext,
         requestContext: IRequestContext
     ): Promise<Response> {
-        const { tableMetadata, logger } = tableContext;
+        const { tableMetadata } = tableContext;
         const actionType = this.getActionType();
         const statusCode = this.getStatusCode();
         const includeId = this.requiresId();
@@ -75,7 +82,7 @@ export abstract class BaseAction {
 
         try {
             // Initial logging
-            this.logStart(logger, requestId, tableMetadata.name, actionType, id);
+            this.logStart(requestId, tableMetadata.name, actionType, id);
 
             // Execute beforeAction hook
             const beforeHookResult = await this.executeBeforeHook(
@@ -113,7 +120,7 @@ export abstract class BaseAction {
             }
 
             // Success logging
-            this.logSuccess(logger, requestId, tableMetadata.name, actionType, startTime, id);
+            this.logSuccess(requestId, tableMetadata.name, actionType, startTime, id);
 
             // Handle special response formatting for GET_MANY with pagination
             if (actionType === ActionTypeEnum.GET_MANY && afterHookResult.result?.totalCount !== undefined) {
@@ -128,7 +135,7 @@ export abstract class BaseAction {
             return createAdapterResponse(afterHookResult.result, statusCode);
 
         } catch (error: any) {
-            return this.handleError(error, requestId, tableMetadata.name, actionType, startTime, id, logger);
+            return this.handleError(error, requestId, tableMetadata.name, actionType, startTime, id);
         }
     }
 
@@ -138,7 +145,7 @@ export abstract class BaseAction {
         requestId: string,
         startTime: number
     ): Promise<IAdapterResponse | null> {
-        const { tableMetadata, tableConfig, logger } = context;
+        const { tableMetadata, tableConfig } = context;
 
         if (!tableConfig?.hooks?.beforeOperation) return null;
 
@@ -153,7 +160,7 @@ export abstract class BaseAction {
         } catch (hookError: any) {
             const duration = Date.now() - startTime;
 
-            logger.error({
+            this.logger.error({
                 requestId,
                 table: tableMetadata.name,
                 duration,
@@ -183,7 +190,7 @@ export abstract class BaseAction {
         requestId: string,
         startTime: number
     ): Promise<{ result: any; error?: IAdapterResponse }> {
-        const { tableMetadata, tableConfig, logger } = context;
+        const { tableMetadata, tableConfig } = context;
 
         if (!tableConfig?.hooks?.afterOperation) {
             return { result };
@@ -209,7 +216,7 @@ export abstract class BaseAction {
         } catch (hookError: any) {
             const duration = Date.now() - startTime;
 
-            logger.error({
+            this.logger.error({
                 requestId,
                 table: tableMetadata.name,
                 duration,
@@ -240,7 +247,6 @@ export abstract class BaseAction {
      */
 
     protected logStart(
-        logger: any,
         requestId: string,
         tableName: string,
         action: ActionTypeEnum,
@@ -255,11 +261,10 @@ export abstract class BaseAction {
         if (this.body) logData.bodyKeys = Object.keys(this.body);
         if (this.query && Object.keys(this.query).length > 0) logData.query = this.query;
 
-        logger.debug(logData, `Processing ${action} request`);
+        this.logger.debug(logData, `Processing ${action} request`);
     }
 
     protected logSuccess(
-        logger: any,
         requestId: string,
         tableName: string,
         action: ActionTypeEnum,
@@ -275,7 +280,7 @@ export abstract class BaseAction {
 
         if (id) logData.id = id;
 
-        logger.info(logData, `${action} request completed successfully`);
+        this.logger.info(logData, `${action} request completed successfully`);
     }
 
     /**
@@ -288,8 +293,7 @@ export abstract class BaseAction {
         tableName: string,
         action: ActionTypeEnum,
         startTime: number,
-        id: string | undefined,
-        logger: any
+        id: string | undefined
     ): IAdapterResponse {
         const duration = Date.now() - startTime;
         const logData: any = {
@@ -306,7 +310,7 @@ export abstract class BaseAction {
 
         if (id) logData.id = id;
 
-        logger.error(logData, `Unexpected error in ${action} request`);
+        this.logger.error(logData, `Unexpected error in ${action} request`);
 
         // This should only handle truly unexpected errors now
         // Most specific errors should be handled in the individual actions
@@ -318,9 +322,9 @@ export abstract class BaseAction {
 
     // Error handling abstractions for actions
     protected createNotFoundError(message = 'Record not found', context?: any): IAdapterResponse {
-        const { tableMetadata, logger } = this.currentContext!;
+        const { tableMetadata } = this.currentContext!;
 
-        logger.info({
+        this.logger.info({
             requestId: this.requestId,
             table: tableMetadata.name,
             ...context
@@ -333,9 +337,9 @@ export abstract class BaseAction {
     }
 
     protected createValidationError(error: any, context?: any): IAdapterResponse {
-        const { tableMetadata, logger } = this.currentContext!;
+        const { tableMetadata } = this.currentContext!;
 
-        logger.warn({
+        this.logger.warn({
             requestId: this.requestId,
             table: tableMetadata.name,
             validationIssues: error.issues,
@@ -350,9 +354,9 @@ export abstract class BaseAction {
     }
 
     protected createBadRequestError(message: string, context?: any): IAdapterResponse {
-        const { tableMetadata, logger } = this.currentContext!;
+        const { tableMetadata } = this.currentContext!;
 
-        logger.warn({
+        this.logger.warn({
             requestId: this.requestId,
             table: tableMetadata.name,
             ...context
@@ -365,9 +369,9 @@ export abstract class BaseAction {
     }
 
     protected createInternalError(error: any, message = 'Internal Server Error', context?: any): IAdapterResponse {
-        const { tableMetadata, logger } = this.currentContext!;
+        const { tableMetadata } = this.currentContext!;
 
-        logger.error({
+        this.logger.error({
             requestId: this.requestId,
             table: tableMetadata.name,
             error: {
@@ -385,9 +389,9 @@ export abstract class BaseAction {
     }
 
     protected createConflictError(message: string, context?: any): IAdapterResponse {
-        const { tableMetadata, logger } = this.currentContext!;
+        const { tableMetadata } = this.currentContext!;
 
-        logger.warn({
+        this.logger.warn({
             requestId: this.requestId,
             table: tableMetadata.name,
             ...context

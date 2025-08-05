@@ -54,7 +54,7 @@ class GetManyAction extends BaseAction {
     }
 }
 
-export const coreGetManyAction: ICoreActionHandler = (tableContext, requestContext) => {
-    const action = new GetManyAction();
+export const coreGetManyAction: ICoreActionHandler = (tableContext, requestContext, logger) => {
+    const action = new GetManyAction(logger);
     return action.execute(tableContext, requestContext);
 };

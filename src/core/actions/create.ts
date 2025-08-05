@@ -40,7 +40,7 @@ class CreateAction extends BaseAction {
     }
 }
 
-export const coreCreateAction: ICoreActionHandler = (tableContext, requestContext) => {
-    const action = new CreateAction();
+export const coreCreateAction: ICoreActionHandler = (tableContext, requestContext, logger) => {
+    const action = new CreateAction(logger);
     return action.execute(tableContext, requestContext);
 };

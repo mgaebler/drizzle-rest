@@ -54,7 +54,7 @@ class ReplaceAction extends BaseAction {
     }
 }
 
-export const coreReplaceAction: ICoreActionHandler = (tableContext, requestContext) => {
-    const action = new ReplaceAction();
+export const coreReplaceAction: ICoreActionHandler = (tableContext, requestContext, logger) => {
+    const action = new ReplaceAction(logger);
     return action.execute(tableContext, requestContext);
 };

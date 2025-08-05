@@ -41,7 +41,7 @@ class GetOneAction extends BaseAction {
     }
 }
 
-export const coreGetOneAction: ICoreActionHandler = (tableContext, requestContext) => {
-    const action = new GetOneAction();
+export const coreGetOneAction: ICoreActionHandler = (tableContext, requestContext, logger) => {
+    const action = new GetOneAction(logger);
     return action.execute(tableContext, requestContext);
 };

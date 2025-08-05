@@ -53,7 +53,7 @@ class UpdateAction extends BaseAction {
     }
 }
 
-export const coreUpdateAction: ICoreActionHandler = (tableContext, requestContext) => {
-    const action = new UpdateAction();
+export const coreUpdateAction: ICoreActionHandler = (tableContext, requestContext, logger) => {
+    const action = new UpdateAction(logger);
     return action.execute(tableContext, requestContext);
 };

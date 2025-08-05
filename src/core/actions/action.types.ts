@@ -1,6 +1,5 @@
 import { PgTable } from 'drizzle-orm/pg-core';
 
-import { Logger } from '../logger';
 import { DrizzleDb } from '../types/handler.types';
 import { TableMetadata } from '../utils/schema-inspector';
 
@@ -33,7 +32,6 @@ export interface ICoreTableContext {
             afterOperation?: (context: any, result: any) => Promise<any>;
         };
     };
-    logger: Logger;
 }
 
 /**

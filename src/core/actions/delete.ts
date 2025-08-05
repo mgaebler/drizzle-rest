@@ -40,7 +40,7 @@ class DeleteAction extends BaseAction {
     }
 }
 
-export const coreDeleteAction: ICoreActionHandler = (tableContext, requestContext) => {
-    const action = new DeleteAction();
+export const coreDeleteAction: ICoreActionHandler = (tableContext, requestContext, logger) => {
+    const action = new DeleteAction(logger);
     return action.execute(tableContext, requestContext);
 };

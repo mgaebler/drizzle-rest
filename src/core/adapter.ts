@@ -46,50 +46,6 @@ export interface ICoreRestAdapterOptions {
     logger?: Logger;
 }
 
-/**
- * Core framework-agnostic REST adapter base class
- * Framework-specific adapters should extend this class and implement framework-specific concerns
- *
- * @example
- * ```typescript
- * // Example of creating a framework-specific adapter
- * export class MyFrameworkAdapter extends CoreRestAdapter implements IFrameworkAdapter {
- *     readonly name = 'my-framework';
- *
- *     constructor(options: ICoreRestAdapterOptions) {
- *         super(options);
- *     }
- *
- *     async parseRequest(frameworkReq: any): Promise<IAdapterRequest> {
- *         // Convert framework request to native Web API Request
- *         const protocol = frameworkReq.protocol || 'http';
- *         const host = frameworkReq.get('host') || 'localhost';
- *         const fullUrl = `${protocol}://${host}${frameworkReq.url}`;
- *
- *         // Create native Headers object
- *         const headers = new Headers();
- *         Object.entries(frameworkReq.headers).forEach(([key, value]) => {
- *             if (typeof value === 'string') headers.set(key, value);
- *         });
- *
- *         // Create native Request
- *         const nativeRequest = new Request(fullUrl, {
- *             method: frameworkReq.method,
- *             headers,
- *             body: frameworkReq.body ? JSON.stringify(frameworkReq.body) : undefined
- *         });
- *
- *         return nativeRequest;
- *     }
- *     }
- *
- *     async sendResponse(response: IAdapterResponse, frameworkRes: any): Promise<void> {
- *         // Send response using framework's response mechanism
- *         frameworkRes.status(response.status).json(response.body);
- *     }
- * }
- * ```
- */
 export abstract class CoreRestAdapter implements IRestHandler {
     private routes: Map<string, IRouteHandler> = new Map();
     private options: ICoreRestAdapterOptions;
@@ -166,8 +122,7 @@ export abstract class CoreRestAdapter implements IRestHandler {
                 columns,
                 schema: this.options.schema,
                 tablesMetadataMap: this.tablesMetadataMap,
-                tableConfig,
-                logger: this.logger
+                tableConfig
             };
 
             // Register CRUD routes for this table
@@ -200,7 +155,7 @@ export abstract class CoreRestAdapter implements IRestHandler {
             this.routes.set(`GET:${resourcePath}`, {
                 method: 'GET',
                 path: resourcePath,
-                actionHandler: (requestContext) => coreGetManyAction(tableContext, requestContext)
+                actionHandler: (requestContext) => coreGetManyAction(tableContext, requestContext, this.logger)
             });
         }
 
@@ -209,7 +164,7 @@ export abstract class CoreRestAdapter implements IRestHandler {
             this.routes.set(`POST:${resourcePath}`, {
                 method: 'POST',
                 path: resourcePath,
-                actionHandler: (requestContext) => coreCreateAction(tableContext, requestContext)
+                actionHandler: (requestContext) => coreCreateAction(tableContext, requestContext, this.logger)
             });
         }
 
@@ -218,7 +173,7 @@ export abstract class CoreRestAdapter implements IRestHandler {
             this.routes.set(`GET:${itemPath}`, {
                 method: 'GET',
                 path: itemPath,
-                actionHandler: (requestContext) => coreGetOneAction(tableContext, requestContext)
+                actionHandler: (requestContext) => coreGetOneAction(tableContext, requestContext, this.logger)
             });
         }
 
@@ -227,7 +182,7 @@ export abstract class CoreRestAdapter implements IRestHandler {
             this.routes.set(`PATCH:${itemPath}`, {
                 method: 'PATCH',
                 path: itemPath,
-                actionHandler: (requestContext) => coreUpdateAction(tableContext, requestContext)
+                actionHandler: (requestContext) => coreUpdateAction(tableContext, requestContext, this.logger)
             });
         }
 
@@ -236,7 +191,7 @@ export abstract class CoreRestAdapter implements IRestHandler {
             this.routes.set(`PUT:${itemPath}`, {
                 method: 'PUT',
                 path: itemPath,
-                actionHandler: (requestContext) => coreReplaceAction(tableContext, requestContext)
+                actionHandler: (requestContext) => coreReplaceAction(tableContext, requestContext, this.logger)
             });
         }
 
@@ -245,7 +200,7 @@ export abstract class CoreRestAdapter implements IRestHandler {
             this.routes.set(`DELETE:${itemPath}`, {
                 method: 'DELETE',
                 path: itemPath,
-                actionHandler: (requestContext) => coreDeleteAction(tableContext, requestContext)
+                actionHandler: (requestContext) => coreDeleteAction(tableContext, requestContext, this.logger)
             });
         }
     }
