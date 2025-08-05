@@ -28,11 +28,10 @@ class DeleteAction extends BaseAction {
     }
 }
 
-export const coreDeleteAction: ICoreActionHandler = (request, context) => {
+export const coreDeleteAction: ICoreActionHandler = (context) => {
     const action = new DeleteAction();
-    return action.execute(request, context, {
+    return action.execute(context, {
         actionType: ActionTypeEnum.DELETE,
-        includeId: true,
-        statusCode: 204
+        includeId: true
     });
 };

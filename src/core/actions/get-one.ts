@@ -29,9 +29,9 @@ class GetOneAction extends BaseAction {
     }
 }
 
-export const coreGetOneAction: ICoreActionHandler = (request, context) => {
+export const coreGetOneAction: ICoreActionHandler = (context) => {
     const action = new GetOneAction();
-    return action.execute(request, context, {
+    return action.execute(context, {
         actionType: ActionTypeEnum.GET_ONE,
         includeId: true
     });

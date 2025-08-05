@@ -42,9 +42,9 @@ class ReplaceAction extends BaseAction {
     }
 }
 
-export const coreReplaceAction: ICoreActionHandler = (request, context) => {
+export const coreReplaceAction: ICoreActionHandler = (context) => {
     const action = new ReplaceAction();
-    return action.execute(request, context, {
+    return action.execute(context, {
         actionType: ActionTypeEnum.REPLACE,
         includeId: true
     });

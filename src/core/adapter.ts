@@ -9,37 +9,22 @@ import {
     coreReplaceAction,
     coreUpdateAction
 } from './actions';
-import { ActionTypeEnum, ICoreActionContext } from './actions';
+import { ActionTypeEnum, ITableActionContext } from './actions';
 import { createLogger, Logger } from './logger';
-import { IAdapterRequest, IAdapterResponse } from './types/adapter.types';
+import { IRequestContext } from './types/adapter.types';
 import { DrizzleDb, IRouteHandler } from './types/handler.types';
-import { createAdapterResponse } from './utils/response-helper';
 import { SchemaInspector } from './utils/schema-inspector';
+
+// Re-export for convenience
+export type { IFrameworkAdapter } from './types/adapter.types';
 
 interface ITableHooks {
     beforeOperation?: (context: any) => Promise<void>;
     afterOperation?: (context: any, result: any) => Promise<any>;
 }
 
-export interface IFrameworkAdapter {
-    /**
-     * Framework name for identification
-     */
-    readonly name: string;
-
-    /**
-     * Convert framework-specific request to our internal format
-     */
-    parseRequest(frameworkReq: any): Promise<IAdapterRequest>;
-
-    /**
-     * Send our internal response through the framework's response mechanism
-     */
-    sendResponse(response: IAdapterResponse, frameworkRes: any): Promise<void>;
-}
-
 interface IRestHandler {
-    handle(request: IAdapterRequest): Promise<IAdapterResponse>;
+    handle(request: Request): Promise<Response>;
 }
 
 export interface ICoreRestAdapterOptions {
@@ -76,15 +61,31 @@ export interface ICoreRestAdapterOptions {
  *     }
  *
  *     async parseRequest(frameworkReq: any): Promise<IAdapterRequest> {
- *         // Convert framework request to standard format
- *         return {
+ *         // Convert framework request to native Web API Request
+ *         const protocol = frameworkReq.protocol || 'http';
+ *         const host = frameworkReq.get('host') || 'localhost';
+ *         const fullUrl = `${protocol}://${host}${frameworkReq.url}`;
+ *
+ *         // Create native Headers object
+ *         const headers = new Headers();
+ *         Object.entries(frameworkReq.headers).forEach(([key, value]) => {
+ *             if (typeof value === 'string') headers.set(key, value);
+ *         });
+ *
+ *         // Create native Request
+ *         const nativeRequest = new Request(fullUrl, {
  *             method: frameworkReq.method,
- *             url: frameworkReq.url,
- *             headers: frameworkReq.headers,
- *             params: frameworkReq.params,
- *             query: frameworkReq.query,
- *             body: frameworkReq.body
- *         };
+ *             headers,
+ *             body: frameworkReq.body ? JSON.stringify(frameworkReq.body) : undefined
+ *         });
+ *
+ *         // Extend with routing properties
+ *         const adapterRequest = nativeRequest as IAdapterRequest;
+ *         adapterRequest.params = frameworkReq.params;
+ *         adapterRequest.query = frameworkReq.query;
+ *         adapterRequest.parsedBody = frameworkReq.body;
+ *
+ *         return adapterRequest;
  *     }
  *
  *     async sendResponse(response: IAdapterResponse, frameworkRes: any): Promise<void> {
@@ -161,8 +162,8 @@ export abstract class CoreRestAdapter implements IRestHandler {
             const columns = getTableColumns(table);
             const tableConfig = tableOptions?.[tableMetadata.name];
 
-            // Create action context
-            const actionContext: ICoreActionContext = {
+            // Create table context (will be merged with request context in handlers)
+            const tableContext: ITableActionContext = {
                 db: this.options.db,
                 table,
                 tableMetadata,
@@ -178,7 +179,7 @@ export abstract class CoreRestAdapter implements IRestHandler {
             this.registerTableRoutes(
                 resourcePath,
                 itemPath,
-                actionContext
+                tableContext
             );
         });
 
@@ -194,19 +195,18 @@ export abstract class CoreRestAdapter implements IRestHandler {
     protected registerTableRoutes(
         resourcePath: string,
         itemPath: string,
-        actionContext: ICoreActionContext
+        tableContext: ITableActionContext
     ): void {
         // Get table configuration from context
-        const tableConfig = actionContext.tableConfig;
+        const tableConfig = tableContext.tableConfig;
 
         // GET /<table-name> (GET_MANY)
         if (!tableConfig?.disabledEndpoints?.includes(ActionTypeEnum.GET_MANY)) {
             this.routes.set(`GET:${resourcePath}`, {
                 method: 'GET',
                 path: resourcePath,
-                handler: async (request) => {
-                    return coreGetManyAction(request, actionContext);
-                }
+                actionHandler: coreGetManyAction,
+                tableContext: tableContext
             });
         }
 
@@ -215,9 +215,8 @@ export abstract class CoreRestAdapter implements IRestHandler {
             this.routes.set(`POST:${resourcePath}`, {
                 method: 'POST',
                 path: resourcePath,
-                handler: async (request) => {
-                    return coreCreateAction(request, actionContext);
-                }
+                actionHandler: coreCreateAction,
+                tableContext: tableContext
             });
         }
 
@@ -226,9 +225,8 @@ export abstract class CoreRestAdapter implements IRestHandler {
             this.routes.set(`GET:${itemPath}`, {
                 method: 'GET',
                 path: itemPath,
-                handler: async (request) => {
-                    return coreGetOneAction(request, actionContext);
-                }
+                actionHandler: coreGetOneAction,
+                tableContext: tableContext
             });
         }
 
@@ -237,9 +235,8 @@ export abstract class CoreRestAdapter implements IRestHandler {
             this.routes.set(`PATCH:${itemPath}`, {
                 method: 'PATCH',
                 path: itemPath,
-                handler: async (request) => {
-                    return coreUpdateAction(request, actionContext);
-                }
+                actionHandler: coreUpdateAction,
+                tableContext: tableContext
             });
         }
 
@@ -248,9 +245,8 @@ export abstract class CoreRestAdapter implements IRestHandler {
             this.routes.set(`PUT:${itemPath}`, {
                 method: 'PUT',
                 path: itemPath,
-                handler: async (request) => {
-                    return coreReplaceAction(request, actionContext);
-                }
+                actionHandler: coreReplaceAction,
+                tableContext: tableContext
             });
         }
 
@@ -259,27 +255,29 @@ export abstract class CoreRestAdapter implements IRestHandler {
             this.routes.set(`DELETE:${itemPath}`, {
                 method: 'DELETE',
                 path: itemPath,
-                handler: async (request) => {
-                    return coreDeleteAction(request, actionContext);
-                }
+                actionHandler: coreDeleteAction,
+                tableContext: tableContext
             });
         }
     }
 
     /**
-     * Handles an incoming adapter request by matching it to a route, extracting parameters,
-     * executing the corresponding handler, and returning a response.
+     * Handles an incoming Web API Request by matching it to a route, extracting parameters,
+     * executing the corresponding handler, and returning a Web API Response.
      *
-     * @param request The incoming adapter request to process.
-     * @returns A promise that resolves to an adapter response.
+     * @param request The incoming Web API Request to process.
+     * @returns A promise that resolves to a Web API Response.
      */
-    async handle(request: IAdapterRequest): Promise<IAdapterResponse> {
-        const requestId = request.requestId || Math.random().toString(36).substring(7);
+    async handle(request: Request): Promise<Response> {
+        const requestId = request.headers.get('x-request-id') || Math.random().toString(36).substring(7);
         const startTime = Date.now();
 
         try {
+            // Create request context by parsing the request
+            const requestContext = await this.createRequestContext(request, requestId);
+
             // Find matching route
-            const route = this.findMatchingRoute(request);
+            const route = this.findMatchingRoute(requestContext);
 
             if (!route) {
                 this.logger.warn({
@@ -288,25 +286,31 @@ export abstract class CoreRestAdapter implements IRestHandler {
                     url: request.url
                 }, 'No matching route found');
 
-                return createAdapterResponse({
+                return new Response(JSON.stringify({
                     error: 'Route not found',
                     requestId
-                }, 404);
+                }), {
+                    status: 404,
+                    headers: { 'Content-Type': 'application/json' }
+                });
             }
 
-            // Extract route parameters
+            // Extract route parameters and update context
             const params = this.extractRouteParams(route.path, request.url);
-            request.params = { ...request.params, ...params };
+            requestContext.params = { ...requestContext.params, ...params };
 
             this.logger.debug({
                 requestId,
                 method: request.method,
                 path: route.path,
-                params: request.params
+                params: requestContext.params
             }, 'Processing request');
 
-            // Execute the handler
-            const response = await route.handler(request);
+            // Create unified context by merging table context with request context
+            const unifiedContext = { ...route.tableContext, ...requestContext };
+
+            // Execute the action handler with the unified context
+            const response = await route.actionHandler(unifiedContext);
 
             this.logger.info({
                 requestId,
@@ -316,6 +320,7 @@ export abstract class CoreRestAdapter implements IRestHandler {
                 duration: Date.now() - startTime
             }, 'Request completed successfully');
 
+            // Return the response
             return response;
 
         } catch (error: any) {
@@ -331,14 +336,63 @@ export abstract class CoreRestAdapter implements IRestHandler {
                 }
             }, 'Unexpected request error');
 
-            return createAdapterResponse({
+            return new Response(JSON.stringify({
                 error: 'Internal Server Error',
                 requestId
-            }, 500);
+            }), {
+                status: 500,
+                headers: { 'Content-Type': 'application/json' }
+            });
         }
     }
 
-    protected findMatchingRoute(request: IAdapterRequest): IRouteHandler | null {
+    /**
+     * Create request context from pure Web API Request
+     */
+    protected async createRequestContext(request: Request, requestId: string): Promise<IRequestContext> {
+        // Parse URL for query parameters
+        const url = new URL(request.url);
+        const query: Record<string, any> = {};
+
+        // Convert URLSearchParams to plain object
+        url.searchParams.forEach((value, key) => {
+            if (query[key]) {
+                // Handle multiple values for same key
+                if (Array.isArray(query[key])) {
+                    query[key].push(value);
+                } else {
+                    query[key] = [query[key], value];
+                }
+            } else {
+                query[key] = value;
+            }
+        });
+
+        // Parse body if present
+        let parsedBody: any = null;
+        if (request.method !== 'GET' && request.method !== 'HEAD') {
+            const contentType = request.headers.get('content-type');
+            if (contentType?.includes('application/json')) {
+                try {
+                    const text = await request.text();
+                    parsedBody = text ? JSON.parse(text) : null;
+                } catch {
+                    // Invalid JSON, leave as null
+                }
+            }
+        }
+
+        return {
+            request,
+            params: {}, // Will be populated by route matching
+            query,
+            requestId,
+            parsedBody
+        };
+    }
+
+    protected findMatchingRoute(context: IRequestContext): IRouteHandler | null {
+        const request = context.request;
         const routeKey = `${request.method}:${this.normalizeUrlPath(request.url)}`;
 
         // Try exact match first

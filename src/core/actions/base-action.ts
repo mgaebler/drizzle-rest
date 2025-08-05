@@ -1,5 +1,5 @@
 import { createCoreHookContext } from '../hook-context';
-import type { IAdapterRequest, IAdapterResponse } from '../types/adapter.types';
+import type { IAdapterResponse } from '../types/adapter.types';
 import { createAdapterResponse } from '../utils/response-helper';
 import { ICoreActionContext } from './action.types';
 import { ActionOptions, ActionTypeEnum } from './action.types';
@@ -42,31 +42,29 @@ export abstract class BaseAction {
     }
 
     public async execute(
-        request: IAdapterRequest,
         context: ICoreActionContext,
         options: ActionOptions
-    ): Promise<IAdapterResponse> {
+    ): Promise<Response> {
         const { tableMetadata, logger } = context;
         const { actionType, includeId = false, statusCode = 200 } = options;
 
         // Parse request data and make available to subclasses
-        this.params = request.params || {};
-        this.query = request.query || {};
-        this.body = request.body || null;
-        this.requestId = request.requestId || 'unknown';
+        this.params = context.params || {};
+        this.query = context.query || {};
+        this.body = context.parsedBody || null;
+        this.requestId = context.requestId || 'unknown';
         this.currentContext = context;
 
-        const requestId = request.requestId || 'unknown';
+        const requestId = context.requestId || 'unknown';
         const startTime = Date.now();
         const id = includeId ? this.params.id : undefined;
 
         try {
             // Initial logging
-            this.logStart(logger, requestId, tableMetadata.name, actionType, request, id);
+            this.logStart(logger, requestId, tableMetadata.name, actionType, context, id);
 
             // Execute beforeAction hook
             const beforeHookResult = await this.executeBeforeHook(
-                request,
                 context,
                 actionType,
                 requestId,
@@ -88,7 +86,6 @@ export abstract class BaseAction {
 
             // Execute afterAction hook
             const afterHookResult = await this.executeAfterHook(
-                request,
                 context,
                 actionType,
                 result,
@@ -104,6 +101,16 @@ export abstract class BaseAction {
             // Success logging
             this.logSuccess(logger, requestId, tableMetadata.name, actionType, startTime, id);
 
+            // Handle special response formatting for GET_MANY with pagination
+            if (actionType === ActionTypeEnum.GET_MANY && afterHookResult.result?.totalCount !== undefined) {
+                const { data, totalCount } = afterHookResult.result;
+                const headers = {
+                    'X-Total-Count': totalCount.toString(),
+                    'Access-Control-Expose-Headers': 'X-Total-Count'
+                };
+                return createAdapterResponse(data, statusCode, headers);
+            }
+
             return createAdapterResponse(afterHookResult.result, statusCode);
 
         } catch (error: any) {
@@ -112,7 +119,6 @@ export abstract class BaseAction {
     }
 
     private async executeBeforeHook(
-        request: IAdapterRequest,
         context: ICoreActionContext,
         actionType: ActionTypeEnum,
         requestId: string,
@@ -123,7 +129,7 @@ export abstract class BaseAction {
         if (!tableConfig?.hooks?.beforeOperation) return null;
 
         const hookContext = createCoreHookContext(
-            request,
+            context.request,
             actionType,
             tableMetadata.name
         );
@@ -158,7 +164,6 @@ export abstract class BaseAction {
     }
 
     private async executeAfterHook(
-        request: IAdapterRequest,
         context: ICoreActionContext,
         actionType: ActionTypeEnum,
         result: any,
@@ -172,7 +177,7 @@ export abstract class BaseAction {
         }
 
         const hookContext = createCoreHookContext(
-            request,
+            context.request,
             actionType,
             tableMetadata.name
         );
@@ -223,7 +228,7 @@ export abstract class BaseAction {
         requestId: string,
         tableName: string,
         action: ActionTypeEnum,
-        request: IAdapterRequest,
+        context: ICoreActionContext,
         id?: string
     ): void {
         const logData: any = {

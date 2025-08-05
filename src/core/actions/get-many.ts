@@ -1,9 +1,8 @@
-import type { IAdapterRequest, IAdapterResponse } from '../types/adapter.types';
 import { ICoreActionHandler } from '../types/handler.types';
 import { QueryBuilder } from '../utils/query-builder';
 import { CoreQueryParser } from '../utils/query-parser';
 import { ICoreActionContext } from './action.types';
-import { ActionOptions, ActionTypeEnum } from './action.types';
+import { ActionTypeEnum } from './action.types';
 import { BaseAction } from './base-action';
 
 class GetManyAction extends BaseAction {
@@ -41,28 +40,11 @@ class GetManyAction extends BaseAction {
             totalCount
         };
     }
-
-    // Override to add pagination headers
-    public async execute(request: IAdapterRequest, context: ICoreActionContext, options: ActionOptions): Promise<IAdapterResponse> {
-        const response = await super.execute(request, context, options);
-
-        if (response.status === 200 && response.body?.totalCount !== undefined) {
-            response.headers = {
-                ...response.headers,
-                'X-Total-Count': response.body.totalCount.toString(),
-                'Access-Control-Expose-Headers': 'X-Total-Count'
-            };
-            // Return just the data, not the wrapper object
-            response.body = response.body.data;
-        }
-
-        return response;
-    }
 }
 
-export const coreGetManyAction: ICoreActionHandler = (request, context) => {
+export const coreGetManyAction: ICoreActionHandler = (context) => {
     const action = new GetManyAction();
-    return action.execute(request, context, {
+    return action.execute(context, {
         actionType: ActionTypeEnum.GET_MANY
     });
 };

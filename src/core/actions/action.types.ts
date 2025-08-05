@@ -18,10 +18,11 @@ export interface ActionOptions {
     includeId?: boolean;
     statusCode?: number;
 }/**
- * Framework-agnostic action context
+ * Table action context containing database and table configuration data
+ * Used internally by the adapter before merging with request data
  */
-
-export interface ICoreActionContext {
+export interface ITableActionContext {
+    // Database and table configuration
     db: DrizzleDb;
     table: PgTable;
     tableMetadata: TableMetadata;
@@ -37,5 +38,18 @@ export interface ICoreActionContext {
         };
     };
     logger: Logger;
+}
+
+/**
+ * Unified action context containing all data needed to handle actions
+ * Combines request data with database/table configuration
+ */
+export interface ICoreActionContext extends ITableActionContext {
+    // Request data
+    request: Request;
+    params: Record<string, string>;
+    query: Record<string, any>;
+    requestId: string;
+    parsedBody: any;
 }
 

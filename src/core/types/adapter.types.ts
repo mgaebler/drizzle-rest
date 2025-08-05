@@ -1,46 +1,31 @@
 /**
- * Framework-agnostic request interface that adapters produce for the core system
+ * Pure Web API Request - our clean gate FROM frameworks
+ * No extensions, just the standard Web API Request
  */
-export interface IAdapterRequest {
-    /** HTTP method */
-    method: string;
-
-    /** Request URL */
-    url: string;
-
-    /** Request headers */
-    headers: Record<string, string>;
-
-    /** Parsed URL parameters (e.g., :id from route) */
-    params: Record<string, string>;
-
-    /** Parsed query string parameters */
-    query: Record<string, any>;
-
-    /** Request body (parsed JSON) */
-    body?: any;
-
-    /** Request ID for logging/tracing */
-    requestId?: string;
-}
+export type IAdapterRequest = Request;
 
 /**
- * Framework-agnostic response builder
+ * Pure Web API Response - our clean gate TO frameworks
+ * No extensions, just the standard Web API Response
  */
-export interface IAdapterResponse {
-    /** HTTP status code */
-    status: number;
+export type IAdapterResponse = Response;
 
-    /** Response headers */
-    headers: Record<string, string>;
-
-    /** Response body */
-    body: any;
+/**
+ * Request context interface for internal processing
+ * Contains routing data and parsed request information
+ */
+export interface IRequestContext {
+    request: Request;
+    params: Record<string, string>;
+    query: Record<string, any>;
+    requestId: string;
+    parsedBody: any;
 }
 
 /**
  * Framework adapter interface for converting between framework-specific
- * request/response objects and our internal Web API-based format
+ * request/response objects and pure Web API Request/Response interfaces.
+ * This ensures perfect compatibility with web standards.
  */
 export interface IFrameworkAdapter {
     /**
@@ -49,12 +34,12 @@ export interface IFrameworkAdapter {
     readonly name: string;
 
     /**
-     * Convert framework-specific request to our internal format
+     * Convert framework-specific request to pure Web API Request
      */
-    parseRequest(frameworkReq: any): Promise<IAdapterRequest>;
+    parseRequest(frameworkReq: any): Promise<Request>;
 
     /**
-     * Send our internal response through the framework's response mechanism
+     * Send pure Web API Response through the framework's response mechanism
      */
-    sendResponse(response: IAdapterResponse, frameworkRes: any): Promise<void>;
+    sendResponse(response: Response, frameworkRes: any): Promise<void>;
 }

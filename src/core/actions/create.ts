@@ -28,9 +28,9 @@ class CreateAction extends BaseAction {
     }
 }
 
-export const coreCreateAction: ICoreActionHandler = (request, context) => {
+export const coreCreateAction: ICoreActionHandler = (context) => {
     const action = new CreateAction();
-    return action.execute(request, context, {
+    return action.execute(context, {
         actionType: ActionTypeEnum.CREATE,
         statusCode: 201
     });

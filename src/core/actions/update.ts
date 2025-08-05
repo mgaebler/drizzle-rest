@@ -41,9 +41,9 @@ class UpdateAction extends BaseAction {
     }
 }
 
-export const coreUpdateAction: ICoreActionHandler = (request, context) => {
+export const coreUpdateAction: ICoreActionHandler = (context) => {
     const action = new UpdateAction();
-    return action.execute(request, context, {
+    return action.execute(context, {
         actionType: ActionTypeEnum.UPDATE,
         includeId: true
     });

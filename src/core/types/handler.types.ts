@@ -1,7 +1,6 @@
 import { PgliteDatabase } from 'drizzle-orm/pglite';
 
-import { ICoreActionContext } from '../actions/action.types';
-import { IAdapterRequest, IAdapterResponse } from './adapter.types';
+import { ICoreActionContext, ITableActionContext } from '../actions/action.types';
 
 /**
  * Framework-agnostic database type
@@ -9,20 +8,20 @@ import { IAdapterRequest, IAdapterResponse } from './adapter.types';
 export type DrizzleDb = PgliteDatabase<any>;
 
 /**
- * Framework-agnostic action handler interface
+ * Framework-agnostic action/route handler interface
+ * Unified interface for both action handlers and route handlers
  */
 export interface ICoreActionHandler {
-    (
-        request: IAdapterRequest,
-        context: ICoreActionContext
-    ): Promise<IAdapterResponse>;
+    (context: ICoreActionContext): Promise<Response>;
 }
 
 /**
  * Route handler for a specific HTTP method and path
+ * Contains both the action handler and the table context needed to create unified context
  */
 export interface IRouteHandler {
     method: string;
     path: string;
-    handler: (request: IAdapterRequest) => Promise<IAdapterResponse>;
+    actionHandler: ICoreActionHandler;
+    tableContext: ITableActionContext;
 }
