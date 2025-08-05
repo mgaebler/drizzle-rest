@@ -339,6 +339,7 @@ export abstract class CoreRestAdapter implements IRestHandler {
 
     /**
      * Create request context from pure Web API Request
+     * From now on the request context will be used instead of the request object directly
      */
     protected async createRequestContext(request: Request, requestId: string): Promise<IRequestContext> {
         // Parse URL for query parameters
@@ -374,7 +375,9 @@ export abstract class CoreRestAdapter implements IRestHandler {
         }
 
         return {
-            request,
+            method: request.method,
+            url: request.url,
+            headers: request.headers,
             params: {}, // Will be populated by route matching
             query,
             requestId,
@@ -383,8 +386,7 @@ export abstract class CoreRestAdapter implements IRestHandler {
     }
 
     protected findMatchingRoute(context: IRequestContext): IRouteHandler | null {
-        const request = context.request;
-        const routeKey = `${request.method}:${this.normalizeUrlPath(request.url)}`;
+        const routeKey = `${context.method}:${this.normalizeUrlPath(context.url)}`;
 
         // Try exact match first
         const exactMatch = this.routes.get(routeKey);
@@ -394,9 +396,9 @@ export abstract class CoreRestAdapter implements IRestHandler {
 
         // Try pattern matching for routes with parameters
         for (const [key, route] of this.routes) {
-            if (key.startsWith(`${request.method}:`)) {
-                const pattern = key.substring(request.method.length + 1);
-                if (this.matchesPattern(pattern, this.normalizeUrlPath(request.url))) {
+            if (key.startsWith(`${context.method}:`)) {
+                const pattern = key.substring(context.method.length + 1);
+                if (this.matchesPattern(pattern, this.normalizeUrlPath(context.url))) {
                     return route;
                 }
             }

@@ -72,7 +72,7 @@ export function sanitizeRequestForLogging(context: IRequestContext): any {
     const sensitiveHeaders = ['authorization', 'cookie', 'x-api-key', 'x-auth-token'];
 
     const sanitizedHeaders = new Headers();
-    context.request.headers.forEach((value: string, key: string) => {
+    context.headers.forEach((value: string, key: string) => {
         if (sensitiveHeaders.includes(key.toLowerCase())) {
             sanitizedHeaders.set(key, '[REDACTED]');
         } else {
@@ -81,8 +81,8 @@ export function sanitizeRequestForLogging(context: IRequestContext): any {
     });
 
     return {
-        method: context.request.method,
-        url: context.request.url,
+        method: context.method,
+        url: context.url,
         headers: sanitizedHeaders,
         params: context.params,
         query: context.query,

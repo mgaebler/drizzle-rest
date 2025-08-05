@@ -15,7 +15,9 @@ export type IAdapterResponse = Response;
  * Contains routing data and parsed request information
  */
 export interface IRequestContext {
-    request: Request;
+    method: string;
+    url: string;
+    headers: Headers;
     params: Record<string, string>;
     query: Record<string, any>;
     requestId: string;
