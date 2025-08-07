@@ -23,7 +23,7 @@ class CreateAction extends BaseAction {
 
         // Validate body presence
         if (!this.body || Object.keys(this.body).length === 0) {
-            return this.createBadRequestError('Request body is required for create actions', { action: 'create' });
+            return this.createBadRequestError('Request body is required for create actions');
         }
 
         try {
@@ -35,7 +35,7 @@ class CreateAction extends BaseAction {
 
             return insertResult[0];
         } catch (error: any) {
-            return this.handleValidationError(error, { action: 'create' });
+            return this.handleValidationError(error);
         }
     }
 }

@@ -23,7 +23,7 @@ class GetOneAction extends BaseAction {
         const id = this.params.id;
 
         if (!id) {
-            return this.createBadRequestError('ID parameter is required', { action: 'get-one' });
+            return this.createBadRequestError('ID parameter is required');
         }
 
         const primaryKeyCol = columns[primaryKeyColumn];
@@ -34,7 +34,7 @@ class GetOneAction extends BaseAction {
             .limit(1);
 
         if (results.length === 0) {
-            return this.createNotFoundError('Record not found', { action: 'get-one', id });
+            return this.createNotFoundError('Record not found');
         }
 
         return results[0];

@@ -24,11 +24,11 @@ class ReplaceAction extends BaseAction {
         const id = this.params.id;
 
         if (!id) {
-            return this.createBadRequestError('ID parameter is required', { action: 'replace' });
+            return this.createBadRequestError('ID parameter is required');
         }
 
         if (!this.body || Object.keys(this.body).length === 0) {
-            return this.createBadRequestError('Request body is required for replace actions', { action: 'replace', id });
+            return this.createBadRequestError('Request body is required for replace actions');
         }
 
         try {
@@ -44,12 +44,12 @@ class ReplaceAction extends BaseAction {
                 .returning();
 
             if (results.length === 0) {
-                return this.createNotFoundError('Record not found', { action: 'replace', id });
+                return this.createNotFoundError('Record not found');
             }
 
             return results[0];
         } catch (error: any) {
-            return this.handleValidationError(error, { action: 'replace', id });
+            return this.handleValidationError(error);
         }
     }
 }

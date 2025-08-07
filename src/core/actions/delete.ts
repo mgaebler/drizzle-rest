@@ -23,7 +23,7 @@ class DeleteAction extends BaseAction {
         const id = this.params.id;
 
         if (!id) {
-            return this.createBadRequestError('ID parameter is required', { action: 'delete' });
+            return this.createBadRequestError('ID parameter is required');
         }
 
         const primaryKeyCol = columns[primaryKeyColumn];
@@ -33,7 +33,7 @@ class DeleteAction extends BaseAction {
             .returning();
 
         if (result.length === 0) {
-            return this.createNotFoundError('Record not found', { action: 'delete', id });
+            return this.createNotFoundError('Record not found');
         }
 
         return null; // DELETE returns 204 No Content

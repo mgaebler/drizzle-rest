@@ -24,11 +24,11 @@ class UpdateAction extends BaseAction {
         const id = this.params.id;
 
         if (!id) {
-            return this.createBadRequestError('ID parameter is required', { action: 'update' });
+            return this.createBadRequestError('ID parameter is required');
         }
 
         if (!this.body || Object.keys(this.body).length === 0) {
-            return this.createBadRequestError('Request body is required for update actions', { action: 'update', id });
+            return this.createBadRequestError('Request body is required for update actions');
         }
 
         try {
@@ -43,12 +43,12 @@ class UpdateAction extends BaseAction {
                 .returning();
 
             if (results.length === 0) {
-                return this.createNotFoundError('Record not found', { action: 'update', id });
+                return this.createNotFoundError('Record not found');
             }
 
             return results[0];
         } catch (error: any) {
-            return this.handleValidationError(error, { action: 'update', id });
+            return this.handleValidationError(error);
         }
     }
 }
