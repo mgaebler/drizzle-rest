@@ -1,8 +1,7 @@
-import { createCoreHookContext } from '../hooks';
 import { Logger } from '../logger';
 import type { IAdapterResponse, IRequestContext } from '../types/adapter.types';
 import { createAdapterResponse } from '../utils/response-helper';
-import { ICoreRequestContext, ICoreTableContext } from './action.types';
+import { ICoreTableContext } from './action.types';
 import { ActionTypeEnum } from './action.types';
 
 /**
@@ -33,8 +32,10 @@ export abstract class BaseAction {
     protected requestId: string = 'unknown';
     /** Current logger instance */
     protected logger: Logger;
-    /** Current action context for error handling */
-    protected currentContext: ICoreRequestContext | null = null;
+    /** Current table context for error handling */
+    protected currentTableContext: ICoreTableContext | null = null;
+    /** Current request context for error handling */
+    protected currentRequestContext: IRequestContext | null = null;
 
     constructor(logger: Logger) {
         this.logger = logger;
@@ -72,9 +73,9 @@ export abstract class BaseAction {
         this.body = requestContext.parsedBody || null;
         this.requestId = requestContext.requestId || 'unknown';
 
-        // Create unified context for backwards compatibility with hooks and error handling
-        const unifiedContext = { ...tableContext, ...requestContext };
-        this.currentContext = unifiedContext;
+        // Store contexts for error handling
+        this.currentTableContext = tableContext;
+        this.currentRequestContext = requestContext;
 
         const requestId = requestContext.requestId || 'unknown';
         const startTime = Date.now();
@@ -86,7 +87,8 @@ export abstract class BaseAction {
 
             // Execute beforeAction hook
             const beforeHookResult = await this.executeBeforeHook(
-                unifiedContext,
+                tableContext,
+                requestContext,
                 actionType,
                 requestId,
                 startTime
@@ -107,7 +109,8 @@ export abstract class BaseAction {
 
             // Execute afterAction hook
             const afterHookResult = await this.executeAfterHook(
-                unifiedContext,
+                tableContext,
+                requestContext,
                 actionType,
                 result,
                 requestId,
@@ -140,22 +143,18 @@ export abstract class BaseAction {
     }
 
     private async executeBeforeHook(
-        context: ICoreRequestContext,
+        tableContext: ICoreTableContext,
+        requestContext: IRequestContext,
         actionType: ActionTypeEnum,
         requestId: string,
         startTime: number
     ): Promise<IAdapterResponse | null> {
-        const { tableMetadata, tableConfig } = context;
+        const { tableMetadata, tableConfig } = tableContext;
 
         if (!tableConfig?.hooks?.beforeOperation) return null;
 
-        const hookContext = createCoreHookContext(
-            actionType,
-            tableMetadata.name
-        );
-
         try {
-            await tableConfig.hooks.beforeOperation(hookContext);
+            await tableConfig.hooks.beforeOperation(tableContext, requestContext);
             return null; // Success, continue with action
         } catch (hookError: any) {
             const duration = Date.now() - startTime;
@@ -184,33 +183,29 @@ export abstract class BaseAction {
     }
 
     private async executeAfterHook(
-        context: ICoreRequestContext,
+        tableContext: ICoreTableContext,
+        requestContext: IRequestContext,
         actionType: ActionTypeEnum,
         result: any,
         requestId: string,
         startTime: number
     ): Promise<{ result: any; error?: IAdapterResponse }> {
-        const { tableMetadata, tableConfig } = context;
+        const { tableMetadata, tableConfig } = tableContext;
 
         if (!tableConfig?.hooks?.afterOperation) {
             return { result };
         }
 
-        const hookContext = createCoreHookContext(
-            actionType,
-            tableMetadata.name
-        );
-
         try {
             if (Array.isArray(result)) {
                 // Handle array results (like GET_MANY)
                 const processedResult = await Promise.all(
-                    result.map((item: any) => tableConfig.hooks!.afterOperation!(hookContext, item))
+                    result.map((item: any) => tableConfig.hooks!.afterOperation!(tableContext, requestContext, item))
                 );
                 return { result: processedResult };
             } else {
                 // Handle single results
-                const processedResult = await tableConfig.hooks.afterOperation(hookContext, result);
+                const processedResult = await tableConfig.hooks.afterOperation(tableContext, requestContext, result);
                 return { result: processedResult };
             }
         } catch (hookError: any) {
@@ -322,7 +317,7 @@ export abstract class BaseAction {
 
     // Error handling abstractions for actions
     protected createNotFoundError(message = 'Record not found', context?: any): IAdapterResponse {
-        const { tableMetadata } = this.currentContext!;
+        const { tableMetadata } = this.currentTableContext!;
 
         this.logger.info({
             requestId: this.requestId,
@@ -337,7 +332,7 @@ export abstract class BaseAction {
     }
 
     protected createValidationError(error: any, context?: any): IAdapterResponse {
-        const { tableMetadata } = this.currentContext!;
+        const { tableMetadata } = this.currentTableContext!;
 
         this.logger.warn({
             requestId: this.requestId,
@@ -354,7 +349,7 @@ export abstract class BaseAction {
     }
 
     protected createBadRequestError(message: string, context?: any): IAdapterResponse {
-        const { tableMetadata } = this.currentContext!;
+        const { tableMetadata } = this.currentTableContext!;
 
         this.logger.warn({
             requestId: this.requestId,
@@ -369,7 +364,7 @@ export abstract class BaseAction {
     }
 
     protected createInternalError(error: any, message = 'Internal Server Error', context?: any): IAdapterResponse {
-        const { tableMetadata } = this.currentContext!;
+        const { tableMetadata } = this.currentTableContext!;
 
         this.logger.error({
             requestId: this.requestId,
@@ -389,7 +384,7 @@ export abstract class BaseAction {
     }
 
     protected createConflictError(message: string, context?: any): IAdapterResponse {
-        const { tableMetadata } = this.currentContext!;
+        const { tableMetadata } = this.currentTableContext!;
 
         this.logger.warn({
             requestId: this.requestId,

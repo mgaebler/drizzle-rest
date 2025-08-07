@@ -1,5 +1,6 @@
 import { PgTable } from 'drizzle-orm/pg-core';
 
+import { IRequestContext } from '../types/adapter.types';
 import { DrizzleDb } from '../types/handler.types';
 import { TableMetadata } from '../utils/schema-inspector';
 
@@ -28,21 +29,8 @@ export interface ICoreTableContext {
     tableConfig?: {
         disabledEndpoints?: Array<ActionTypeEnum>;
         hooks?: {
-            beforeOperation?: (context: any) => Promise<void>;
-            afterOperation?: (context: any, result: any) => Promise<any>;
+            beforeOperation?: (tableContext: ICoreTableContext, requestContext: IRequestContext) => Promise<void>;
+            afterOperation?: (tableContext: ICoreTableContext, requestContext: IRequestContext, result: any) => Promise<any>;
         };
     };
 }
-
-/**
- * Unified action context containing all data needed to handle actions
- * Combines request data with database/table configuration
- */
-export interface ICoreRequestContext extends ICoreTableContext {
-    // Request data
-    params: Record<string, string>;
-    query: Record<string, any>;
-    requestId: string;
-    parsedBody: any;
-}
-
