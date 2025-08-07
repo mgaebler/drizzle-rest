@@ -1,12 +1,12 @@
 import express from 'express';
 
 import { ExpressAdapter } from './adapters/express-adapter';
-import { ICoreRestAdapterOptions } from './core/adapter';
+import { ICoreAdapterOptions } from './core/core-adapter';
 
 /**
  * Configuration options for Express Drizzle REST adapter.
  */
-type ExpressDrizzleRestOptions = ICoreRestAdapterOptions;
+type ExpressDrizzleRestOptions = ICoreAdapterOptions;
 
 /**
  * Create an Express router with automatic REST API endpoints for your Drizzle schema.

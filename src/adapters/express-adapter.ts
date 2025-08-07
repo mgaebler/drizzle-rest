@@ -1,14 +1,14 @@
 import { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 
-import { CoreRestAdapter, ICoreRestAdapterOptions, IFrameworkAdapter } from '../core/adapter';
+import { CoreAdapter, ICoreAdapterOptions, IFrameworkAdapter } from '../core/core-adapter';
 
 /**
  * Express.js adapter that extends CoreRestAdapter and implements framework-specific concerns
  */
-export class ExpressAdapter extends CoreRestAdapter implements IFrameworkAdapter {
+export class ExpressAdapter extends CoreAdapter implements IFrameworkAdapter {
     readonly name = 'express';
 
-    constructor(options: ICoreRestAdapterOptions) {
+    constructor(options: ICoreAdapterOptions) {
         super(options);
     }
 
@@ -27,12 +27,6 @@ export class ExpressAdapter extends CoreRestAdapter implements IFrameworkAdapter
                 // Send the Web API Response back through Express
                 await this.sendResponse(webResponse, res);
             } catch (error: any) {
-                this.getLogger().error({
-                    error: error.message,
-                    method: req.method,
-                    url: req.url
-                }, 'Express handler error');
-
                 res.status(500).json({
                     error: 'Internal Server Error'
                 });

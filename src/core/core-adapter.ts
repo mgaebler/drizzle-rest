@@ -28,7 +28,7 @@ interface IRestHandler {
     handle(request: Request): Promise<Response>;
 }
 
-export interface ICoreRestAdapterOptions {
+export interface ICoreAdapterOptions {
     /** The Drizzle database instance. */
     db: DrizzleDb;
 
@@ -47,13 +47,13 @@ export interface ICoreRestAdapterOptions {
     logger?: Logger;
 }
 
-export abstract class CoreRestAdapter implements IRestHandler {
+export abstract class CoreAdapter implements IRestHandler {
     private routes: Map<string, IRouteHandler> = new Map();
-    private options: ICoreRestAdapterOptions;
+    private options: ICoreAdapterOptions;
     private logger: Logger;
     private tablesMetadataMap: Map<string, any> = new Map();
 
-    constructor(options: ICoreRestAdapterOptions) {
+    constructor(options: ICoreAdapterOptions) {
         this.options = options;
         this.logger = options.logger || createLogger();
 
