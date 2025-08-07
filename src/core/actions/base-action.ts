@@ -51,9 +51,6 @@ export abstract class BaseAction {
     /** Get the HTTP status code for this specific action */
     protected abstract getStatusCode(): number;
 
-    /** Whether this action requires an ID parameter */
-    protected abstract requiresId(): boolean;
-
     protected getCurrentRequestId(): string {
         return this.requestId;
     }
@@ -65,7 +62,6 @@ export abstract class BaseAction {
         const { tableMetadata } = tableContext;
         const actionType = this.getActionType();
         const statusCode = this.getStatusCode();
-        const includeId = this.requiresId();
 
         // Parse request data and make available to subclasses
         this.params = requestContext.params || {};
@@ -79,7 +75,7 @@ export abstract class BaseAction {
 
         const requestId = requestContext.requestId || 'unknown';
         const startTime = Date.now();
-        const id = includeId ? this.params.id : undefined;
+        const id = this.params.id; // Always try to get ID from params for logging
 
         try {
             // Initial logging
@@ -125,17 +121,8 @@ export abstract class BaseAction {
             // Success logging
             this.logSuccess(requestId, tableMetadata.name, actionType, startTime, id);
 
-            // Handle special response formatting for GET_MANY with pagination
-            if (actionType === ActionTypeEnum.GET_MANY && afterHookResult.result?.totalCount !== undefined) {
-                const { data, totalCount } = afterHookResult.result;
-                const headers = {
-                    'X-Total-Count': totalCount.toString(),
-                    'Access-Control-Expose-Headers': 'X-Total-Count'
-                };
-                return createAdapterResponse(data, statusCode, headers);
-            }
-
-            return createAdapterResponse(afterHookResult.result, statusCode);
+            // Allow subclasses to customize response creation
+            return this.createResponse(afterHookResult.result, statusCode);
 
         } catch (error: any) {
             return this.handleError(error, requestId, tableMetadata.name, actionType, startTime, id);
@@ -235,6 +222,13 @@ export abstract class BaseAction {
                 }, statusCode)
             };
         }
+    }
+
+    /**
+     * Creates the response for this action. Subclasses can override this to customize response formatting.
+     */
+    protected createResponse(result: any, statusCode: number): IAdapterResponse {
+        return createAdapterResponse(result, statusCode);
     }
 
     /**

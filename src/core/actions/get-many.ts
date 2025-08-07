@@ -1,6 +1,8 @@
+import type { IAdapterResponse } from '../types/adapter.types';
 import { ICoreActionHandler } from '../types/handler.types';
 import { QueryBuilder } from '../utils/query-builder';
 import { CoreQueryParser } from '../utils/query-parser';
+import { createAdapterResponse } from '../utils/response-helper';
 import { ICoreTableContext } from './action.types';
 import { ActionTypeEnum } from './action.types';
 import { BaseAction } from './base-action';
@@ -12,10 +14,6 @@ class GetManyAction extends BaseAction {
 
     protected getStatusCode(): number {
         return 200;
-    }
-
-    protected requiresId(): boolean {
-        return false;
     }
 
     protected async runDatabaseQuery(tableContext: ICoreTableContext) {
@@ -51,6 +49,20 @@ class GetManyAction extends BaseAction {
             data: processedResults,
             totalCount
         };
+    }
+
+    protected createResponse(result: any, statusCode: number): IAdapterResponse {
+        // Handle pagination response formatting
+        if (result?.totalCount !== undefined) {
+            const { data, totalCount } = result;
+            const headers = {
+                'X-Total-Count': totalCount.toString(),
+                'Access-Control-Expose-Headers': 'X-Total-Count'
+            };
+            return createAdapterResponse(data, statusCode, headers);
+        }
+
+        return createAdapterResponse(result, statusCode);
     }
 }
 

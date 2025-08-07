@@ -15,10 +15,6 @@ class UpdateAction extends BaseAction {
         return 200;
     }
 
-    protected requiresId(): boolean {
-        return true;
-    }
-
     protected async runDatabaseQuery(tableContext: ICoreTableContext) {
         const { db, table, primaryKeyColumn, columns } = tableContext;
         const id = this.params.id;

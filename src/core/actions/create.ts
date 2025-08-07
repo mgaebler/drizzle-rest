@@ -14,10 +14,6 @@ class CreateAction extends BaseAction {
         return 201;
     }
 
-    protected requiresId(): boolean {
-        return false;
-    }
-
     protected async runDatabaseQuery(tableContext: ICoreTableContext) {
         const { db, table } = tableContext;
 

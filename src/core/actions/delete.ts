@@ -14,10 +14,6 @@ class DeleteAction extends BaseAction {
         return 204;
     }
 
-    protected requiresId(): boolean {
-        return true;
-    }
-
     protected async runDatabaseQuery(tableContext: ICoreTableContext) {
         const { db, table, primaryKeyColumn, columns } = tableContext;
         const id = this.params.id;
