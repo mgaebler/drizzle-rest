@@ -1,2 +1,2 @@
 // Framework-specific exports
-export { createExpressDrizzleRestAdapter } from './express';
+export { createExpressDrizzleRestAdapter } from './adapters/express-adapter';

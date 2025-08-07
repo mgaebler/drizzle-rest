@@ -5,11 +5,10 @@ import request from 'supertest';
 import { expect } from 'vitest';
 
 import { createExpressDrizzleRestAdapter } from '@/adapters/express-adapter';
+import { ICoreAdapterOptions } from '@/core/core-adapter';
 import { createLogger } from '@/core/logger';
 import { db } from '@/db/connection';
 import * as schema from '@/db/schema.js';
-
-import { ICoreAdapterOptions } from '../core/core-adapter';
 
 // Type alias for backward compatibility
 type DrizzleRestAdapterOptions = Omit<ICoreAdapterOptions, 'adapter'>;

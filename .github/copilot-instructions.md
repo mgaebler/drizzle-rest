@@ -39,127 +39,47 @@ This is a TypeScript library that creates a dynamic REST API adapter for Drizzle
 ## Core Technologies & Dependencies
 - **TypeScript** (primary language)
 - **Drizzle ORM** (database ORM)
-- **Express.js** (for REST API implementation)
-- **Zod** (for validation)
-- **Vitest** (for testing)
-- **ESLint** (for linting)
-- **PostgreSQL** (primary database, with MySQL/SQLite support)
 
-## Code Style & Conventions
+## Available Scripts
 
-### TypeScript Guidelines
-- Use strict TypeScript configuration
-- Prefer explicit type annotations for public APIs
-- Use interface for public types, type aliases for internal types
-- Always export types alongside implementations
-- Use generic types for reusable components
+### Development & Testing
+- `npm run dev` - Development mode with hot reload
+- `npm start` - Start the application
+- `npm test` - Run tests once
+- `npm run test:watch` - Run tests in watch mode
+- `npm run tsc` - TypeScript type checking
 
-### File Naming & Structure
-- Use kebab-case for file names (e.g., `drizzle-rest-adapter.ts`)
-- Use PascalCase for class names and interfaces
-- Use camelCase for functions and variables
-- Organize files by feature/domain in `src/` directory
-- Keep tests adjacent to source files with `.test.ts` suffix
+### Code Quality
+- `npm run lint` - Run ESLint
+- `npm run lint:fix` - Run ESLint with auto-fix
+- `npm run unused-exports` - Find unused exports
+- `npm run unused-exports:custom` - Custom unused exports script
 
-### Import/Export Patterns
-- Use ES modules (`import`/`export`)
-- Re-export public APIs through `src/index.ts`
-- Use relative imports for local modules
-- Group imports: external libraries, then local modules
+### Build & Verification
+- `npm run build` - Build (TypeScript source distribution)
+- `npm run build:check` - Full check: TypeScript + lint + test
+- `npm run ci` - CI pipeline: build check + package verification
+- `npm run package:test` - Test the npm package
+- `npm run package:verify` - Verify package contents (dry run)
 
-## API Design Principles
+### Database
+- `npm run db:generate` - Generate Drizzle migrations
+- `npm run db:migrate` - Run Drizzle migrations
 
-### REST Endpoints
-- Follow RESTful conventions:
-  - `GET /resource` - list resources
-  - `GET /resource/:id` - get single resource
-  - `POST /resource` - create resource
-  - `PUT/PATCH /resource/:id` - update resource
-  - `DELETE /resource/:id` - delete resource
+### Release & Publishing
+- `npm run prerelease` - Pre-release checks
+- `npm run release:alpha` - Release alpha version
+- `npm run release:beta` - Release beta version
+- `npm run release:patch` - Release patch version
+- `npm run release:minor` - Release minor version
+- `npm run release:major` - Release major version
 
-### Query Parameters (JSON-Server Compatible)
-- Support filtering: `?field=value`, `?field_like=pattern`
-- Support sorting: `?_sort=field&_order=asc|desc`
-- Support pagination: `?_page=1&_limit=10`
-- Support embedding: `?_embed=relatedTable`
+### Security & Maintenance
+- `npm run security:check` - Run security audit
+- `npm run security:fix` - Fix security vulnerabilities
+- `npm run clean` - Clean and reinstall dependencies
 
-### Error Handling
-- Use proper HTTP status codes (200, 201, 400, 404, 500)
-- Return consistent error response format
-- Provide meaningful error messages
-- Handle database errors gracefully
+### Dependency Analysis
+- `npm run deps:graph` - Generate dependency graph (all src)
+- `npm run deps:graph:core` - Generate dependency graph (core only)
 
-## Database & ORM Patterns
-
-### Drizzle Schema Integration
-- Automatically introspect Drizzle schemas
-- Support all Drizzle column types
-- Handle relationships between tables
-- Respect schema constraints and validations
-
-### Database Operations
-- Use Drizzle ORM query builders exclusively
-- Implement proper transaction handling
-- Support connection pooling
-- Handle database-specific features appropriately
-
-## Testing Guidelines
-
-### Test Structure
-- Use Vitest for all testing
-- Write integration tests for API endpoints
-- Test database operations with real database connections
-- Use descriptive test names that explain the scenario
-
-### Test Organization
-- Group tests by feature/functionality
-- Use `describe` blocks for test organization
-- Include setup/teardown for database state
-- Test both success and error scenarios
-
-## Development Patterns
-
-### Configuration
-- Support environment-based configuration
-- Provide sensible defaults
-- Allow per-table endpoint customization
-- Support middleware hooks for customization
-
-### Performance Considerations
-- Implement efficient database queries
-- Support pagination for large datasets
-- Cache schema introspection when possible
-- Minimize unnecessary database round trips
-
-### Security
-- Validate all input parameters
-- Sanitize database queries
-- Implement proper error handling to avoid information leakage
-- Support configurable endpoint restrictions
-
-## Documentation Standards
-- Include JSDoc comments for all public APIs
-- Document complex algorithms and business logic
-- Provide usage examples in README
-- Maintain up-to-date TypeScript type definitions
-
-## When Contributing Code
-1. Follow the existing code style and patterns
-2. Add appropriate tests for new functionality
-3. Update TypeScript types as needed
-4. Consider backward compatibility
-5. Document any breaking changes
-6. Ensure all tests pass before submitting
-
-## Specific to This Project
-- The main adapter function is `createDrizzleRestAdapter`
-- Core logic is in `src/drizzle-rest-adapter.ts`
-- Utility functions are organized in `src/utils/`
-- Examples are provided in `examples/express/`
-- Integration tests cover all major functionality
-
-## Development Environment
-- Uses dev container with Debian GNU/Linux 12
-- Supports PostgreSQL, MySQL, and SQLite databases
-- Includes comprehensive linting and testing setup
-- Uses modern TypeScript and ES module standards
