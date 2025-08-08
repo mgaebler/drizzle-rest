@@ -239,6 +239,9 @@ importers:
       '@drizzle-rest/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@drizzle-rest/react-router-adapter':
+        specifier: workspace:*
+        version: link:../../packages/adapters/react-router
       '@libsql/client':
         specifier: ^0.14.0
         version: 0.14.0

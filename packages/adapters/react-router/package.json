@@ -1,8 +1,8 @@
 {
     "name": "@drizzle-rest/react-router-adapter",
     "version": "0.1.0",
-    "main": "dist/index.js",
-    "types": "dist/index.d.ts",
+    "main": "dist/react-router-adapter.js",
+    "types": "dist/react-router-adapter.d.ts",
     "files": [
         "dist"
     ],

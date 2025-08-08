@@ -1,5 +1,5 @@
 import { createBrowserRouter } from 'react-router-dom';
-import { createReactRouterDrizzleRestRoute } from 'drizzle-rest-adapter';
+import { createReactRouterDrizzleRestRoute } from '@drizzle-rest/react-router-adapter';
 import { App } from './App';
 import { HomePage } from './pages/HomePage';
 import { UsersPage } from './pages/UsersPage';
