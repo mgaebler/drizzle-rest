@@ -1,4 +1,4 @@
-import { CoreAdapter, ICoreAdapterOptions, IFrameworkAdapter } from '@/core/core-adapter';
+import { CoreAdapter, ICoreAdapterOptions, IFrameworkAdapter } from '../core/core-adapter';
 
 // React Router types - these would typically come from 'react-router' package
 // but we'll define them here to avoid dependency issues in the core library

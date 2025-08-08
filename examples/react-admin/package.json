@@ -22,7 +22,7 @@
         "@mui/icons-material": "^7.0.1",
         "@mui/material": "^7.0.1",
         "drizzle-orm": "^0.44.2",
-        "drizzle-rest-adapter": "file:../../",
+        "@drizzle-rest/core": "workspace:*",
         "express": "^4.18.2",
         "ra-data-json-server": "^5.9.1",
         "react": "^19.0.0",

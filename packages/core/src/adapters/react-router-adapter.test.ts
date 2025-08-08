@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { ReactRouterAdapter } from '@/adapters/react-router-adapter';
-import { db } from '@/db/connection';
-import * as schema from '@/db/schema';
+import { db } from '../db/connection';
+import * as schema from '../db/schema';
+import { ReactRouterAdapter } from './react-router-adapter';
 
 describe('React Router Adapter', () => {
     const adapter = new ReactRouterAdapter({

@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import * as schema from '@/db/schema';
-
+import * as schema from '../../db/schema';
 import { SchemaInspector } from './schema-inspector';
 
 describe('SchemaInspector', () => {

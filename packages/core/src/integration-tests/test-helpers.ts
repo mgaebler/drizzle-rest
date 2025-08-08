@@ -4,11 +4,11 @@ import express from 'express';
 import request from 'supertest';
 import { expect } from 'vitest';
 
-import { createExpressDrizzleRestAdapter } from '@/adapters/express-adapter';
-import { ICoreAdapterOptions } from '@/core/core-adapter';
-import { createLogger } from '@/core/logger';
-import { db } from '@/db/connection';
-import * as schema from '@/db/schema.js';
+import { createExpressDrizzleRestAdapter } from '../adapters/express-adapter';
+import { ICoreAdapterOptions } from '../core/core-adapter';
+import { createLogger } from '../core/logger';
+import { db } from '../db/connection';
+import * as schema from '../db/schema.js';
 
 // Type alias for backward compatibility
 type DrizzleRestAdapterOptions = Omit<ICoreAdapterOptions, 'adapter'>;

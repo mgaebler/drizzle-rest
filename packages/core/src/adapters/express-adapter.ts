@@ -1,7 +1,7 @@
 import { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 import express from 'express';
 
-import { CoreAdapter, ICoreAdapterOptions, IFrameworkAdapter } from '@/core/core-adapter';
+import { CoreAdapter, ICoreAdapterOptions, IFrameworkAdapter } from '../core/core-adapter';
 
 /**
  * Express.js adapter that extends CoreRestAdapter and implements framework-specific concerns
