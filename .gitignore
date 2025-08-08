@@ -1,6 +1,9 @@
 node_modules
 dist
 
+# pnpm
+.pnpm-store
+
 # Package files
 *.tgz
 
