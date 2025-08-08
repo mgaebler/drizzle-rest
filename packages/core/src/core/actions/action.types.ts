@@ -2,7 +2,7 @@ import { PgTable } from 'drizzle-orm/pg-core';
 
 import { IRequestContext } from '../types/adapter.types';
 import { DrizzleDb } from '../types/handler.types';
-import { TableMetadata } from '../utils/schema-inspector';
+import { TableMetadata } from '../utils/schema-inspector/schema-inspector';
 
 export enum ActionTypeEnum {
     GET_MANY = 'GET_MANY',

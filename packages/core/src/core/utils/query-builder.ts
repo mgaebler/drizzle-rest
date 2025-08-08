@@ -5,7 +5,7 @@ import { DrizzleDb } from '../types/handler.types';
 import { EmbedBuilder } from './embed-builder';
 import { FilterBuilder } from './filter-builder';
 import { ParsedQueryParams } from './query.types';
-import { TableMetadata } from './schema-inspector';
+import { TableMetadata } from './schema-inspector/schema-inspector';
 
 export class QueryBuilder {
     private filterBuilder: FilterBuilder;

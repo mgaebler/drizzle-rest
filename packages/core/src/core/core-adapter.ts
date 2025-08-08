@@ -14,7 +14,7 @@ import { createLogger, Logger } from './logger';
 import { IRequestContext } from './types/adapter.types';
 import { DrizzleDb, IRouteHandler } from './types/handler.types';
 import { parseQueryParamsFromUrl } from './utils/request-helpers';
-import { SchemaInspector } from './utils/schema-inspector';
+import { SchemaInspector } from './utils/schema-inspector/schema-inspector';
 
 // Re-export for convenience
 export type { IFrameworkAdapter } from './types/adapter.types';
