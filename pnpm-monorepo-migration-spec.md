@@ -19,14 +19,22 @@ This document outlines how to convert an existing single-package JavaScript/Type
 ```
 .
 ├── packages
-│   └── core
-│       ├── src
-│       ├── package.json         ← publishes to npm
-│       ├── tsconfig.json        ← local config extending root
-│       └── (your existing files from src/)
+│   ├── core
+│   │   ├── src
+│   │   ├── package.json         ← publishes to npm
+│   │   ├── tsconfig.json        ← local config extending root
+│   │   └── (core logic, types, utils)
+│   └── adapters
+│       ├── express
+│       │   ├── src
+│       │   ├── package.json     ← depends on @drizzle-rest/core
+│       │   └── (express adapter code)
+│       └── react-router
+│           ├── src
+│           ├── package.json     ← depends on @drizzle-rest/core
+│           └── (react-router adapter code)
 ├── examples
 │   ├── express
-│   │   └── package.json         ← depends on @drizzle-rest/core
 │   ├── react-admin
 │   └── react-router-simple
 ├── docs
@@ -108,7 +116,53 @@ packages:
 }
 ```
 
-### 5. `examples/*/package.json` (template)
+### 5. `packages/adapters/express/package.json`
+
+```json
+{
+  "name": "@drizzle-rest/express-adapter",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup src/index.ts --dts --out-dir dist",
+    "test": "vitest",
+    "lint": "eslint . --ext .ts"
+  },
+  "dependencies": {
+    "@drizzle-rest/core": "workspace:*"
+  },
+  "devDependencies": {
+    "tsup": "^7.0.0"
+  }
+}
+```
+
+### 6. `packages/adapters/react-router/package.json`
+
+```json
+{
+  "name": "@drizzle-rest/react-router-adapter",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup src/index.ts --dts --out-dir dist",
+    "test": "vitest",
+    "lint": "eslint . --ext .ts"
+  },
+  "dependencies": {
+    "@drizzle-rest/core": "workspace:*"
+  },
+  "devDependencies": {
+    "tsup": "^7.0.0"
+  }
+}
+```
+
+### 7. `examples/*/package.json` (template)
 
 ```json
 {
@@ -116,7 +170,8 @@ packages:
   "private": true,
   "version": "0.0.0",
   "dependencies": {
-    "@drizzle-rest/core": "workspace:*"
+    "@drizzle-rest/core": "workspace:*",
+    "@drizzle-rest/express-adapter": "workspace:*"
   },
   "scripts": {
     "dev": "node index.js"
@@ -128,10 +183,17 @@ packages:
 
 ## ✅ Tasks to Implement
 
-- [ ] Move `src/` to `packages/core/src`
-- [ ] Add `package.json` in `packages/core`
-- [ ] Add `pnpm-workspace.yaml` at root
-- [ ] Add or adjust `examples/*/package.json` with dependency on `@drizzle-rest/core`
+- [ ] Move core logic to `packages/core/src`
+- [ ] Move each adapter to `packages/adapters/*/src`
+- [ ] Add `package.json` in `packages/core` and each adapter
+- [ ] Create `pnpm-workspace.yaml` at root
+- [ ] Create or update `examples/*/package.json` with proper dependencies
+- [ ] Rename `tsconfig.json` → `tsconfig.base.json` at root
+- [ ] Add `tsconfig.json` in each package extending the base
+- [ ] Run `pnpm install` to bootstrap the workspace
+- [ ] Verify builds, tests, and linting for all packages
+- [ ] Ensure `npm publish` works from each publishable directory
+
 ---
 ## ℹ️ Additional Notes
 
@@ -154,7 +216,7 @@ packages:
 - For publishing errors, verify your npm authentication and scope ownership.
 - If TypeScript cannot resolve workspace packages, check `tsconfig.json` paths and references.
 - [ ] Rename `tsconfig.json` → `tsconfig.base.json` at root
-- [ ] Add individual `tsconfig.json` in `packages/core` extending the base
+- [ ] Add individual `tsconfig.json` in `packages/core` and each adapter extending the base
 - [ ] Use `pnpm install` to bootstrap the workspace
-- [ ] Verify that core package builds, tests, and linting work
-- [ ] Keep `npm publish` working from `packages/core` directory
+- [ ] Verify that each package builds, tests, and linting work
+- [ ] Keep `npm publish` working from `packages/core` and adapter directories
