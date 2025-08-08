@@ -2,9 +2,9 @@ import express from 'express';
 import request from 'supertest';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { createExpressDrizzleRestAdapter } from '../adapters/express-adapter';
 import { db } from '../db/connection';
 import * as schema from '../db/schema.js';
+import { createExpressDrizzleRestAdapter } from '../index';
 import { createTestAdapterOptions, setupTestDatabase, TEST_USERS } from './test-helpers';
 
 // Example permission lists for different user types

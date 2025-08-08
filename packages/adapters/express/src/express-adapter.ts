@@ -1,7 +1,6 @@
+import { CoreAdapter, ICoreAdapterOptions, IFrameworkAdapter } from '@drizzle-rest/core';
 import { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 import express from 'express';
-
-import { CoreAdapter, ICoreAdapterOptions, IFrameworkAdapter } from '../core/core-adapter';
 
 /**
  * Express.js adapter that extends CoreRestAdapter and implements framework-specific concerns
@@ -89,10 +88,7 @@ export class ExpressAdapter extends CoreAdapter implements IFrameworkAdapter {
         }
     }
 }
-/**
- * Configuration options for Express Drizzle REST adapter.
- */
-type ExpressDrizzleRestOptions = ICoreAdapterOptions;
+
 /**
  * Create an Express router with automatic REST API endpoints for your Drizzle schema.
  *
@@ -101,7 +97,7 @@ type ExpressDrizzleRestOptions = ICoreAdapterOptions;
  */
 
 export const createExpressDrizzleRestAdapter = (
-    options: ExpressDrizzleRestOptions
+    options: ICoreAdapterOptions
 ): express.Router => {
     const router = express.Router();
 

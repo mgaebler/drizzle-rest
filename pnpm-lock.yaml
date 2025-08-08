@@ -277,6 +277,16 @@ importers:
         specifier: ^5.1.4
         version: 5.1.4(typescript@5.9.2)(vite@6.3.5(@types/node@20.19.9)(jiti@2.5.1)(tsx@4.20.3)(yaml@2.8.1))
 
+  packages/adapters/express:
+    dependencies:
+      '@drizzle-rest/core':
+        specifier: workspace:*
+        version: link:../../core
+    devDependencies:
+      tsup:
+        specifier: ^7.0.0
+        version: 7.3.0(postcss@8.5.6)(typescript@5.9.2)
+
   packages/core:
     devDependencies:
       tsup:
@@ -2712,7 +2722,6 @@ packages:
 
   libsql@0.4.7:
     resolution: {integrity: sha512-T9eIRCs6b0J1SHKYIvD8+KCJMcWZ900iZyxdnSCdqxN12Z1ijzT+jY5nrk72Jw4B0HGzms2NgpryArlJqvc3Lw==}
-    cpu: [x64, arm64, wasm32]
     os: [darwin, linux, win32]
 
   lilconfig@3.1.3:

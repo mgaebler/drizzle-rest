@@ -1,0 +1,20 @@
+{
+    "name": "@drizzle-rest/express-adapter",
+    "version": "0.1.0",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "tsup src/express-adapter.ts --dts --out-dir dist",
+        "test": "vitest --run",
+        "lint": "eslint . --ext .ts"
+    },
+    "dependencies": {
+        "@drizzle-rest/core": "workspace:*"
+    },
+    "devDependencies": {
+        "tsup": "^7.0.0"
+    }
+}

@@ -25,9 +25,10 @@ Transform your Drizzle schema into a fully functional REST API with a single fun
 
 ```bash
 npm install drizzle-rest-adapter
-```
+````
 
-## 🚀 Quick Start
+
+
 
 ```typescript
 import express from 'express';
