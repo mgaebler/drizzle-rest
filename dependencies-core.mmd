@@ -1,0 +1,81 @@
+flowchart LR
+
+subgraph 0["packages"]
+subgraph 1["core"]
+subgraph 2["src"]
+subgraph 3["core"]
+subgraph 4["actions"]
+5["action.types.ts"]
+6["base-action.ts"]
+9["create.ts"]
+A["delete.ts"]
+B["get-many.ts"]
+G["get-one.ts"]
+H["index.ts"]
+I["replace.ts"]
+J["update.ts"]
+end
+subgraph 7["utils"]
+8["response-helper.ts"]
+C["query-builder.ts"]
+D["embed-builder.ts"]
+E["filter-builder.ts"]
+F["query-parser.ts"]
+M["request-helpers.ts"]
+subgraph N["schema-inspector"]
+O["schema-inspector.ts"]
+V["schema-inspector.test.ts"]
+W["schema.ts"]
+end
+T["query.types.ts"]
+U["request-helpers.test.ts"]
+end
+K["core-adapter.ts"]
+L["logger.ts"]
+P["hooks.ts"]
+subgraph Q["types"]
+R["adapter.types.ts"]
+S["handler.types.ts"]
+end
+end
+X["index.ts"]
+subgraph Y["integration-tests"]
+Z["hooks.integration.test.ts"]
+10["test-helpers.ts"]
+end
+end
+end
+end
+6-->8
+9-->5
+9-->6
+A-->5
+A-->6
+B-->C
+B-->F
+B-->8
+B-->5
+B-->6
+C-->D
+C-->E
+G-->5
+G-->6
+H-->5
+H-->9
+H-->A
+H-->B
+H-->G
+H-->I
+H-->J
+I-->5
+I-->6
+J-->5
+J-->6
+K-->H
+K-->L
+K-->M
+K-->O
+U-->M
+V-->W
+V-->O
+X-->K
