@@ -53,6 +53,12 @@ app.listen(3000, () => {
 });
 ```
 
+
+## Adapter Documentation
+
+- [Express Adapter](./packages/adapters/express/express-adapter.md)
+- [React Router Adapter](./packages/adapters/react-router/react-router-adapter.md)
+
 That's it! Your API is now available with full CRUD operations for all tables in your schema.
 
 
