@@ -5,24 +5,12 @@
     "type": "module",
     "scripts": {
         "build": "pnpm --filter @drizzle-rest/* build",
+        "test": "pnpm --filter @drizzle-rest/* test",
         "lint:fix": "eslint . --fix",
         "lint": "eslint .",
         "deps:graph": "depcruise --no-config --output-type mermaid --exclude 'node_modules|dist' packages > dependencies.mmd",
         "deps:graph:core": "depcruise --no-config --output-type mermaid --exclude 'node_modules|dist' packages/core > dependencies-core.mmd"
     },
-    "keywords": [
-        "drizzle",
-        "drizzle-orm",
-        "rest",
-        "api",
-        "json-server",
-        "typescript",
-        "express",
-        "crud",
-        "adapter",
-        "database",
-        "postgresql"
-    ],
     "author": "Marian Gaebler <marian.gaebler@gmail.com>",
     "license": "MIT",
     "repository": {

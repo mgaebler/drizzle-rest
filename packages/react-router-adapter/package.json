@@ -16,5 +16,20 @@
     },
     "devDependencies": {
         "tsup": "^7.0.0"
-    }
+    },
+    "keywords": [
+        "drizzle",
+        "drizzle-orm",
+        "rest",
+        "api",
+        "json-server",
+        "typescript",
+        "express",
+        "crud",
+        "adapter",
+        "database",
+        "postgresql"
+    ],
+    "author": "Marian Gaebler <marian.gaebler@gmail.com>",
+    "license": "MIT"
 }
