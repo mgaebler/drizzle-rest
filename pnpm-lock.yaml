@@ -236,12 +236,9 @@ importers:
 
   examples/react-router-simple:
     dependencies:
-      '@drizzle-rest/core':
-        specifier: workspace:*
-        version: link:../../packages/core
       '@drizzle-rest/react-router-adapter':
         specifier: workspace:*
-        version: link:../../packages/adapters/react-router
+        version: link:../../packages/react-router-adapter
       '@libsql/client':
         specifier: ^0.14.0
         version: 0.14.0
@@ -280,27 +277,27 @@ importers:
         specifier: ^5.1.4
         version: 5.1.4(typescript@5.9.2)(vite@6.3.5(@types/node@20.19.9)(jiti@2.5.1)(tsx@4.20.3)(yaml@2.8.1))
 
-  packages/adapters/express:
-    dependencies:
-      '@drizzle-rest/core':
-        specifier: workspace:*
-        version: link:../../core
-    devDependencies:
-      tsup:
-        specifier: ^7.0.0
-        version: 7.3.0(postcss@8.5.6)(typescript@5.9.2)
-
-  packages/adapters/react-router:
-    dependencies:
-      '@drizzle-rest/core':
-        specifier: workspace:*
-        version: link:../../core
-    devDependencies:
-      tsup:
-        specifier: ^7.0.0
-        version: 7.3.0(postcss@8.5.6)(typescript@5.9.2)
-
   packages/core:
+    devDependencies:
+      tsup:
+        specifier: ^7.0.0
+        version: 7.3.0(postcss@8.5.6)(typescript@5.9.2)
+
+  packages/express-adapter:
+    dependencies:
+      '@drizzle-rest/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      tsup:
+        specifier: ^7.0.0
+        version: 7.3.0(postcss@8.5.6)(typescript@5.9.2)
+
+  packages/react-router-adapter:
+    dependencies:
+      '@drizzle-rest/core':
+        specifier: workspace:*
+        version: link:../core
     devDependencies:
       tsup:
         specifier: ^7.0.0

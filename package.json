@@ -73,7 +73,6 @@
     },
     "workspaces": [
         "packages/*",
-        "packages/adapters/*",
         "examples/*"
     ]
 }
