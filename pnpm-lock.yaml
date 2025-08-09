@@ -102,9 +102,9 @@ importers:
 
   examples/express:
     dependencies:
-      '@drizzle-rest/core':
+      '@drizzle-rest/express-adapter':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../packages/express-adapter
       '@electric-sql/pglite':
         specifier: ^0.3.4
         version: 0.3.7

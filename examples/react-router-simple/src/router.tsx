@@ -30,6 +30,7 @@ export const router = createBrowserRouter([
                 path: 'posts',
                 element: <PostsPage />,
             },
+
         ],
     },
     // API routes
