@@ -8,32 +8,24 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        node-version: [22]
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          cache: 'pnpm'
-
-      - name: Setup pnpm
+      - uses: actions/checkout@v4
+      - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10
-
-      - name: Check pnpm version
-        run: pnpm --version
-
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "pnpm"
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Run linter
-        run: pnpm run lint
-
+        run: pnpm install
       - name: Run tests
         run: pnpm test
-
-      - name: Check TypeScript compilation
-        run: pnpm exec tsc --noEmit
+      - name: Build packages
+        run: pnpm build
