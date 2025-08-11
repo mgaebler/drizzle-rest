@@ -1,68 +1,87 @@
-# React Router Simple Example
+# Welcome to React Router!
 
-This example demonstrates how to use the Drizzle REST Adapter with React Router v7.
+A modern, production-ready template for building full-stack React applications using React Router.
 
-## Setup
+[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
+
+## Features
+
+- 🚀 Server-side rendering
+- ⚡️ Hot Module Replacement (HMR)
+- 📦 Asset bundling and optimization
+- 🔄 Data loading and mutations
+- 🔒 TypeScript by default
+- 🎉 TailwindCSS for styling
+- 📖 [React Router docs](https://reactrouter.com/)
+
+## Getting Started
+
+### Installation
+
+Install the dependencies:
 
 ```bash
 npm install
+```
+
+### Development
+
+Start the development server with HMR:
+
+```bash
 npm run dev
 ```
 
-## Usage Example
+Your application will be available at `http://localhost:5173`.
 
-```typescript
-// router.tsx
-import { createBrowserRouter } from 'react-router-dom';
-import { createReactRouterDrizzleRestRoute } from 'drizzle-rest-adapter';
-import { db } from './db/connection';
-import * as schema from './db/schema';
+## Building for Production
 
-// Create the API route using our React Router adapter
-const apiRoute = createReactRouterDrizzleRestRoute('/api/*', {
-  db: db as any,
-  schema,
-});
+Create a production build:
 
-export const router = createBrowserRouter([
-  {
-    path: '/',
-    element: <App />,
-    children: [
-      { index: true, element: <HomePage /> },
-      { path: 'users', element: <UsersPage /> },
-      { path: 'posts', element: <PostsPage /> },
-    ],
-  },
-  // API routes
-  apiRoute,
-]);
+```bash
+npm run build
 ```
 
-## Available Endpoints
+## Deployment
 
-Once running, the following REST endpoints will be available:
+### Docker Deployment
 
-### Users
-- `GET /api/users` - List all users
-- `GET /api/users/:id` - Get user by ID
-- `POST /api/users` - Create new user
-- `PUT /api/users/:id` - Replace user
-- `PATCH /api/users/:id` - Update user
-- `DELETE /api/users/:id` - Delete user
+To build and run using Docker:
 
-### Posts
-- `GET /api/posts` - List all posts
-- `GET /api/posts/:id` - Get post by ID
-- `POST /api/posts` - Create new post
-- `PUT /api/posts/:id` - Replace post
-- `PATCH /api/posts/:id` - Update post
-- `DELETE /api/posts/:id` - Delete post
+```bash
+docker build -t my-app .
 
-## Query Parameters
+# Run the container
+docker run -p 3000:3000 my-app
+```
 
-Supports JSON-Server compatible query syntax:
-- `?_page=1&_per_page=10` - Pagination
-- `?_sort=createdAt&_order=desc` - Sorting
-- `?name_like=John` - Text search
-- `?published=true` - Filtering
+The containerized application can be deployed to any platform that supports Docker, including:
+
+- AWS ECS
+- Google Cloud Run
+- Azure Container Apps
+- Digital Ocean App Platform
+- Fly.io
+- Railway
+
+### DIY Deployment
+
+If you're familiar with deploying Node applications, the built-in app server is production-ready.
+
+Make sure to deploy the output of `npm run build`
+
+```
+├── package.json
+├── package-lock.json (or pnpm-lock.yaml, or bun.lockb)
+├── build/
+│   ├── client/    # Static assets
+│   └── server/    # Server-side code
+```
+
+## Styling
+
+This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
+
+---
+
+Built with ❤️ using React Router.
