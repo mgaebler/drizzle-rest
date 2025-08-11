@@ -1,2 +1,1 @@
-
 export { createExpressDrizzleRestAdapter } from './express-adapter';

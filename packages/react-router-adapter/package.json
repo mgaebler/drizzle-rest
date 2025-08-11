@@ -1,13 +1,23 @@
 {
     "name": "@drizzle-rest/react-router-adapter",
     "version": "0.1.0",
-    "main": "dist/react-router-adapter.js",
-    "types": "dist/react-router-adapter.d.ts",
+    "type": "module",
+    "main": "dist/index.cjs",
+    "types": "dist/index.d.cts",
     "files": [
         "dist"
     ],
+    "tsup": {
+        "entry": [
+            "src/index.ts"
+        ],
+        "splitting": false,
+        "sourcemap": true,
+        "clean": true,
+        "dts": true
+    },
     "scripts": {
-        "build": "tsup src/react-router-adapter.ts --dts --out-dir dist",
+        "build": "tsup",
         "test": "vitest --run",
         "lint": "eslint . --ext .ts"
     },
@@ -15,6 +25,7 @@
         "@drizzle-rest/core": "workspace:*"
     },
     "devDependencies": {
+        "react-router": "^7.8.0",
         "tsup": "^7.0.0"
     },
     "keywords": [
