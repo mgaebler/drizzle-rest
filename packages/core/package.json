@@ -2,6 +2,7 @@
     "name": "@drizzle-rest/core",
     "version": "0.1.0",
     "type": "module",
+    "main": "dist/index.js",
     "files": [
         "dist"
     ],
@@ -16,10 +17,12 @@
     },
     "scripts": {
         "build": "tsup",
+        "build:check": "npm run lint && npm run test && npm run build",
         "test": "vitest --run",
         "lint": "eslint . --ext .ts",
         "package:verify": "npm pack --dry-run",
         "prepublishOnly": "npm run test && npm run lint",
+        "security:check": "npm audit --audit-level=high || true",
         "prerelease": "npm run build:check && npm run security:check",
         "release:alpha": "npm version prerelease --preid=alpha && npm publish --tag alpha --access public",
         "release:beta": "npm version prerelease --preid=beta && npm publish --tag beta --access public",
@@ -27,10 +30,17 @@
         "release:minor": "npm version minor && npm publish --access public",
         "release:patch": "npm version patch && npm publish --access public"
     },
-    "dependencies": {
+    "peerDependencies": {
+        "drizzle-orm": "^0.44.0",
+        "drizzle-zod": "^0.5.0",
+        "zod": "^3.22.0",
         "pino": "^9.8.0"
     },
     "devDependencies": {
+        "drizzle-orm": "^0.44.0",
+        "drizzle-zod": "^0.5.0",
+        "zod": "^3.22.0",
+        "pino": "^9.8.0",
         "tsup": "^7.0.0"
     },
     "keywords": [
@@ -47,5 +57,11 @@
         "postgresql"
     ],
     "author": "Marian Gaebler <marian.gaebler@gmail.com>",
-    "license": "MIT"
+    "license": "MIT",
+    "engines": {
+        "node": ">=22"
+    },
+    "publishConfig": {
+        "access": "public"
+    }
 }

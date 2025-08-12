@@ -20,10 +20,13 @@
         "test": "vitest --run",
         "lint": "eslint . --ext .ts"
     },
-    "dependencies": {
-        "@drizzle-rest/core": "workspace:*"
+    "peerDependencies": {
+        "@drizzle-rest/core": "*",
+        "express": "^4.18.0"
     },
     "devDependencies": {
+        "@drizzle-rest/core": "workspace:*",
+        "express": "^4.18.0",
         "tsup": "^7.0.0"
     },
     "keywords": [
@@ -40,5 +43,11 @@
         "postgresql"
     ],
     "author": "Marian Gaebler <marian.gaebler@gmail.com>",
-    "license": "MIT"
+    "license": "MIT",
+    "engines": {
+        "node": ">=22"
+    },
+    "publishConfig": {
+        "access": "public"
+    }
 }

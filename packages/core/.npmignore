@@ -2,19 +2,7 @@
 *
 
 # Then explicitly include what should be packaged
-!src/
-!src/actions/
-!src/actions/**
-!src/utils/
-!src/utils/**
-!src/index.ts
-!src/drizzle-rest-adapter.ts
-
-# Explicitly exclude test files and directories
-src/integration-tests/
-src/db/
-src/**/*.test.ts
-src/**/*.spec.ts
+!dist/
 
 # Include essential files
 !README.md
