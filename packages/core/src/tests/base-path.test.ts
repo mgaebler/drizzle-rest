@@ -1,7 +1,7 @@
 import { pgTable, serial, text } from 'drizzle-orm/pg-core';
 import { describe, expect, it } from 'vitest';
 
-import { CoreAdapter, type ICoreAdapterOptions } from './core-adapter';
+import { CoreAdapter, type ICoreAdapterOptions } from '../core-adapter';
 
 // minimal table
 const users = pgTable('users', {
