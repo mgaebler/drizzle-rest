@@ -94,7 +94,7 @@ export abstract class CoreAdapter implements IRestHandler {
         tables.forEach(tableMetadata => {
             const table = schema[tableMetadata.name];
             const resourcePath = `/${tableMetadata.name}`;
-            const itemPath = `/${tableMetadata.name}/:id`;
+            const itemPath = `${resourcePath}/:id`;
 
             this.logger.debug({
                 table: tableMetadata.name,
