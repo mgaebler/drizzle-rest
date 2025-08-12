@@ -1,11 +1,11 @@
 import { and, asc, desc } from 'drizzle-orm';
-import { PgTable } from 'drizzle-orm/pg-core';
+import type { PgTable } from 'drizzle-orm/pg-core';
 
-import { DrizzleDb } from '../types/handler.types';
+import type { DrizzleDb } from '../types/handler.types';
 import { EmbedBuilder } from './embed-builder';
 import { FilterBuilder } from './filter-builder';
-import { ParsedQueryParams } from './query.types';
-import { TableMetadata } from './schema-inspector/schema-inspector';
+import type { ParsedQueryParams } from './query.types';
+import type { TableMetadata } from './schema-inspector/schema-inspector';
 
 export class QueryBuilder {
     private filterBuilder: FilterBuilder;

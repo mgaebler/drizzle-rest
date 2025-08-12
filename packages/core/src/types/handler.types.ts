@@ -1,8 +1,8 @@
-import { PgliteDatabase } from 'drizzle-orm/pglite';
+import type { PgliteDatabase } from 'drizzle-orm/pglite';
 
-import { ICoreTableContext } from '../actions/action.types';
-import { Logger } from '../logger';
-import { IRequestContext } from './adapter.types';
+import type { ICoreTableContext } from '../actions/action.types';
+import type { Logger } from '../logger';
+import type { IRequestContext } from './adapter.types';
 
 /**
  * Framework-agnostic database type

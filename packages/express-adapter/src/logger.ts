@@ -8,7 +8,6 @@ export interface LoggerOptions {
 }
 
 export function createLogger(options: LoggerOptions = {}): pino.Logger {
-    const isProduction = process.env.NODE_ENV === 'production';
     const isDevelopment = process.env.NODE_ENV === 'development';
 
     const {
@@ -31,7 +30,7 @@ export function createLogger(options: LoggerOptions = {}): pino.Logger {
                     hideObject: false
                 }
             };
-        } catch (err) {
+        } catch {
             // Fallback: no pretty transport
         }
     }

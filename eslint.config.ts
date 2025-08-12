@@ -36,6 +36,7 @@ export default [
             '@stylistic/no-multiple-empty-lines': ['error', { max: 1, maxEOF: 1 }],
             '@typescript-eslint/no-explicit-any': 'off',
             '@typescript-eslint/no-unused-vars': 'off', // Turned off in favor of unused-imports
+            '@typescript-eslint/consistent-type-imports': ['error', { fixStyle: 'separate-type-imports' }],
             'unused-imports/no-unused-imports': 'error',
             'unused-imports/no-unused-vars': [
                 'warn',

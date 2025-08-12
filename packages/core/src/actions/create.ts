@@ -1,7 +1,7 @@
 import { createInsertSchema } from 'drizzle-zod';
 
-import { ICoreActionHandler } from '../types/handler.types';
-import { ICoreTableContext } from './action.types';
+import type { ICoreActionHandler } from '../types/handler.types';
+import type { ICoreTableContext } from './action.types';
 import { ActionTypeEnum } from './action.types';
 import { BaseAction } from './base-action';
 

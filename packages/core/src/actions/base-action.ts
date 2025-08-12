@@ -1,8 +1,8 @@
-import { Logger } from '../logger';
+import type { Logger } from '../logger';
 import type { IAdapterResponse, IRequestContext } from '../types/adapter.types';
 import { createAdapterResponse } from '../utils/response-helper';
-import { ICoreTableContext } from './action.types';
-import { ActionTypeEnum } from './action.types';
+import type { ICoreTableContext } from './action.types';
+import type { ActionTypeEnum } from './action.types';
 
 /**
  * Base class providing common action patterns and error handling abstractions

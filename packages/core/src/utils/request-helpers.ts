@@ -2,7 +2,7 @@
  * Utility functions for working with native Web API Request objects
  */
 
-import { IAdapterRequest, IRequestContext } from '../types/adapter.types';
+import type { IAdapterRequest, IRequestContext } from '../types/adapter.types';
 
 /**
  * Get a header value from the request using native Headers.get() method

@@ -1,6 +1,7 @@
 import { getTableColumns } from 'drizzle-orm';
-import { PgTable } from 'drizzle-orm/pg-core';
+import type { PgTable } from 'drizzle-orm/pg-core';
 
+import type { ITableActionContext } from './actions';
 import {
     coreCreateAction,
     coreDeleteAction,
@@ -9,10 +10,11 @@ import {
     coreReplaceAction,
     coreUpdateAction
 } from './actions';
-import { ActionTypeEnum, ITableActionContext } from './actions';
-import { createLogger, Logger } from './logger';
-import { IRequestContext } from './types/adapter.types';
-import { DrizzleDb, IRouteHandler } from './types/handler.types';
+import { ActionTypeEnum } from './actions';
+import type { Logger } from './logger';
+import { createLogger } from './logger';
+import type { IRequestContext } from './types/adapter.types';
+import type { DrizzleDb, IRouteHandler } from './types/handler.types';
 import { parseQueryParamsFromUrl } from './utils/request-helpers';
 import { SchemaInspector } from './utils/schema-inspector/schema-inspector';
 

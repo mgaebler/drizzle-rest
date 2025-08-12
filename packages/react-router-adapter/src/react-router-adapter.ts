@@ -1,4 +1,5 @@
-import { CoreAdapter, ICoreAdapterOptions, IFrameworkAdapter } from '@drizzle-rest/core';
+import type { ICoreAdapterOptions, IFrameworkAdapter } from '@drizzle-rest/core';
+import { CoreAdapter } from '@drizzle-rest/core';
 import type { ActionFunctionArgs, LoaderFunctionArgs } from 'react-router';
 
 export class ReactRouterAdapter extends CoreAdapter implements IFrameworkAdapter {
@@ -13,7 +14,8 @@ export class ReactRouterAdapter extends CoreAdapter implements IFrameworkAdapter
             try {
                 const webResponse = await this.handle(request);
                 return webResponse;
-            } catch {
+            } catch (error) {
+                console.error('Error handling request:', error);
                 throw new Response('Internal Server Error', { status: 500 });
             }
         };

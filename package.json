@@ -3,6 +3,7 @@
     "version": "0.1.2-alpha.3",
     "description": "A dynamic REST API adapter for Drizzle ORM with JSON-Server compatible query syntax",
     "type": "module",
+    "private": true,
     "scripts": {
         "build": "pnpm --filter @drizzle-rest/* build",
         "test": "pnpm --filter @drizzle-rest/* test",
@@ -22,8 +23,7 @@
     },
     "homepage": "https://github.com/mgaebler/drizzle-rest#readme",
     "engines": {
-        "node": ">=20.0.0",
-        "npm": ">=10.0.0"
+        "node": ">=22"
     },
     "dependencies": {
         "@electric-sql/pglite": "^0.3.4",

@@ -1,4 +1,4 @@
-import { ActionTypeEnum } from './actions/action.types';
+import type { ActionTypeEnum } from './actions/action.types';
 
 interface CoreHookContext {
 

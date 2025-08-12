@@ -1,9 +1,10 @@
-import { drizzle } from 'drizzle-orm/libsql';
-import { createClient } from '@libsql/client';
+import { PGlite } from '@electric-sql/pglite';
+import { drizzle } from 'drizzle-orm/pglite';
 
-// Create an in-memory SQLite database for this example
-const client = createClient({
-    url: ':memory:'
-});
+import * as schema from './schema';
 
-export const db = drizzle(client);
+// Create PGlite instance - using in-memory database for demo
+const client = new PGlite();
+
+// Create Drizzle instance with schema
+export const db = drizzle(client, { schema });

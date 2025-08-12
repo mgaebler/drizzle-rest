@@ -1,5 +1,6 @@
-import { CoreAdapter, ICoreAdapterOptions, IFrameworkAdapter } from '@drizzle-rest/core';
-import { Request as ExpressRequest, Response as ExpressResponse } from 'express';
+import type { ICoreAdapterOptions, IFrameworkAdapter } from '@drizzle-rest/core';
+import { CoreAdapter } from '@drizzle-rest/core';
+import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 import express from 'express';
 
 /**
@@ -26,7 +27,7 @@ export class ExpressAdapter extends CoreAdapter implements IFrameworkAdapter {
 
                 // Send the Web API Response back through Express
                 await this.sendResponse(webResponse, res);
-            } catch (error: any) {
+            } catch {
                 res.status(500).json({
                     error: 'Internal Server Error'
                 });

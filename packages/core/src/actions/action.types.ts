@@ -1,8 +1,8 @@
-import { PgTable } from 'drizzle-orm/pg-core';
+import type { PgTable } from 'drizzle-orm/pg-core';
 
-import { IRequestContext } from '../types/adapter.types';
-import { DrizzleDb } from '../types/handler.types';
-import { TableMetadata } from '../utils/schema-inspector/schema-inspector';
+import type { IRequestContext } from '../types/adapter.types';
+import type { DrizzleDb } from '../types/handler.types';
+import type { TableMetadata } from '../utils/schema-inspector/schema-inspector';
 
 export enum ActionTypeEnum {
     GET_MANY = 'GET_MANY',

@@ -1,9 +1,9 @@
 import type { IAdapterResponse } from '../types/adapter.types';
-import { ICoreActionHandler } from '../types/handler.types';
+import type { ICoreActionHandler } from '../types/handler.types';
 import { QueryBuilder } from '../utils/query-builder';
 import { CoreQueryParser } from '../utils/query-parser';
 import { createAdapterResponse } from '../utils/response-helper';
-import { ICoreTableContext } from './action.types';
+import type { ICoreTableContext } from './action.types';
 import { ActionTypeEnum } from './action.types';
 import { BaseAction } from './base-action';
 

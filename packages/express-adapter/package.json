@@ -2,19 +2,18 @@
     "name": "@drizzle-rest/express-adapter",
     "version": "0.1.0",
     "type": "module",
-    "main": "dist/index.cjs",
-    "types": "dist/index.d.cts",
+    "main": "dist/index.js",
     "files": [
         "dist"
     ],
-    "tsup": {
-        "entry": [
-            "src/index.ts"
-        ],
-        "splitting": false,
-        "sourcemap": true,
-        "clean": true,
-        "dts": true
+    "sideEffects": false,
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js",
+            "default": "./dist/index.js"
+        }
     },
     "scripts": {
         "build": "tsup",
