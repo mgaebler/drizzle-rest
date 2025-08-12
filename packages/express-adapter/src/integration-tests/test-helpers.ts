@@ -36,7 +36,7 @@ const setupExpressApp = (tableOptions?: DrizzleRestAdapterOptions['tableOptions'
 
     const drizzleApiRouter = createExpressDrizzleRestAdapter(createTestAdapterOptions(tableOptions));
 
-    app.use('/api/v1', drizzleApiRouter);
+    app.use('', drizzleApiRouter);
     return app;
 };
 
@@ -163,11 +163,11 @@ export const expectEmbeddedCommentsData = (post: any, expectedCommentCount: numb
 
 // API request utilities
 export const apiRequest = {
-    get: (path: string) => request(app).get(`/api/v1${path}`),
-    post: (path: string, data?: any) => request(app).post(`/api/v1${path}`).send(data),
-    patch: (path: string, data?: any) => request(app).patch(`/api/v1${path}`).send(data),
-    put: (path: string, data?: any) => request(app).put(`/api/v1${path}`).send(data),
-    delete: (path: string) => request(app).delete(`/api/v1${path}`)
+    get: (path: string) => request(app).get(`${path}`),
+    post: (path: string, data?: any) => request(app).post(`${path}`).send(data),
+    patch: (path: string, data?: any) => request(app).patch(`${path}`).send(data),
+    put: (path: string, data?: any) => request(app).put(`${path}`).send(data),
+    delete: (path: string) => request(app).delete(`${path}`)
 };
 
 // Database setup helpers

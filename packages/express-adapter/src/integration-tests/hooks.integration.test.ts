@@ -65,7 +65,7 @@ const createAppWithHooks = (tableOptions: any = {}) => {
 
     const drizzleApiRouter = createExpressDrizzleRestAdapter(createTestAdapterOptions(tableOptions));
 
-    app.use('/api/v1', drizzleApiRouter);
+    app.use('', drizzleApiRouter);
     return app;
 };
 
@@ -82,7 +82,7 @@ const createAppWithAdminUser = (tableOptions: any = {}) => {
 
     const drizzleApiRouter = createExpressDrizzleRestAdapter(createTestAdapterOptions(tableOptions));
 
-    app.use('/api/v1', drizzleApiRouter);
+    app.use('', drizzleApiRouter);
     return app;
 };
 
@@ -104,7 +104,7 @@ describe.skip('Hook System Integration Tests', () => {
             });
 
             await request(app)
-                .post('/api/v1/users')
+                .post('/users')
                 .send(TEST_USERS.alice);
 
             expect(beforeOperationSpy).toHaveBeenCalledWith(
@@ -131,7 +131,7 @@ describe.skip('Hook System Integration Tests', () => {
             });
 
             const res = await request(app)
-                .post('/api/v1/users')
+                .post('/users')
                 .send(TEST_USERS.alice);
 
             expect(res.status).toBe(403);
@@ -152,7 +152,7 @@ describe.skip('Hook System Integration Tests', () => {
             });
 
             await request(app)
-                .post('/api/v1/users')
+                .post('/users')
                 .send(TEST_USERS.alice);
 
             expect(afterOperationSpy).toHaveBeenCalledWith(
@@ -191,7 +191,7 @@ describe.skip('Hook System Integration Tests', () => {
             });
 
             const res = await request(app)
-                .post('/api/v1/users')
+                .post('/users')
                 .send(TEST_USERS.alice);
 
             expect(res.status).toBe(201);
@@ -220,7 +220,7 @@ describe.skip('Hook System Integration Tests', () => {
             });
 
             const res = await request(app)
-                .get(`/api/v1/users/${testUser.id}`);
+                .get(`/users/${testUser.id}`);
 
             expect(res.status).toBe(200);
             expect(res.body.fullName).toBe(TEST_USERS.alice.fullName);
@@ -248,7 +248,7 @@ describe.skip('Hook System Integration Tests', () => {
             });
 
             const res = await request(app)
-                .get(`/api/v1/users/${testUser.id}`);
+                .get(`/users/${testUser.id}`);
 
             expect(res.status).toBe(200);
             expect(res.body.fullName).toBe(TEST_USERS.alice.fullName);
@@ -291,7 +291,7 @@ describe.skip('Hook System Integration Tests', () => {
 
             // User has "users:read" permission
             const res = await request(app)
-                .get('/api/v1/users');
+                .get('/users');
 
             expect(res.status).toBe(200);
         });
@@ -312,7 +312,7 @@ describe.skip('Hook System Integration Tests', () => {
 
             // User does NOT have "users:delete" permission
             const res = await request(app)
-                .delete('/api/v1/users/1');
+                .delete('/users/1');
 
             expect(res.status).toBe(403);
             expect(res.body.error).toBe('Forbidden: Missing permission users:delete');
@@ -334,7 +334,7 @@ describe.skip('Hook System Integration Tests', () => {
 
             // Admin has "users:delete" permission
             const res = await request(app)
-                .delete('/api/v1/users/1');
+                .delete('/users/1');
 
             expect(res.status).toBe(404); // 404 because user doesn't exist, but permission passed
         });
@@ -362,16 +362,16 @@ describe.skip('Hook System Integration Tests', () => {
                 }
             }));
 
-            appWithEditor.use('/api/v1', drizzleApiRouter);
+            appWithEditor.use('', drizzleApiRouter);
 
             // Editor has "posts:read" permission
             const readRes = await request(appWithEditor)
-                .get('/api/v1/posts');
+                .get('/posts');
             expect(readRes.status).toBe(200);
 
             // Editor has "posts:create" permission
             const createRes = await request(appWithEditor)
-                .post('/api/v1/posts')
+                .post('/posts')
                 .send({ title: 'Test Post', content: 'Test content' });
             expect(createRes.status).not.toBe(403); // Should not be forbidden due to permissions
         });
@@ -415,22 +415,22 @@ describe.skip('Hook System Integration Tests', () => {
                 }
             }));
 
-            appWithLimitedUser.use('/api/v1', drizzleApiRouter);
+            appWithLimitedUser.use('', drizzleApiRouter);
 
             // Limited user can read posts
             const postsRes = await request(appWithLimitedUser)
-                .get('/api/v1/posts');
+                .get('/posts');
             expect(postsRes.status).toBe(200);
 
             // Limited user cannot read users (no users:read permission)
             const usersRes = await request(appWithLimitedUser)
-                .get('/api/v1/users');
+                .get('/users');
             expect(usersRes.status).toBe(403);
             expect(usersRes.body.error).toBe('Forbidden: Missing permission users:read');
 
             // Limited user cannot create posts (no posts:create permission)
             const createRes = await request(appWithLimitedUser)
-                .post('/api/v1/posts')
+                .post('/posts')
                 .send({ title: 'Test', content: 'Test' });
             expect(createRes.status).toBe(403);
             expect(createRes.body.error).toBe('Forbidden: Missing permission posts:create');
@@ -456,7 +456,7 @@ describe.skip('Hook System Integration Tests', () => {
             });
 
             const res = await request(app)
-                .delete(`/api/v1/users/${testUser.id}`);
+                .delete(`/users/${testUser.id}`);
 
             expect(res.status).toBe(204);
         });
@@ -479,7 +479,7 @@ describe.skip('Hook System Integration Tests', () => {
             });
 
             const res = await request(app)
-                .delete(`/api/v1/users/${testUser.id}`);
+                .delete(`/users/${testUser.id}`);
 
             expect(res.status).toBe(403);
             expect(res.body.error).toBe('Forbidden: Missing permission users:delete');
@@ -507,7 +507,7 @@ describe.skip('Hook System Integration Tests', () => {
 
             // User does NOT have "users:create" permission, so this should fail
             const res = await request(app)
-                .post('/api/v1/users')
+                .post('/users')
                 .send(TEST_USERS.alice);
 
             expect(res.status).toBe(403);
@@ -550,10 +550,10 @@ describe.skip('Hook System Integration Tests', () => {
                 }
             }));
 
-            app.use('/api/v1', drizzleApiRouter);
+            app.use('', drizzleApiRouter);
 
             const res = await request(app)
-                .post('/api/v1/users')
+                .post('/users')
                 .send(TEST_USERS.alice);
 
             expect(res.status).toBe(201);
@@ -578,7 +578,7 @@ describe.skip('Hook System Integration Tests', () => {
             });
 
             const res = await request(app)
-                .post('/api/v1/users')
+                .post('/users')
                 .send(TEST_USERS.alice);
 
             expect(res.status).toBe(403);
@@ -598,7 +598,7 @@ describe.skip('Hook System Integration Tests', () => {
             });
 
             const res = await request(app)
-                .post('/api/v1/users')
+                .post('/users')
                 .send(TEST_USERS.alice);
 
             expect(res.status).toBe(500);
@@ -617,7 +617,7 @@ describe.skip('Hook System Integration Tests', () => {
             });
 
             const res = await request(app)
-                .post('/api/v1/users')
+                .post('/users')
                 .send(TEST_USERS.alice);
 
             expect(res.status).toBe(403);
@@ -644,7 +644,7 @@ describe.skip('Hook System Integration Tests', () => {
             });
 
             await request(app)
-                .post('/api/v1/users')
+                .post('/users')
                 .send(TEST_USERS.alice);
 
             expect(executionOrder).toEqual(['beforeOperation', 'afterOperation']);
@@ -669,7 +669,7 @@ describe.skip('Hook System Integration Tests', () => {
             });
 
             await request(app)
-                .post('/api/v1/users')
+                .post('/users')
                 .send(TEST_USERS.alice);
 
             expect(executionOrder).toEqual(['beforeOperation']);
