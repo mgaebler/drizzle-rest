@@ -1,0 +1,129 @@
+flowchart LR
+
+subgraph 0["packages"]
+subgraph 1["core"]
+subgraph 2["src"]
+subgraph 3["actions"]
+4["action.types.ts"]
+5["base-action.ts"]
+8["create.ts"]
+9["delete.ts"]
+A["get-many.ts"]
+F["get-one.ts"]
+G["index.ts"]
+H["replace.ts"]
+I["update.ts"]
+end
+subgraph 6["utils"]
+7["response-helper.ts"]
+B["query-builder.ts"]
+C["embed-builder.ts"]
+D["filter-builder.ts"]
+E["query-parser.ts"]
+M["request-helpers.ts"]
+subgraph N["schema-inspector"]
+O["schema-inspector.ts"]
+W["schema-inspector.test.ts"]
+X["schema.ts"]
+end
+U["query.types.ts"]
+V["request-helpers.test.ts"]
+end
+J["base-path.test.ts"]
+K["core-adapter.ts"]
+L["logger.ts"]
+P["hooks.ts"]
+Q["index.ts"]
+subgraph R["types"]
+S["adapter.types.ts"]
+T["handler.types.ts"]
+end
+end
+end
+subgraph Y["express-adapter"]
+Z["drizzle.config.ts"]
+subgraph 10["src"]
+subgraph 11["db"]
+12["connection.ts"]
+13["schema.ts"]
+end
+14["express-adapter.ts"]
+15["index.ts"]
+subgraph 16["integration-tests"]
+17["crud.integration.test.ts"]
+18["test-helpers.ts"]
+1A["embedding.integration.test.ts"]
+1B["filtering.integration.test.ts"]
+1C["hooks.integration.test.ts"]
+1D["http-methods.integration.test.ts"]
+1E["pagination.integration.test.ts"]
+1F["sorting.integration.test.ts"]
+end
+19["logger.ts"]
+end
+end
+subgraph 1G["react-router-adapter"]
+subgraph 1H["src"]
+subgraph 1I["db"]
+1J["connection.ts"]
+1K["schema.ts"]
+end
+1L["index.ts"]
+1M["react-router-adapter.ts"]
+1N["react-router-adapter.test.ts"]
+end
+end
+end
+5-->7
+8-->4
+8-->5
+9-->4
+9-->5
+A-->B
+A-->E
+A-->7
+A-->4
+A-->5
+B-->C
+B-->D
+F-->4
+F-->5
+G-->4
+G-->8
+G-->9
+G-->A
+G-->F
+G-->H
+G-->I
+H-->4
+H-->5
+I-->4
+I-->5
+J-->K
+K-->G
+K-->L
+K-->M
+K-->O
+Q-->K
+V-->M
+W-->X
+W-->O
+15-->14
+17-->18
+18-->12
+18-->13
+18-->15
+18-->19
+1A-->18
+1B-->18
+1C-->12
+1C-->13
+1C-->15
+1C-->18
+1D-->18
+1E-->18
+1F-->18
+1L-->1M
+1N-->1J
+1N-->1K
+1N-->1M
