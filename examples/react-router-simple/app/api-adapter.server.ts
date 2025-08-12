@@ -6,6 +6,7 @@ import { createReactRouterDrizzleRestAdapter } from "@drizzle-rest/react-router-
 const adapter = createReactRouterDrizzleRestAdapter({
     db: db as any,
     schema,
+    basePath: '/api',
 });
 
 export { adapter }

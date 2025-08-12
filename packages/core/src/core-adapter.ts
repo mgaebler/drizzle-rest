@@ -37,6 +37,13 @@ export interface ICoreAdapterOptions {
     /** The imported Drizzle schema object. */
     schema: Record<string, PgTable | any>;
 
+    /**
+     * Optional global base path prefix (e.g. "/api/v1").
+     * If omitted, empty, or "/" it is ignored.
+     * Will be normalized to start with a single leading slash and have no trailing slash.
+     */
+    basePath?: string;
+
     /** Detailed configuration per table. */
     tableOptions?: {
         [tableName: string]: {
@@ -54,13 +61,16 @@ export abstract class CoreAdapter implements IRestHandler {
     private options: ICoreAdapterOptions;
     private logger: Logger;
     private tablesMetadataMap: Map<string, any> = new Map();
+    private basePath: string; // normalized base path ('' means none)
 
     constructor(options: ICoreAdapterOptions) {
         this.options = options;
         this.logger = options.logger || createLogger();
+        this.basePath = this.normalizeBasePath(options.basePath);
 
         this.logger.info({
-            tablesCount: Object.keys(options.schema).length
+            tablesCount: Object.keys(options.schema).length,
+            basePath: this.basePath || '(none)'
         }, 'Initializing Core REST Adapter');
 
         this.setupRoutes();
@@ -93,7 +103,7 @@ export abstract class CoreAdapter implements IRestHandler {
 
         tables.forEach(tableMetadata => {
             const table = schema[tableMetadata.name];
-            const resourcePath = `/${tableMetadata.name}`;
+            const resourcePath = `${this.basePath}/${tableMetadata.name}`.replace(/\/+/g, '/');
             const itemPath = `${resourcePath}/:id`;
 
             this.logger.debug({
@@ -300,13 +310,19 @@ export abstract class CoreAdapter implements IRestHandler {
         const url = new URL(request.url);
         const query = parseQueryParamsFromUrl(request.url);
 
+        // Normalize pathname: remove trailing slash (except root)
+        let pathname = url.pathname;
+        if (pathname.length > 1 && pathname.endsWith('/')) {
+            pathname = pathname.slice(0, -1);
+        }
+
         // Parse body if present
         const parsedBody = await this.parseRequestBody(request);
 
         return {
             method: request.method,
             url: request.url,
-            pathname: url.pathname,
+            pathname,
             headers: request.headers,
             params: {}, // Will be populated during route matching
             query,
@@ -400,6 +416,16 @@ export abstract class CoreAdapter implements IRestHandler {
         }
 
         return params;
+    }
+
+    /** Normalize a base path value into a canonical form */
+    private normalizeBasePath(input?: string): string {
+        if (!input) return '';
+        let p = input.trim();
+        if (p === '' || p === '/') return '';
+        if (!p.startsWith('/')) p = '/' + p;
+        if (p.endsWith('/')) p = p.slice(0, -1);
+        return p === '/' ? '' : p;
     }
 }
 
