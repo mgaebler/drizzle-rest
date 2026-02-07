@@ -5,6 +5,7 @@
     "type": "module",
     "private": true,
     "scripts": {
+        "prepare": "lefthook install",
         "build": "pnpm --filter @drizzle-rest/* build",
         "test": "pnpm --filter @drizzle-rest/* test",
         "lint": "biome check .",
@@ -37,10 +38,10 @@
     },
     "devDependencies": {
         "@biomejs/biome": "^2.3.14",
+        "@evilmartians/lefthook": "^2.1.0",
         "@types/node": "^20.11.5",
         "dependency-cruiser": "^17.0.0",
         "drizzle-kit": "^0.31.4",
-        "husky": "^9.1.7",
         "jiti": "^2.4.2",
         "pino-pretty": "^13.0.0",
         "ts-unused-exports": "^11.0.1",

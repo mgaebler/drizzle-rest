@@ -1,4 +1,7 @@
 packages:
-  - "packages/*"
-  - "packages/adapters/*"
-  - "examples/*"
+  - packages/*
+  - packages/adapters/*
+  - examples/*
+
+ignoredBuiltDependencies:
+  - '@evilmartians/lefthook'
