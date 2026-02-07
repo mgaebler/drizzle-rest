@@ -10,14 +10,9 @@ export interface LoggerOptions {
 export function createLogger(options: LoggerOptions = {}): pino.Logger {
     const isDevelopment = process.env.NODE_ENV === 'development';
 
-    const {
-        level = isDevelopment ? 'debug' : 'info',
-        pretty = isDevelopment,
-        base = {},
-        pinoOptions = {}
-    } = options;
+    const { level = isDevelopment ? 'debug' : 'info', pretty = isDevelopment, base = {}, pinoOptions = {} } = options;
 
-    let transport;
+    let transport: pino.TransportSingleOptions | undefined;
     if (pretty) {
         try {
             transport = {
@@ -27,8 +22,8 @@ export function createLogger(options: LoggerOptions = {}): pino.Logger {
                     translateTime: 'yyyy-mm-dd HH:MM:ss',
                     ignore: 'pid,hostname',
                     singleLine: false,
-                    hideObject: false
-                }
+                    hideObject: false,
+                },
             };
         } catch {
             // Fallback: no pretty transport
@@ -39,6 +34,6 @@ export function createLogger(options: LoggerOptions = {}): pino.Logger {
         level,
         base,
         ...pinoOptions,
-        transport
+        transport,
     });
 }

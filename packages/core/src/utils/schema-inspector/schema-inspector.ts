@@ -34,7 +34,7 @@ export interface TableMetadata {
 }
 
 export class SchemaInspector {
-    constructor(private schema: DrizzleSchema) { }
+    constructor(private schema: DrizzleSchema) {}
 
     extractTables(): TableMetadata[] {
         const tables = Object.entries(this.schema)
@@ -42,9 +42,9 @@ export class SchemaInspector {
             .map(([name, table]) => this.extractTableMetadata(name, table));
 
         // Build relations after all tables are extracted
-        return tables.map(table => ({
+        return tables.map((table) => ({
             ...table,
-            relations: this.buildTableRelations(table, tables)
+            relations: this.buildTableRelations(table, tables),
         }));
     }
 
@@ -75,7 +75,7 @@ export class SchemaInspector {
             tableName: (tableAsRecord[Symbol.for('drizzle:Name')] as string) || name,
             columns,
             primaryKey,
-            relations: []
+            relations: [],
         };
     }
 
@@ -87,19 +87,17 @@ export class SchemaInspector {
             type: this.getColumnType(col),
             nullable: !col.notNull,
             isPrimaryKey: col.primary || false,
-            references: this.extractColumnReferences(col)
+            references: this.extractColumnReferences(col),
         }));
     }
 
     private extractPrimaryKey(table: PgTable, columns: ColumnMetadata[]): string[] {
         // Find columns marked as primary
-        const primaryColumns = columns
-            .filter(col => col.isPrimaryKey)
-            .map(col => col.name);
+        const primaryColumns = columns.filter((col) => col.isPrimaryKey).map((col) => col.name);
 
         // If no explicit primary key found, assume 'id' (with warning)
         if (primaryColumns.length === 0) {
-            const hasIdColumn = columns.some(col => col.name === 'id');
+            const hasIdColumn = columns.some((col) => col.name === 'id');
             const tableAsRecord = table as unknown as Record<symbol, unknown>;
             const tableName = (tableAsRecord[Symbol.for('drizzle:Name')] as string) || 'unknown';
 
@@ -131,13 +129,13 @@ export class SchemaInspector {
         // Pattern 1: camelCase ending with 'Id' (e.g., userId -> user)
         if (columnName.endsWith('Id')) {
             const tableName = columnName.slice(0, -2).toLowerCase(); // Remove 'Id' and make lowercase
-            const possibleTableNames = [tableName, tableName + 's'];
+            const possibleTableNames = [tableName, `${tableName}s`];
 
             for (const possibleName of possibleTableNames) {
                 if (this.schema[possibleName]) {
                     return {
                         table: possibleName,
-                        column: 'id'
+                        column: 'id',
                     };
                 }
             }
@@ -146,13 +144,13 @@ export class SchemaInspector {
         // Pattern 2: snake_case ending with '_id' (e.g., user_id -> user)
         if (columnName.endsWith('_id')) {
             const tableName = columnName.slice(0, -3).toLowerCase(); // Remove '_id' and make lowercase
-            const possibleTableNames = [tableName, tableName + 's'];
+            const possibleTableNames = [tableName, `${tableName}s`];
 
             for (const possibleName of possibleTableNames) {
                 if (this.schema[possibleName]) {
                     return {
                         table: possibleName,
-                        column: 'id'
+                        column: 'id',
                     };
                 }
             }
@@ -165,28 +163,28 @@ export class SchemaInspector {
         const relations: RelationMetadata[] = [];
 
         // Add belongs_to relations for each foreign key column
-        table.columns.forEach(column => {
+        table.columns.forEach((column) => {
             if (column.references) {
                 relations.push({
                     type: 'belongs_to',
                     relatedTable: column.references.table,
                     foreignKey: column.name,
-                    relatedColumn: column.references.column
+                    relatedColumn: column.references.column,
                 });
             }
         });
 
         // Add has_many relations by looking at other tables that reference this table
-        allTables.forEach(otherTable => {
+        allTables.forEach((otherTable) => {
             if (otherTable.name === table.name) return;
 
-            otherTable.columns.forEach(column => {
+            otherTable.columns.forEach((column) => {
                 if (column.references && column.references.table === table.name) {
                     relations.push({
                         type: 'has_many',
                         relatedTable: otherTable.name,
                         foreignKey: column.name,
-                        relatedColumn: column.references.column
+                        relatedColumn: column.references.column,
                     });
                 }
             });

@@ -79,7 +79,7 @@ export function parseQueryParams(searchParams: URLSearchParams): Record<string, 
         if (!paramGroups.has(key)) {
             paramGroups.set(key, []);
         }
-        paramGroups.get(key)!.push(value);
+        paramGroups.get(key)?.push(value);
     }
 
     // Convert to final object format
@@ -119,6 +119,6 @@ export function sanitizeRequestForLogging(context: IRequestContext): any {
         headers: sanitizedHeaders,
         params: context.params,
         query: context.query,
-        requestId: context.requestId
+        requestId: context.requestId,
     };
 }

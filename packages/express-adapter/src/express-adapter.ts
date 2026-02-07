@@ -9,10 +9,6 @@ import express from 'express';
 export class ExpressAdapter extends CoreAdapter implements IFrameworkAdapter {
     readonly name = 'express';
 
-    constructor(options: ICoreAdapterOptions) {
-        super(options);
-    }
-
     /**
      * Create an Express route handler that uses this adapter
      */
@@ -29,7 +25,7 @@ export class ExpressAdapter extends CoreAdapter implements IFrameworkAdapter {
                 await this.sendResponse(webResponse, res);
             } catch {
                 res.status(500).json({
-                    error: 'Internal Server Error'
+                    error: 'Internal Server Error',
                 });
             }
         };
@@ -47,7 +43,9 @@ export class ExpressAdapter extends CoreAdapter implements IFrameworkAdapter {
             if (typeof value === 'string') {
                 headers.set(key, value);
             } else if (Array.isArray(value)) {
-                value.forEach(v => headers.append(key, v));
+                for (const v of value) {
+                    headers.append(key, v);
+                }
             } else if (value !== undefined) {
                 headers.set(key, String(value));
             }
@@ -65,10 +63,7 @@ export class ExpressAdapter extends CoreAdapter implements IFrameworkAdapter {
         return new Request(fullUrl, requestInit);
     }
 
-    async sendResponse(
-        response: Response,
-        res: ExpressResponse
-    ): Promise<void> {
+    async sendResponse(response: Response, res: ExpressResponse): Promise<void> {
         // Set headers from Web API Response
         response.headers.forEach((value, key) => {
             res.setHeader(key, value);
@@ -97,9 +92,7 @@ export class ExpressAdapter extends CoreAdapter implements IFrameworkAdapter {
  * @returns Express router with REST endpoints
  */
 
-export const createExpressDrizzleRestAdapter = (
-    options: ICoreAdapterOptions
-): express.Router => {
+export const createExpressDrizzleRestAdapter = (options: ICoreAdapterOptions): express.Router => {
     const router = express.Router();
 
     // Create the Express adapter (which extends CoreRestAdapter)
@@ -110,4 +103,3 @@ export const createExpressDrizzleRestAdapter = (
 
     return router;
 };
-

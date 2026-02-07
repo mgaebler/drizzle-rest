@@ -8,7 +8,7 @@ describe('SchemaInspector', () => {
         const inspector = new SchemaInspector(schema);
         const tables = inspector.extractTables();
 
-        const usersTable = tables.find(t => t.name === 'users');
+        const usersTable = tables.find((t) => t.name === 'users');
         expect(usersTable).toBeDefined();
         expect(usersTable?.tableName).toBe('users');
         expect(usersTable?.primaryKey).toContain('id'); // Should find 'id' as primary key
@@ -16,15 +16,15 @@ describe('SchemaInspector', () => {
             expect.arrayContaining([
                 expect.objectContaining({
                     name: 'id',
-                    isPrimaryKey: true
+                    isPrimaryKey: true,
                 }),
                 expect.objectContaining({
-                    name: 'fullName'
+                    name: 'fullName',
                 }),
                 expect.objectContaining({
-                    name: 'phone'
-                })
-            ])
+                    name: 'phone',
+                }),
+            ]),
         );
     });
 
@@ -41,7 +41,7 @@ describe('SchemaInspector', () => {
         const usersTable = tables[0];
         expect(usersTable.primaryKey).toEqual(['id']);
 
-        const idColumn = usersTable.columns.find(col => col.name === 'id');
+        const idColumn = usersTable.columns.find((col) => col.name === 'id');
         expect(idColumn?.isPrimaryKey).toBe(true);
     });
 });

@@ -10,7 +10,7 @@ describe('request-helpers', () => {
 
             expect(result).toEqual({
                 name: 'john',
-                age: '25'
+                age: '25',
             });
         });
 
@@ -20,7 +20,7 @@ describe('request-helpers', () => {
 
             expect(result).toEqual({
                 tags: ['javascript', 'typescript'],
-                category: 'programming'
+                category: 'programming',
             });
         });
 
@@ -37,7 +37,7 @@ describe('request-helpers', () => {
 
             expect(result).toEqual({
                 name: '',
-                active: 'true'
+                active: 'true',
             });
         });
     });
@@ -50,7 +50,7 @@ describe('request-helpers', () => {
             expect(result).toEqual({
                 name: 'john',
                 age: '25',
-                tags: ['js', 'ts']
+                tags: ['js', 'ts'],
             });
         });
 
@@ -62,14 +62,15 @@ describe('request-helpers', () => {
         });
 
         it('should handle complex query parameters', () => {
-            const url = 'https://api.example.com/posts?_embed=comments&_embed=author&_sort=createdAt&_order=desc&status=published&status=draft';
+            const url =
+                'https://api.example.com/posts?_embed=comments&_embed=author&_sort=createdAt&_order=desc&status=published&status=draft';
             const result = parseQueryParamsFromUrl(url);
 
             expect(result).toEqual({
                 _embed: ['comments', 'author'],
                 _sort: 'createdAt',
                 _order: 'desc',
-                status: ['published', 'draft']
+                status: ['published', 'draft'],
             });
         });
     });

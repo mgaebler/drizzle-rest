@@ -7,8 +7,8 @@ export class EmbedBuilder {
     constructor(
         private db: DrizzleDb,
         private schema: Record<string, any>,
-        private tablesMetadata: Map<string, TableMetadata>
-    ) { }
+        private tablesMetadata: Map<string, TableMetadata>,
+    ) {}
 
     async applyEmbeds(data: any[], tableName: string, embedKeys: string[]): Promise<any[]> {
         if (!embedKeys || embedKeys.length === 0) {
@@ -46,16 +46,15 @@ export class EmbedBuilder {
 
     private findRelation(tableMetadata: TableMetadata, embedKey: string): RelationMetadata | null {
         // Try to find relation by exact match first
-        let relation = tableMetadata.relations.find(rel =>
-            this.getEmbedKeyForRelation(rel) === embedKey
-        );
+        let relation = tableMetadata.relations.find((rel) => this.getEmbedKeyForRelation(rel) === embedKey);
 
         if (!relation) {
             // Try fuzzy matching
-            relation = tableMetadata.relations.find(rel =>
-                rel.relatedTable === embedKey ||
-                rel.relatedTable.replace(/s$/, '') === embedKey ||
-                rel.relatedTable === embedKey + 's'
+            relation = tableMetadata.relations.find(
+                (rel) =>
+                    rel.relatedTable === embedKey ||
+                    rel.relatedTable.replace(/s$/, '') === embedKey ||
+                    rel.relatedTable === `${embedKey}s`,
             );
         }
 
@@ -80,13 +79,11 @@ export class EmbedBuilder {
         }
 
         // Get unique foreign key values
-        const foreignKeyValues = [...new Set(
-            data.map(item => item[relation.foreignKey]).filter(id => id != null)
-        )];
+        const foreignKeyValues = [...new Set(data.map((item) => item[relation.foreignKey]).filter((id) => id != null))];
 
         if (foreignKeyValues.length === 0) {
             // Add null embed key to all items
-            return data.map(item => ({ ...item, [embedKey]: null }));
+            return data.map((item) => ({ ...item, [embedKey]: null }));
         }
 
         // Fetch related records
@@ -106,9 +103,9 @@ export class EmbedBuilder {
         }
 
         // Embed related data
-        return data.map(item => ({
+        return data.map((item) => ({
             ...item,
-            [embedKey]: relatedMap.get(item[relation.foreignKey]) || null
+            [embedKey]: relatedMap.get(item[relation.foreignKey]) || null,
         }));
     }
 
@@ -122,17 +119,15 @@ export class EmbedBuilder {
         // Get primary key values from main data
         const mainTableMetadata = this.tablesMetadata.get(data[0]?.constructor?.name);
         const primaryKeyColumn = mainTableMetadata?.primaryKey[0] || 'id';
-        const primaryKeyValues = data.map(item => item[primaryKeyColumn]).filter(id => id != null);
+        const primaryKeyValues = data.map((item) => item[primaryKeyColumn]).filter((id) => id != null);
 
         if (primaryKeyValues.length === 0) {
             // Add empty arrays to all items
-            return data.map(item => ({ ...item, [embedKey]: [] }));
+            return data.map((item) => ({ ...item, [embedKey]: [] }));
         }
 
         // Fetch related records
-        const allRelatedRecords = await this.db
-            .select()
-            .from(relatedTable);
+        const allRelatedRecords = await this.db.select().from(relatedTable);
 
         // Group by foreign key
         const relatedMap = new Map();
@@ -145,9 +140,9 @@ export class EmbedBuilder {
         });
 
         // Embed related data
-        return data.map(item => ({
+        return data.map((item) => ({
             ...item,
-            [embedKey]: relatedMap.get(item[primaryKeyColumn]) || []
+            [embedKey]: relatedMap.get(item[primaryKeyColumn]) || [],
         }));
     }
 }

@@ -1,11 +1,6 @@
-import { beforeEach,describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
-import {
-    apiRequest,
-    createTestUsers,
-    expectSuccessResponse,
-    setupTestDatabase
-} from './test-helpers';
+import { apiRequest, createTestUsers, expectSuccessResponse, setupTestDatabase } from './test-helpers';
 
 describe('JSON-Server Sorting', () => {
     beforeEach(async () => {

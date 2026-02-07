@@ -23,10 +23,7 @@ class DeleteAction extends BaseAction {
         }
 
         const primaryKeyCol = columns[primaryKeyColumn];
-        const result = await db
-            .delete(table)
-            .where(eq(primaryKeyCol, id))
-            .returning();
+        const result = await db.delete(table).where(eq(primaryKeyCol, id)).returning();
 
         if (result.length === 0) {
             return this.createNotFoundError('Record not found');

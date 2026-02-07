@@ -23,11 +23,7 @@ class GetOneAction extends BaseAction {
         }
 
         const primaryKeyCol = columns[primaryKeyColumn];
-        const results = await db
-            .select()
-            .from(table)
-            .where(eq(primaryKeyCol, id))
-            .limit(1);
+        const results = await db.select().from(table).where(eq(primaryKeyCol, id)).limit(1);
 
         if (results.length === 0) {
             return this.createNotFoundError('Record not found');

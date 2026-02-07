@@ -33,11 +33,7 @@ class ReplaceAction extends BaseAction {
             const validatedBody = insertSchema.parse(this.body);
 
             const primaryKeyCol = columns[primaryKeyColumn];
-            const results = await db
-                .update(table)
-                .set(validatedBody)
-                .where(eq(primaryKeyCol, id))
-                .returning();
+            const results = await db.update(table).set(validatedBody).where(eq(primaryKeyCol, id)).returning();
 
             if (results.length === 0) {
                 return this.createNotFoundError('Record not found');

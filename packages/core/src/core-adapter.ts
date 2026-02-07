@@ -3,14 +3,14 @@ import type { PgTable } from 'drizzle-orm/pg-core';
 
 import type { ITableActionContext } from './actions';
 import {
+    ActionTypeEnum,
     coreCreateAction,
     coreDeleteAction,
     coreGetManyAction,
     coreGetOneAction,
     coreReplaceAction,
-    coreUpdateAction
+    coreUpdateAction,
 } from './actions';
-import { ActionTypeEnum } from './actions';
 import type { Logger } from './logger';
 import { createLogger } from './logger';
 import type { IRequestContext } from './types/adapter.types';
@@ -49,7 +49,7 @@ export interface ICoreAdapterOptions {
         [tableName: string]: {
             disabledEndpoints?: Array<ActionTypeEnum>;
             hooks?: ITableHooks;
-        }
+        };
     };
 
     /** Logger instance to use (create with createLogger() if needed) */
@@ -68,10 +68,13 @@ export abstract class CoreAdapter implements IRestHandler {
         this.logger = options.logger || createLogger();
         this.basePath = this.normalizeBasePath(options.basePath);
 
-        this.logger.info({
-            tablesCount: Object.keys(options.schema).length,
-            basePath: this.basePath || '(none)'
-        }, 'Initializing Core REST Adapter');
+        this.logger.info(
+            {
+                tablesCount: Object.keys(options.schema).length,
+                basePath: this.basePath || '(none)',
+            },
+            'Initializing Core REST Adapter',
+        );
 
         this.setupRoutes();
     }
@@ -90,34 +93,45 @@ export abstract class CoreAdapter implements IRestHandler {
         const inspector = new SchemaInspector(schema);
         const tables = inspector.extractTables();
 
-        this.logger.debug({
-            tables: tables.map(t => ({
-                name: t.name,
-                primaryKey: t.primaryKey,
-                columnsCount: t.columns.length
-            }))
-        }, 'Schema inspection completed');
+        this.logger.debug(
+            {
+                tables: tables.map((t) => ({
+                    name: t.name,
+                    primaryKey: t.primaryKey,
+                    columnsCount: t.columns.length,
+                })),
+            },
+            'Schema inspection completed',
+        );
 
         // Create metadata map for quick lookup
-        tables.forEach(table => this.tablesMetadataMap.set(table.name, table));
+        for (const table of tables) {
+            this.tablesMetadataMap.set(table.name, table);
+        }
 
-        tables.forEach(tableMetadata => {
+        tables.forEach((tableMetadata) => {
             const table = schema[tableMetadata.name];
             const resourcePath = `${this.basePath}/${tableMetadata.name}`.replace(/\/+/g, '/');
             const itemPath = `${resourcePath}/:id`;
 
-            this.logger.debug({
-                table: tableMetadata.name,
-                resourcePath,
-                primaryKey: tableMetadata.primaryKey
-            }, 'Setting up routes for table');
+            this.logger.debug(
+                {
+                    table: tableMetadata.name,
+                    resourcePath,
+                    primaryKey: tableMetadata.primaryKey,
+                },
+                'Setting up routes for table',
+            );
 
             // Get primary key column name(s)
             const primaryKeyColumns = tableMetadata.primaryKey;
             if (primaryKeyColumns.length === 0) {
-                this.logger.warn({
-                    table: tableMetadata.name
-                }, 'Skipping table: no primary key found');
+                this.logger.warn(
+                    {
+                        table: tableMetadata.name,
+                    },
+                    'Skipping table: no primary key found',
+                );
                 return;
             }
 
@@ -135,31 +149,26 @@ export abstract class CoreAdapter implements IRestHandler {
                 columns,
                 schema: this.options.schema,
                 tablesMetadataMap: this.tablesMetadataMap,
-                tableConfig
+                tableConfig,
             };
 
             // Register CRUD routes for this table
-            this.registerTableRoutes(
-                resourcePath,
-                itemPath,
-                tableContext
-            );
+            this.registerTableRoutes(resourcePath, itemPath, tableContext);
         });
 
-        this.logger.info({
-            tablesProcessed: tables.length,
-            routesRegistered: this.routes.size
-        }, 'Core REST Adapter initialization completed');
+        this.logger.info(
+            {
+                tablesProcessed: tables.length,
+                routesRegistered: this.routes.size,
+            },
+            'Core REST Adapter initialization completed',
+        );
     }
 
     /**
      * Register CRUD routes for a specific table
      */
-    protected registerTableRoutes(
-        resourcePath: string,
-        itemPath: string,
-        tableContext: ITableActionContext
-    ): void {
+    protected registerTableRoutes(resourcePath: string, itemPath: string, tableContext: ITableActionContext): void {
         // Get table configuration from context
         const tableConfig = tableContext.tableConfig;
 
@@ -168,7 +177,7 @@ export abstract class CoreAdapter implements IRestHandler {
             this.routes.set(`GET:${resourcePath}`, {
                 method: 'GET',
                 path: resourcePath,
-                actionHandler: (requestContext) => coreGetManyAction(tableContext, requestContext, this.logger)
+                actionHandler: (requestContext) => coreGetManyAction(tableContext, requestContext, this.logger),
             });
         }
 
@@ -177,7 +186,7 @@ export abstract class CoreAdapter implements IRestHandler {
             this.routes.set(`POST:${resourcePath}`, {
                 method: 'POST',
                 path: resourcePath,
-                actionHandler: (requestContext) => coreCreateAction(tableContext, requestContext, this.logger)
+                actionHandler: (requestContext) => coreCreateAction(tableContext, requestContext, this.logger),
             });
         }
 
@@ -186,7 +195,7 @@ export abstract class CoreAdapter implements IRestHandler {
             this.routes.set(`GET:${itemPath}`, {
                 method: 'GET',
                 path: itemPath,
-                actionHandler: (requestContext) => coreGetOneAction(tableContext, requestContext, this.logger)
+                actionHandler: (requestContext) => coreGetOneAction(tableContext, requestContext, this.logger),
             });
         }
 
@@ -195,7 +204,7 @@ export abstract class CoreAdapter implements IRestHandler {
             this.routes.set(`PATCH:${itemPath}`, {
                 method: 'PATCH',
                 path: itemPath,
-                actionHandler: (requestContext) => coreUpdateAction(tableContext, requestContext, this.logger)
+                actionHandler: (requestContext) => coreUpdateAction(tableContext, requestContext, this.logger),
             });
         }
 
@@ -204,7 +213,7 @@ export abstract class CoreAdapter implements IRestHandler {
             this.routes.set(`PUT:${itemPath}`, {
                 method: 'PUT',
                 path: itemPath,
-                actionHandler: (requestContext) => coreReplaceAction(tableContext, requestContext, this.logger)
+                actionHandler: (requestContext) => coreReplaceAction(tableContext, requestContext, this.logger),
             });
         }
 
@@ -213,7 +222,7 @@ export abstract class CoreAdapter implements IRestHandler {
             this.routes.set(`DELETE:${itemPath}`, {
                 method: 'DELETE',
                 path: itemPath,
-                actionHandler: (requestContext) => coreDeleteAction(tableContext, requestContext, this.logger)
+                actionHandler: (requestContext) => coreDeleteAction(tableContext, requestContext, this.logger),
             });
         }
     }
@@ -236,65 +245,82 @@ export abstract class CoreAdapter implements IRestHandler {
             const route = this.findMatchingRoute(requestContext);
 
             if (!route) {
-                this.logger.warn({
-                    requestId: requestContext.requestId,
-                    method: requestContext.method,
-                    url: requestContext.url
-                }, 'No matching route found');
+                this.logger.warn(
+                    {
+                        requestId: requestContext.requestId,
+                        method: requestContext.method,
+                        url: requestContext.url,
+                    },
+                    'No matching route found',
+                );
 
-                return new Response(JSON.stringify({
-                    error: 'Route not found',
-                    requestId: requestContext.requestId
-                }), {
-                    status: 404,
-                    headers: { 'Content-Type': 'application/json' }
-                });
+                return new Response(
+                    JSON.stringify({
+                        error: 'Route not found',
+                        requestId: requestContext.requestId,
+                    }),
+                    {
+                        status: 404,
+                        headers: { 'Content-Type': 'application/json' },
+                    },
+                );
             }
 
             // Extract route parameters from the URL pattern match
             requestContext.params = this.extractRouteParams(route.path, requestContext.pathname);
 
-            this.logger.debug({
-                requestId: requestContext.requestId,
-                method: requestContext.method,
-                path: route.path,
-                params: requestContext.params
-            }, 'Processing request');
+            this.logger.debug(
+                {
+                    requestId: requestContext.requestId,
+                    method: requestContext.method,
+                    path: route.path,
+                    params: requestContext.params,
+                },
+                'Processing request',
+            );
 
             // Execute the action handler with the request context (table context is already bound)
             const response = await route.actionHandler(requestContext);
 
-            this.logger.info({
-                requestId: requestContext.requestId,
-                method: requestContext.method,
-                path: route.path,
-                status: response.status,
-                duration: Date.now() - startTime
-            }, 'Request completed successfully');
+            this.logger.info(
+                {
+                    requestId: requestContext.requestId,
+                    method: requestContext.method,
+                    path: route.path,
+                    status: response.status,
+                    duration: Date.now() - startTime,
+                },
+                'Request completed successfully',
+            );
 
             // Return the response
             return response;
-
         } catch (error: any) {
-            this.logger.error({
-                requestId: requestContext.requestId,
-                method: requestContext.method,
-                url: requestContext.url,
-                duration: Date.now() - startTime,
-                error: {
-                    message: error.message,
-                    code: error.code,
-                    ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
-                }
-            }, 'Unexpected request error');
+            this.logger.error(
+                {
+                    requestId: requestContext.requestId,
+                    method: requestContext.method,
+                    url: requestContext.url,
+                    duration: Date.now() - startTime,
+                    error: {
+                        message: error.message,
+                        code: error.code,
+                        ...(process.env.NODE_ENV === 'development' && { stack: error.stack }),
+                    },
+                },
+                'Unexpected request error',
+            );
 
-            return new Response(JSON.stringify({
-                error: 'Internal Server Error',
-                requestId: requestContext.requestId
-            }), {
-                status: 500,
-                headers: { 'Content-Type': 'application/json' }
-            });
+            return new Response(
+                JSON.stringify({
+                    error: 'Internal Server Error',
+                    requestId: requestContext.requestId,
+                }),
+                {
+                    status: 500,
+                    headers: { 'Content-Type': 'application/json' },
+                },
+            );
         }
     }
 
@@ -327,7 +353,7 @@ export abstract class CoreAdapter implements IRestHandler {
             params: {}, // Will be populated during route matching
             query,
             requestId,
-            parsedBody
+            parsedBody,
         };
     }
 
@@ -423,9 +449,8 @@ export abstract class CoreAdapter implements IRestHandler {
         if (!input) return '';
         let p = input.trim();
         if (p === '' || p === '/') return '';
-        if (!p.startsWith('/')) p = '/' + p;
+        if (!p.startsWith('/')) p = `/${p}`;
         if (p.endsWith('/')) p = p.slice(0, -1);
         return p === '/' ? '' : p;
     }
 }
-

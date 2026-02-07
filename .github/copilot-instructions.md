@@ -50,8 +50,9 @@ This is a TypeScript library that creates a dynamic REST API adapter for Drizzle
 - `npm run tsc` - TypeScript type checking
 
 ### Code Quality
-- `npm run lint` - Run ESLint
-- `npm run lint:fix` - Run ESLint with auto-fix
+- `npm run lint` - Run Biome check (linting + formatting)
+- `npm run lint:fix` - Run Biome check with auto-fix
+- `npm run format` - Run Biome format with auto-fix
 - `npm run unused-exports` - Find unused exports
 - `npm run unused-exports:custom` - Custom unused exports script
 

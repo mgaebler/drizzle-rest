@@ -15,9 +15,9 @@ export class QueryBuilder {
         private db: DrizzleDb,
         private table: PgTable,
         private columns: Record<string, any>,
-        private schema: Record<string, any>,
-        private tablesMetadata: Map<string, TableMetadata>,
-        private tableName: string
+        schema: Record<string, any>,
+        tablesMetadata: Map<string, TableMetadata>,
+        private tableName: string,
     ) {
         this.filterBuilder = new FilterBuilder(columns);
         this.embedBuilder = new EmbedBuilder(db, schema, tablesMetadata);
@@ -35,8 +35,8 @@ export class QueryBuilder {
         // Apply sorting
         if (params.sort && params.sort.length > 0) {
             const orderByExpressions = params.sort
-                .filter(sortField => this.columns[sortField.column]) // Only sort by valid columns
-                .map(sortField => {
+                .filter((sortField) => this.columns[sortField.column]) // Only sort by valid columns
+                .map((sortField) => {
                     const sortFn = sortField.order === 'desc' ? desc : asc;
                     return sortFn(this.columns[sortField.column]);
                 });

@@ -13,16 +13,16 @@ export type DrizzleDb = PgliteDatabase<any>;
  * Framework-agnostic action/route handler interface
  * Unified interface for both action handlers and route handlers
  */
-export interface ICoreActionHandler {
-    (tableContext: ICoreTableContext, requestContext: IRequestContext, logger: Logger): Promise<Response>;
-}
+export type ICoreActionHandler = (
+    tableContext: ICoreTableContext,
+    requestContext: IRequestContext,
+    logger: Logger,
+) => Promise<Response>;
 
 /**
  * Bound action handler that only needs request context
  */
-export interface IBoundActionHandler {
-    (requestContext: IRequestContext): Promise<Response>;
-}
+export type IBoundActionHandler = (requestContext: IRequestContext) => Promise<Response>;
 
 /**
  * Route handler for a specific HTTP method and path

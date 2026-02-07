@@ -21,4 +21,3 @@ export const comments = pgTable('comments', {
     userId: integer('user_id').references(() => users.id),
     createdAt: timestamp('created_at').defaultNow(),
 });
-

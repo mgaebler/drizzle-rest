@@ -6,16 +6,16 @@ import { CoreAdapter, type ICoreAdapterOptions } from '../core-adapter';
 // minimal table
 const users = pgTable('users', {
     id: serial('id').primaryKey(),
-    name: text('name')
+    name: text('name'),
 });
 
-class TestAdapter extends CoreAdapter { }
+class TestAdapter extends CoreAdapter {}
 
 function createAdapter(basePath?: string) {
     const options: ICoreAdapterOptions = {
         db: {} as any,
         schema: { users },
-        basePath
+        basePath,
     } as any;
     return new TestAdapter(options);
 }

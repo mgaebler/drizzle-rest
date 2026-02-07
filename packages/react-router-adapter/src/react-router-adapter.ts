@@ -5,10 +5,6 @@ import type { ActionFunctionArgs, LoaderFunctionArgs } from 'react-router';
 export class ReactRouterAdapter extends CoreAdapter implements IFrameworkAdapter {
     readonly name = 'react-router';
 
-    constructor(options: ICoreAdapterOptions) {
-        super(options);
-    }
-
     createHandler() {
         return async ({ request }: LoaderFunctionArgs | ActionFunctionArgs) => {
             try {
@@ -26,16 +22,16 @@ export class ReactRouterAdapter extends CoreAdapter implements IFrameworkAdapter
     }
 
     async sendResponse(_response: Response, _frameworkRes: any): Promise<void> {
-        throw new Error('sendResponse should not be called for React Router adapter. Use convertToRouterResponse instead.');
+        throw new Error(
+            'sendResponse should not be called for React Router adapter. Use convertToRouterResponse instead.',
+        );
     }
 }
 
-export const createReactRouterDrizzleRestAdapter = (
-    options: ICoreAdapterOptions
-) => {
+export const createReactRouterDrizzleRestAdapter = (options: ICoreAdapterOptions) => {
     const adapter = new ReactRouterAdapter(options);
     return {
         handler: adapter.createHandler(),
-        adapter
+        adapter,
     };
 };

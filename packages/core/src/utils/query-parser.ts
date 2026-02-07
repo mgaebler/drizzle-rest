@@ -3,45 +3,58 @@ import { z } from 'zod';
 import type { ParsedQueryParams } from './query.types';
 
 // Define Zod schemas for validation and parsing
-const SortSchema = z.string().optional().transform((value) => {
-    if (!value) return undefined;
+const SortSchema = z
+    .string()
+    .optional()
+    .transform((value) => {
+        if (!value) return undefined;
 
-    const sortFields = value.split(',').map(field => field.trim()).filter(Boolean);
-    if (sortFields.length === 0) return undefined;
+        const sortFields = value
+            .split(',')
+            .map((field) => field.trim())
+            .filter(Boolean);
+        if (sortFields.length === 0) return undefined;
 
-    return sortFields.map(field => {
-        if (field.startsWith('-')) {
+        return sortFields.map((field) => {
+            if (field.startsWith('-')) {
+                return {
+                    column: field.substring(1),
+                    order: 'desc' as const,
+                };
+            }
             return {
-                column: field.substring(1),
-                order: 'desc' as const
+                column: field,
+                order: 'asc' as const,
             };
-        }
-        return {
-            column: field,
-            order: 'asc' as const
-        };
+        });
     });
-});
 
-const EmbedSchema = z.union([
-    z.string().transform(str => str.split(',').map(item => item.trim()).filter(Boolean)),
-    z.array(z.string()).transform(arr => arr.map(item => item.trim()).filter(Boolean))
-]).optional();
+const EmbedSchema = z
+    .union([
+        z.string().transform((str) =>
+            str
+                .split(',')
+                .map((item) => item.trim())
+                .filter(Boolean),
+        ),
+        z.array(z.string()).transform((arr) => arr.map((item) => item.trim()).filter(Boolean)),
+    ])
+    .optional();
 
-const QueryParamsSchema = z.object({
-    _page: z.coerce.number().min(1).default(1),
-    _per_page: z.coerce.number().min(1).max(1000).default(10),
-    _start: z.coerce.number().min(0).optional(),
-    _end: z.coerce.number().min(0).optional(),
-    _limit: z.coerce.number().min(1).max(1000).optional(),
-    _sort: SortSchema,
-    _embed: EmbedSchema,
-}).passthrough();
+const QueryParamsSchema = z
+    .object({
+        _page: z.coerce.number().min(1).default(1),
+        _per_page: z.coerce.number().min(1).max(1000).default(10),
+        _start: z.coerce.number().min(0).optional(),
+        _end: z.coerce.number().min(0).optional(),
+        _limit: z.coerce.number().min(1).max(1000).optional(),
+        _sort: SortSchema,
+        _embed: EmbedSchema,
+    })
+    .passthrough();
 
 export class CoreQueryParser {
-    private static readonly EXCLUDE_PARAMS = [
-        '_page', '_per_page', '_start', '_end', '_limit', '_sort', '_embed'
-    ];
+    private static readonly EXCLUDE_PARAMS = ['_page', '_per_page', '_start', '_end', '_limit', '_sort', '_embed'];
 
     static parseQueryParams(query: Record<string, any>): ParsedQueryParams {
         // Parse and validate using Zod
@@ -50,7 +63,7 @@ export class CoreQueryParser {
         // Extract filters (all params except the special ones)
         const filters: Record<string, any> = {};
         for (const [key, value] of Object.entries(parsed)) {
-            if (!this.EXCLUDE_PARAMS.includes(key) && value !== undefined && value !== null) {
+            if (!CoreQueryParser.EXCLUDE_PARAMS.includes(key) && value !== undefined && value !== null) {
                 filters[key] = value;
             }
         }

@@ -10,7 +10,7 @@ export enum ActionTypeEnum {
     CREATE = 'CREATE',
     UPDATE = 'UPDATE',
     REPLACE = 'REPLACE',
-    DELETE = 'DELETE'
+    DELETE = 'DELETE',
 }
 
 /**
@@ -30,7 +30,11 @@ export interface ICoreTableContext {
         disabledEndpoints?: Array<ActionTypeEnum>;
         hooks?: {
             beforeOperation?: (tableContext: ICoreTableContext, requestContext: IRequestContext) => Promise<void>;
-            afterOperation?: (tableContext: ICoreTableContext, requestContext: IRequestContext, result: any) => Promise<any>;
+            afterOperation?: (
+                tableContext: ICoreTableContext,
+                requestContext: IRequestContext,
+                result: any,
+            ) => Promise<any>;
         };
     };
 }

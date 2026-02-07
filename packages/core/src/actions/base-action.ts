@@ -1,8 +1,7 @@
 import type { Logger } from '../logger';
 import type { IAdapterResponse, IRequestContext } from '../types/adapter.types';
 import { createAdapterResponse } from '../utils/response-helper';
-import type { ICoreTableContext } from './action.types';
-import type { ActionTypeEnum } from './action.types';
+import type { ActionTypeEnum, ICoreTableContext } from './action.types';
 
 /**
  * Base class providing common action patterns and error handling abstractions
@@ -41,9 +40,7 @@ export abstract class BaseAction {
         this.logger = logger;
     }
 
-    protected abstract runDatabaseQuery(
-        tableContext: ICoreTableContext
-    ): Promise<any>;
+    protected abstract runDatabaseQuery(tableContext: ICoreTableContext): Promise<any>;
 
     /** Get the action type for this specific action */
     protected abstract getActionType(): ActionTypeEnum;
@@ -55,10 +52,7 @@ export abstract class BaseAction {
         return this.requestId;
     }
 
-    public async execute(
-        tableContext: ICoreTableContext,
-        requestContext: IRequestContext
-    ): Promise<Response> {
+    public async execute(tableContext: ICoreTableContext, requestContext: IRequestContext): Promise<Response> {
         const { tableMetadata } = tableContext;
         const actionType = this.getActionType();
         const statusCode = this.getStatusCode();
@@ -87,7 +81,7 @@ export abstract class BaseAction {
                 requestContext,
                 actionType,
                 requestId,
-                startTime
+                startTime,
             );
 
             // If beforeHook returned an error response, return it immediately
@@ -110,7 +104,7 @@ export abstract class BaseAction {
                 actionType,
                 result,
                 requestId,
-                startTime
+                startTime,
             );
 
             // If afterHook returned an error response, return it immediately
@@ -123,7 +117,6 @@ export abstract class BaseAction {
 
             // Allow subclasses to customize response creation
             return this.createResponse(afterHookResult.result, statusCode);
-
         } catch (error: any) {
             return this.handleError(error, requestId, tableMetadata.name, actionType, startTime, id);
         }
@@ -134,7 +127,7 @@ export abstract class BaseAction {
         requestContext: IRequestContext,
         actionType: ActionTypeEnum,
         requestId: string,
-        startTime: number
+        startTime: number,
     ): Promise<IAdapterResponse | null> {
         const { tableMetadata, tableConfig } = tableContext;
 
@@ -146,26 +139,34 @@ export abstract class BaseAction {
         } catch (hookError: any) {
             const duration = Date.now() - startTime;
 
-            this.logger.error({
-                requestId,
-                table: tableMetadata.name,
-                duration,
-                hook: 'beforeOperation',
-                error: {
-                    message: hookError.message || hookError,
-                    ...(process.env.NODE_ENV === 'development' && { stack: hookError.stack })
-                }
-            }, `${actionType} request failed in beforeOperation hook`);
+            this.logger.error(
+                {
+                    requestId,
+                    table: tableMetadata.name,
+                    duration,
+                    hook: 'beforeOperation',
+                    error: {
+                        message: hookError.message || hookError,
+                        ...(process.env.NODE_ENV === 'development' && { stack: hookError.stack }),
+                    },
+                },
+                `${actionType} request failed in beforeOperation hook`,
+            );
 
             // Hook errors during beforeOperation are typically authorization/validation issues
             const statusCode = 403; // Forbidden
-            const errorMessage = typeof hookError === 'string' ? hookError :
-                hookError.message || 'Authorization failed in beforeOperation hook';
+            const errorMessage =
+                typeof hookError === 'string'
+                    ? hookError
+                    : hookError.message || 'Authorization failed in beforeOperation hook';
 
-            return createAdapterResponse({
-                error: errorMessage,
-                requestId
-            }, statusCode);
+            return createAdapterResponse(
+                {
+                    error: errorMessage,
+                    requestId,
+                },
+                statusCode,
+            );
         }
     }
 
@@ -175,7 +176,7 @@ export abstract class BaseAction {
         actionType: ActionTypeEnum,
         result: any,
         requestId: string,
-        startTime: number
+        startTime: number,
     ): Promise<{ result: any; error?: IAdapterResponse }> {
         const { tableMetadata, tableConfig } = tableContext;
 
@@ -187,7 +188,7 @@ export abstract class BaseAction {
             if (Array.isArray(result)) {
                 // Handle array results (like GET_MANY)
                 const processedResult = await Promise.all(
-                    result.map((item: any) => tableConfig.hooks!.afterOperation!(tableContext, requestContext, item))
+                    result.map((item: any) => tableConfig.hooks?.afterOperation?.(tableContext, requestContext, item)),
                 );
                 return { result: processedResult };
             } else {
@@ -198,28 +199,36 @@ export abstract class BaseAction {
         } catch (hookError: any) {
             const duration = Date.now() - startTime;
 
-            this.logger.error({
-                requestId,
-                table: tableMetadata.name,
-                duration,
-                hook: 'afterOperation',
-                error: {
-                    message: hookError.message || hookError,
-                    ...(process.env.NODE_ENV === 'development' && { stack: hookError.stack })
-                }
-            }, `${actionType} request failed in afterOperation hook`);
+            this.logger.error(
+                {
+                    requestId,
+                    table: tableMetadata.name,
+                    duration,
+                    hook: 'afterOperation',
+                    error: {
+                        message: hookError.message || hookError,
+                        ...(process.env.NODE_ENV === 'development' && { stack: hookError.stack }),
+                    },
+                },
+                `${actionType} request failed in afterOperation hook`,
+            );
 
             // Hook errors during afterOperation are typically processing issues
             const statusCode = 500; // Internal Server Error
-            const errorMessage = typeof hookError === 'string' ? hookError :
-                hookError.message || 'Processing failed in afterOperation hook';
+            const errorMessage =
+                typeof hookError === 'string'
+                    ? hookError
+                    : hookError.message || 'Processing failed in afterOperation hook';
 
             return {
                 result: null,
-                error: createAdapterResponse({
-                    error: errorMessage,
-                    requestId
-                }, statusCode)
+                error: createAdapterResponse(
+                    {
+                        error: errorMessage,
+                        requestId,
+                    },
+                    statusCode,
+                ),
             };
         }
     }
@@ -235,15 +244,10 @@ export abstract class BaseAction {
      * Logging helpers
      */
 
-    protected logStart(
-        requestId: string,
-        tableName: string,
-        action: ActionTypeEnum,
-        id?: string
-    ): void {
+    protected logStart(requestId: string, tableName: string, action: ActionTypeEnum, id?: string): void {
         const logData: any = {
             requestId,
-            table: tableName
+            table: tableName,
         };
 
         if (id) logData.id = id;
@@ -258,13 +262,13 @@ export abstract class BaseAction {
         tableName: string,
         action: ActionTypeEnum,
         startTime: number,
-        id?: string
+        id?: string,
     ): void {
         const duration = Date.now() - startTime;
         const logData: any = {
             requestId,
             table: tableName,
-            duration
+            duration,
         };
 
         if (id) logData.id = id;
@@ -282,7 +286,7 @@ export abstract class BaseAction {
         tableName: string,
         action: ActionTypeEnum,
         startTime: number,
-        id: string | undefined
+        id: string | undefined,
     ): IAdapterResponse {
         const duration = Date.now() - startTime;
         const logData: any = {
@@ -293,8 +297,8 @@ export abstract class BaseAction {
             error: {
                 message: error.message,
                 code: error.code,
-                ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
-            }
+                ...(process.env.NODE_ENV === 'development' && { stack: error.stack }),
+            },
         };
 
         if (id) logData.id = id;
@@ -303,93 +307,126 @@ export abstract class BaseAction {
 
         // This should only handle truly unexpected errors now
         // Most specific errors should be handled in the individual actions
-        return createAdapterResponse({
-            error: 'Internal Server Error',
-            requestId
-        }, 500);
+        return createAdapterResponse(
+            {
+                error: 'Internal Server Error',
+                requestId,
+            },
+            500,
+        );
     }
 
     // Error handling abstractions for actions
     protected createNotFoundError(message = 'Record not found', context?: any): IAdapterResponse {
         const { tableMetadata } = this.currentTableContext!;
 
-        this.logger.info({
-            requestId: this.requestId,
-            table: tableMetadata.name,
-            ...context
-        }, message);
+        this.logger.info(
+            {
+                requestId: this.requestId,
+                table: tableMetadata.name,
+                ...context,
+            },
+            message,
+        );
 
-        return createAdapterResponse({
-            error: message,
-            requestId: this.requestId
-        }, 404);
+        return createAdapterResponse(
+            {
+                error: message,
+                requestId: this.requestId,
+            },
+            404,
+        );
     }
 
     protected createValidationError(error: any, context?: any): IAdapterResponse {
         const { tableMetadata } = this.currentTableContext!;
 
-        this.logger.warn({
-            requestId: this.requestId,
-            table: tableMetadata.name,
-            validationIssues: error.issues,
-            ...context
-        }, 'Validation failed');
+        this.logger.warn(
+            {
+                requestId: this.requestId,
+                table: tableMetadata.name,
+                validationIssues: error.issues,
+                ...context,
+            },
+            'Validation failed',
+        );
 
-        return createAdapterResponse({
-            error: 'Validation failed',
-            details: error.issues,
-            requestId: this.requestId
-        }, 400);
+        return createAdapterResponse(
+            {
+                error: 'Validation failed',
+                details: error.issues,
+                requestId: this.requestId,
+            },
+            400,
+        );
     }
 
     protected createBadRequestError(message: string, context?: any): IAdapterResponse {
         const { tableMetadata } = this.currentTableContext!;
 
-        this.logger.warn({
-            requestId: this.requestId,
-            table: tableMetadata.name,
-            ...context
-        }, message);
+        this.logger.warn(
+            {
+                requestId: this.requestId,
+                table: tableMetadata.name,
+                ...context,
+            },
+            message,
+        );
 
-        return createAdapterResponse({
-            error: message,
-            requestId: this.requestId
-        }, 400);
+        return createAdapterResponse(
+            {
+                error: message,
+                requestId: this.requestId,
+            },
+            400,
+        );
     }
 
     protected createInternalError(error: any, message = 'Internal Server Error', context?: any): IAdapterResponse {
         const { tableMetadata } = this.currentTableContext!;
 
-        this.logger.error({
-            requestId: this.requestId,
-            table: tableMetadata.name,
-            error: {
-                message: error.message,
-                code: error.code,
-                ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
+        this.logger.error(
+            {
+                requestId: this.requestId,
+                table: tableMetadata.name,
+                error: {
+                    message: error.message,
+                    code: error.code,
+                    ...(process.env.NODE_ENV === 'development' && { stack: error.stack }),
+                },
+                ...context,
             },
-            ...context
-        }, message);
+            message,
+        );
 
-        return createAdapterResponse({
-            error: message,
-            requestId: this.requestId
-        }, 500);
+        return createAdapterResponse(
+            {
+                error: message,
+                requestId: this.requestId,
+            },
+            500,
+        );
     }
 
     protected createConflictError(message: string, context?: any): IAdapterResponse {
         const { tableMetadata } = this.currentTableContext!;
 
-        this.logger.warn({
-            requestId: this.requestId,
-            table: tableMetadata.name,
-            ...context
-        }, message);
+        this.logger.warn(
+            {
+                requestId: this.requestId,
+                table: tableMetadata.name,
+                ...context,
+            },
+            message,
+        );
 
-        return createAdapterResponse({
-            error: message,
-            requestId: this.requestId
-        }, 409);
+        return createAdapterResponse(
+            {
+                error: message,
+                requestId: this.requestId,
+            },
+            409,
+        );
     }
 
     // Helper method to handle validation errors with consistent structure
@@ -399,15 +436,18 @@ export abstract class BaseAction {
         }
 
         // Handle database constraint errors
-        if (error.code === '23505') { // PostgreSQL unique constraint violation
+        if (error.code === '23505') {
+            // PostgreSQL unique constraint violation
             return this.createConflictError('A record with this value already exists', context);
         }
 
-        if (error.code === '23503') { // PostgreSQL foreign key constraint violation
+        if (error.code === '23503') {
+            // PostgreSQL foreign key constraint violation
             return this.createBadRequestError('Referenced record does not exist', context);
         }
 
-        if (error.code === '23514') { // PostgreSQL check constraint violation
+        if (error.code === '23514') {
+            // PostgreSQL check constraint violation
             return this.createBadRequestError('Data does not meet validation requirements', context);
         }
 
@@ -415,4 +455,3 @@ export abstract class BaseAction {
         throw error;
     }
 }
-

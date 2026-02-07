@@ -1,4 +1,4 @@
-import { beforeEach,describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import {
     apiRequest,
@@ -7,7 +7,8 @@ import {
     expectFilterResults,
     expectSuccessResponse,
     setupTestDatabase,
-    TEST_USERS} from './test-helpers';
+    TEST_USERS,
+} from './test-helpers';
 
 describe('JSON-Server Filtering', () => {
     beforeEach(async () => {
@@ -27,8 +28,10 @@ describe('JSON-Server Filtering', () => {
 
             it('should support multiple filters with AND logic', async () => {
                 const res = await apiRequest.get('/users?fullName=Alice Smith&phone=123-456-7890');
-                expectFilterResults(res, 1, (users) =>
-                    users[0].fullName === 'Alice Smith' && users[0].phone === '123-456-7890'
+                expectFilterResults(
+                    res,
+                    1,
+                    (users) => users[0].fullName === 'Alice Smith' && users[0].phone === '123-456-7890',
                 );
             });
 
@@ -41,9 +44,7 @@ describe('JSON-Server Filtering', () => {
         describe('String Search Filtering (_like operator)', () => {
             it('should filter with substring search using _like', async () => {
                 const res = await apiRequest.get('/users?fullName_like=Alice');
-                expectFilterResults(res, 2, (users) =>
-                    users.every((user: any) => user.fullName.includes('Alice'))
-                );
+                expectFilterResults(res, 2, (users) => users.every((user: any) => user.fullName.includes('Alice')));
             });
 
             it('should be case-sensitive for _like search', async () => {
@@ -60,16 +61,12 @@ describe('JSON-Server Filtering', () => {
         describe('Negation Filtering (_ne operator)', () => {
             it('should exclude records with _ne operator', async () => {
                 const res = await apiRequest.get('/users?fullName_ne=Alice Smith');
-                expectFilterResults(res, 5, (users) =>
-                    users.every((user: any) => user.fullName !== 'Alice Smith')
-                );
+                expectFilterResults(res, 5, (users) => users.every((user: any) => user.fullName !== 'Alice Smith'));
             });
 
             it('should work with _ne on phone numbers', async () => {
                 const res = await apiRequest.get('/users?phone_ne=123-456-7890');
-                expectFilterResults(res, 5, (users) =>
-                    users.every((user: any) => user.phone !== '123-456-7890')
-                );
+                expectFilterResults(res, 5, (users) => users.every((user: any) => user.phone !== '123-456-7890'));
             });
         });
 
@@ -79,8 +76,14 @@ describe('JSON-Server Filtering', () => {
                 const firstTwoIds = allUsers.body.slice(0, 2).map((user: any) => user.id);
 
                 const res = await apiRequest.get(`/users?id=${firstTwoIds[0]}&id=${firstTwoIds[1]}`);
-                expectFilterResults(res, 2, (users) =>
-                    users.map((user: any) => user.id).sort().join(',') === firstTwoIds.sort().join(',')
+                expectFilterResults(
+                    res,
+                    2,
+                    (users) =>
+                        users
+                            .map((user: any) => user.id)
+                            .sort()
+                            .join(',') === firstTwoIds.sort().join(','),
                 );
             });
 
@@ -109,8 +112,10 @@ describe('JSON-Server Filtering', () => {
 
             it('should work with filtering + sorting', async () => {
                 const res = await apiRequest.get('/users?fullName_like=Alice&_sort=-fullName');
-                expectFilterResults(res, 2, (users) =>
-                    users[0].fullName === 'Alice Wonder' && users[1].fullName === 'Alice Smith'
+                expectFilterResults(
+                    res,
+                    2,
+                    (users) => users[0].fullName === 'Alice Wonder' && users[1].fullName === 'Alice Smith',
                 );
             });
         });

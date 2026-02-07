@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
 interface UnusedExport {
     file: string;
@@ -39,9 +39,11 @@ class UnusedExportsFinder {
 
             if (entry.isDirectory() && !this.excludeDirs.includes(entry.name)) {
                 files.push(...this.getAllTsFiles(fullPath));
-            } else if (entry.isFile() &&
+            } else if (
+                entry.isFile() &&
                 (entry.name.endsWith('.ts') || entry.name.endsWith('.tsx')) &&
-                !this.excludeFiles.some(exclude => entry.name.includes(exclude))) {
+                !this.excludeFiles.some((exclude) => entry.name.includes(exclude))
+            ) {
                 files.push(fullPath);
             }
         }
@@ -71,14 +73,14 @@ class UnusedExportsFinder {
                         if (match[1]) {
                             // Handle destructured exports like { foo, bar }
                             if (match[1].includes(',')) {
-                                const names = match[1].split(',').map(n => n.trim());
-                                names.forEach(name => {
+                                const names = match[1].split(',').map((n) => n.trim());
+                                names.forEach((name) => {
                                     const cleanName = name.replace(/\s+as\s+\w+/, '').trim();
                                     if (cleanName && cleanName !== 'default') {
                                         if (!exports.has(cleanName)) {
                                             exports.set(cleanName, []);
                                         }
-                                        exports.get(cleanName)!.push({ file, line: index + 1 });
+                                        exports.get(cleanName)?.push({ file, line: index + 1 });
                                     }
                                 });
                             } else {
@@ -87,7 +89,7 @@ class UnusedExportsFinder {
                                     if (!exports.has(cleanName)) {
                                         exports.set(cleanName, []);
                                     }
-                                    exports.get(cleanName)!.push({ file, line: index + 1 });
+                                    exports.get(cleanName)?.push({ file, line: index + 1 });
                                 }
                             }
                         }
@@ -110,7 +112,7 @@ class UnusedExportsFinder {
                 const content = fs.readFileSync(file, 'utf-8');
 
                 // Skip the file where it's exported
-                const exportFiles = locations.map(loc => loc.file);
+                const exportFiles = locations.map((loc) => loc.file);
                 if (exportFiles.includes(file)) {
                     continue;
                 }
@@ -137,7 +139,7 @@ class UnusedExportsFinder {
                     unusedExports.push({
                         file: path.relative(process.cwd(), location.file),
                         export: exportName,
-                        line: location.line
+                        line: location.line,
                     });
                 }
             }
@@ -163,7 +165,7 @@ async function main() {
                 if (!byFile.has(unusedExport.file)) {
                     byFile.set(unusedExport.file, []);
                 }
-                byFile.get(unusedExport.file)!.push(unusedExport);
+                byFile.get(unusedExport.file)?.push(unusedExport);
             }
 
             for (const [file, exports] of byFile.entries()) {

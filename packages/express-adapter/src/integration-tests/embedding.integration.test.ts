@@ -9,7 +9,7 @@ import {
     expectEmbeddedUserData,
     expectSuccessResponse,
     setupTestDatabase,
-    TEST_USERS
+    TEST_USERS,
 } from './test-helpers';
 
 describe('JSON-Server Embedding', () => {
@@ -26,7 +26,7 @@ describe('JSON-Server Embedding', () => {
             const posts = await createTestPosts(user.id);
 
             // Create test comments for the first post
-            const firstPost = posts.find(post => post.title === 'First Post');
+            const firstPost = posts.find((post) => post.title === 'First Post');
             if (firstPost) {
                 await createTestComments(firstPost.id, user.id);
             }

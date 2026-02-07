@@ -7,8 +7,9 @@
     "scripts": {
         "build": "pnpm --filter @drizzle-rest/* build",
         "test": "pnpm --filter @drizzle-rest/* test",
-        "lint:fix": "eslint . --fix",
-        "lint": "eslint .",
+        "lint": "biome check .",
+        "lint:fix": "biome check --write .",
+        "format": "biome format --write .",
         "deps:graph": "depcruise --no-config --output-type mermaid --exclude 'node_modules|dist' packages > dependencies.mmd",
         "deps:graph:core": "depcruise --no-config --output-type mermaid --exclude 'node_modules|dist' packages/core > dependencies-core.mmd",
         "deps:graph:packages": "depcruise --no-config --output-type mermaid --exclude 'node_modules|dist' packages > dependencies-packages.mmd"
@@ -35,15 +36,10 @@
         "zod": "^3.22.4"
     },
     "devDependencies": {
-        "@stylistic/eslint-plugin": "^5.1.0",
+        "@biomejs/biome": "^2.3.14",
         "@types/node": "^20.11.5",
         "dependency-cruiser": "^17.0.0",
         "drizzle-kit": "^0.31.4",
-        "eslint": "^9.31.0",
-        "eslint-plugin-drizzle": "^0.2.3",
-        "eslint-plugin-simple-import-sort": "^12.1.1",
-        "eslint-plugin-unused-imports": "^4.1.4",
-        "globals": "^16.3.0",
         "husky": "^9.1.7",
         "jiti": "^2.4.2",
         "pino-pretty": "^13.0.0",
@@ -51,7 +47,6 @@
         "tsconfig-paths": "^4.2.0",
         "tsx": "^4.7.0",
         "typescript": "^5.3.3",
-        "typescript-eslint": "^8.36.0",
         "vite-tsconfig-paths": "^5.1.4",
         "vitest": "^3.2.4"
     },

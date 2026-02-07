@@ -7,7 +7,7 @@ import {
     expectSuccessResponse,
     expectUserProperties,
     setupTestDatabase,
-    TEST_USERS
+    TEST_USERS,
 } from './test-helpers';
 
 describe('CRUD Operations', () => {
@@ -76,8 +76,9 @@ describe('CRUD Operations', () => {
             expectSuccessResponse(res);
             expectUserProperties(res.body, TEST_USERS.primaryKeyTest);
 
-            const updateRes = await apiRequest.patch(`/users/${createdUser.id}`,
-                { fullName: 'Updated Primary Key Test User' });
+            const updateRes = await apiRequest.patch(`/users/${createdUser.id}`, {
+                fullName: 'Updated Primary Key Test User',
+            });
             expectSuccessResponse(updateRes);
             expect(updateRes.body.fullName).toEqual('Updated Primary Key Test User');
         });

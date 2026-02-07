@@ -18,14 +18,9 @@ export function createLogger(options: LoggerOptions = {}): pino.Logger {
     const isProduction = process.env.NODE_ENV === 'production';
     const isDevelopment = process.env.NODE_ENV === 'development';
 
-    const {
-        level = isDevelopment ? 'debug' : 'info',
-        pretty = isDevelopment,
-        base = {},
-        pinoOptions = {}
-    } = options;
+    const { level = isDevelopment ? 'debug' : 'info', pretty = isDevelopment, base = {}, pinoOptions = {} } = options;
 
-    let transport;
+    let transport: pino.TransportSingleOptions | undefined;
     if (pretty) {
         try {
             transport = {
@@ -35,8 +30,8 @@ export function createLogger(options: LoggerOptions = {}): pino.Logger {
                     translateTime: 'yyyy-mm-dd HH:MM:ss',
                     ignore: 'pid,hostname',
                     singleLine: false,
-                    hideObject: false
-                }
+                    hideObject: false,
+                },
             };
         } catch {
             // Fallback to default transport if pino-pretty is not available
@@ -51,7 +46,7 @@ export function createLogger(options: LoggerOptions = {}): pino.Logger {
             service: 'drizzle-rest-adapter',
             version: process.env.npm_package_version || 'unknown',
             environment: process.env.NODE_ENV || 'development',
-            ...base
+            ...base,
         },
         timestamp: pino.stdTimeFunctions.isoTime,
         transport,
@@ -61,9 +56,9 @@ export function createLogger(options: LoggerOptions = {}): pino.Logger {
             error: pino.stdSerializers.err,
             req: pino.stdSerializers.req,
             res: pino.stdSerializers.res,
-            ...pinoOptions.serializers
+            ...pinoOptions.serializers,
         },
-        ...pinoOptions
+        ...pinoOptions,
     };
 
     return pino(loggerConfig);

@@ -1,11 +1,11 @@
-import { beforeEach,describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import {
     apiRequest,
     createTestUsers,
     expectPaginationHeaders,
     expectSuccessResponse,
-    setupTestDatabase
+    setupTestDatabase,
 } from './test-helpers';
 
 describe('Pagination', () => {

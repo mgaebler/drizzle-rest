@@ -8,7 +8,7 @@ import { ReactRouterAdapter } from '../react-router-adapter';
 describe('React Router Adapter', () => {
     const adapter = new ReactRouterAdapter({
         db: db as any,
-        schema
+        schema,
     });
 
     describe('Adapter Properties', () => {
@@ -21,7 +21,7 @@ describe('React Router Adapter', () => {
         it('should parse Request objects without modification', async () => {
             const originalRequest = new Request('http://localhost:3000/api/users', {
                 method: 'GET',
-                headers: { 'Content-Type': 'application/json' }
+                headers: { 'Content-Type': 'application/json' },
             });
 
             const parsedRequest = await adapter.parseRequest(originalRequest);
@@ -37,7 +37,7 @@ describe('React Router Adapter', () => {
             const originalRequest = new Request('http://localhost:3000/api/users', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body
+                body,
             });
             const parsedRequest = await adapter.parseRequest(originalRequest);
             expect(parsedRequest).toBe(originalRequest);

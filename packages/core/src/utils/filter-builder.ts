@@ -1,7 +1,7 @@
 import { eq, gte, inArray, like, lte, ne } from 'drizzle-orm';
 
 export class FilterBuilder {
-    constructor(private columns: Record<string, any>) { }
+    constructor(private columns: Record<string, any>) {}
 
     buildWhereConditions(filters: Record<string, any>): any[] {
         const whereConditions: any[] = [];
@@ -78,7 +78,7 @@ export class FilterBuilder {
 
         if (typeof value === 'string' && value.includes(',')) {
             // Handle comma-separated values as array
-            const values = value.split(',').map(v => v.trim());
+            const values = value.split(',').map((v) => v.trim());
             return inArray(this.columns[key], values);
         }
 

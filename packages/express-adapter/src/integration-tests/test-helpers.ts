@@ -1,4 +1,4 @@
-import { type ICoreAdapterOptions } from '@drizzle-rest/core';
+import type { ICoreAdapterOptions } from '@drizzle-rest/core';
 import { sql } from 'drizzle-orm';
 import { migrate } from 'drizzle-orm/pglite/migrator';
 import express from 'express';
@@ -21,7 +21,7 @@ const testLogger = createLogger({
 
 // Standard test adapter options that should be used across all test files
 export const createTestAdapterOptions = (
-    tableOptions?: DrizzleRestAdapterOptions['tableOptions']
+    tableOptions?: DrizzleRestAdapterOptions['tableOptions'],
 ): DrizzleRestAdapterOptions => ({
     db,
     schema,
@@ -52,7 +52,7 @@ export const TEST_USERS = {
     aliceWonder: { fullName: 'Alice Wonder', phone: '678-901-2345' },
     newUser: { fullName: 'New User', phone: '999-888-7777' },
     primaryKeyTest: { fullName: 'Primary Key Test User', phone: '111-222-3333' },
-    specialChars: { fullName: 'Test User (Special)', phone: '+1-800-TEST' }
+    specialChars: { fullName: 'Test User (Special)', phone: '+1-800-TEST' },
 } as const;
 
 // Helper functions
@@ -64,50 +64,59 @@ export const createTestUser = async (userData: { fullName: string; phone: string
 export const createTestUsers = async (count: number, prefix = 'User') => {
     const users = Array.from({ length: count }, (_, i) => ({
         fullName: `${prefix} ${i + 1}`,
-        phone: `${(i + 1).toString().padStart(3, '0')}-000-0000`
+        phone: `${(i + 1).toString().padStart(3, '0')}-000-0000`,
     }));
     return await db.insert(schema.users).values(users).returning();
 };
 
 export const createFilteringTestData = async () => {
-    return await db.insert(schema.users).values([
-        TEST_USERS.alice,
-        TEST_USERS.bob,
-        TEST_USERS.charlie,
-        TEST_USERS.david,
-        TEST_USERS.eve,
-        TEST_USERS.aliceWonder,
-    ]).returning();
+    return await db
+        .insert(schema.users)
+        .values([
+            TEST_USERS.alice,
+            TEST_USERS.bob,
+            TEST_USERS.charlie,
+            TEST_USERS.david,
+            TEST_USERS.eve,
+            TEST_USERS.aliceWonder,
+        ])
+        .returning();
 };
 
 export const createTestPosts = async (userId: number) => {
-    return await db.insert(schema.posts).values([
-        {
-            title: 'First Post',
-            content: 'This is the first post content',
-            userId
-        },
-        {
-            title: 'Second Post',
-            content: 'This is the second post content',
-            userId
-        }
-    ]).returning();
+    return await db
+        .insert(schema.posts)
+        .values([
+            {
+                title: 'First Post',
+                content: 'This is the first post content',
+                userId,
+            },
+            {
+                title: 'Second Post',
+                content: 'This is the second post content',
+                userId,
+            },
+        ])
+        .returning();
 };
 
 export const createTestComments = async (postId: number, userId: number) => {
-    return await db.insert(schema.comments).values([
-        {
-            text: 'Great post!',
-            postId,
-            userId
-        },
-        {
-            text: 'Very informative',
-            postId,
-            userId
-        }
-    ]).returning();
+    return await db
+        .insert(schema.comments)
+        .values([
+            {
+                text: 'Great post!',
+                postId,
+                userId,
+            },
+            {
+                text: 'Very informative',
+                postId,
+                userId,
+            },
+        ])
+        .returning();
 };
 
 // Common assertion helpers
@@ -167,7 +176,7 @@ export const apiRequest = {
     post: (path: string, data?: any) => request(app).post(`${path}`).send(data),
     patch: (path: string, data?: any) => request(app).patch(`${path}`).send(data),
     put: (path: string, data?: any) => request(app).put(`${path}`).send(data),
-    delete: (path: string) => request(app).delete(`${path}`)
+    delete: (path: string) => request(app).delete(`${path}`),
 };
 
 // Database setup helpers
@@ -177,8 +186,8 @@ export const setupTestDatabase = async () => {
 
     // Clear tables in correct order (child tables first to avoid foreign key violations)
     await db.delete(schema.comments); // Delete comments first
-    await db.delete(schema.posts);    // Then posts
-    await db.delete(schema.users);    // Finally users
+    await db.delete(schema.posts); // Then posts
+    await db.delete(schema.users); // Finally users
 
     // Reset the auto-increment counters
     await db.execute(sql`ALTER SEQUENCE comments_id_seq RESTART WITH 1`);

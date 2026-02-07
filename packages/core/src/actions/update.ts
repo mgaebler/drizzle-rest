@@ -32,11 +32,7 @@ class UpdateAction extends BaseAction {
             const validatedBody = insertSchema.partial().parse(this.body);
 
             const primaryKeyCol = columns[primaryKeyColumn];
-            const results = await db
-                .update(table)
-                .set(validatedBody)
-                .where(eq(primaryKeyCol, id))
-                .returning();
+            const results = await db.update(table).set(validatedBody).where(eq(primaryKeyCol, id)).returning();
 
             if (results.length === 0) {
                 return this.createNotFoundError('Record not found');

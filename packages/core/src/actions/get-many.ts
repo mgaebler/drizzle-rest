@@ -22,21 +22,11 @@ class GetManyAction extends BaseAction {
         const params = CoreQueryParser.parseQueryParams(this.query);
 
         // Create QueryBuilder instance
-        const queryBuilder = new QueryBuilder(
-            db,
-            table,
-            columns,
-            schema,
-            tablesMetadataMap,
-            tableMetadata.name
-        );
+        const queryBuilder = new QueryBuilder(db, table, columns, schema, tablesMetadataMap, tableMetadata.name);
 
         // Build and execute queries
         const { query, embedKeys } = queryBuilder.buildSelectQuery(params);
-        const [results, totalCount] = await Promise.all([
-            query,
-            queryBuilder.getTotalCount(params.filters || {})
-        ]);
+        const [results, totalCount] = await Promise.all([query, queryBuilder.getTotalCount(params.filters || {})]);
 
         let processedResults = results;
 
@@ -47,7 +37,7 @@ class GetManyAction extends BaseAction {
 
         return {
             data: processedResults,
-            totalCount
+            totalCount,
         };
     }
 
@@ -57,7 +47,7 @@ class GetManyAction extends BaseAction {
             const { data, totalCount } = result;
             const headers = {
                 'X-Total-Count': totalCount.toString(),
-                'Access-Control-Expose-Headers': 'X-Total-Count'
+                'Access-Control-Expose-Headers': 'X-Total-Count',
             };
             return createAdapterResponse(data, statusCode, headers);
         }

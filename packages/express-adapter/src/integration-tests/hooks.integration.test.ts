@@ -9,24 +9,54 @@ import { createTestAdapterOptions, setupTestDatabase, TEST_USERS } from './test-
 
 // Example permission lists for different user types
 const userPermissions = [
-    "users:read", "users:update",
-    "comments:read", "comments:create", "comments:update",
-    "posts:read"
+    'users:read',
+    'users:update',
+    'comments:read',
+    'comments:create',
+    'comments:update',
+    'posts:read',
 ];
 
 const editorPermissions = [
-    "users:read", "users:update",
-    "comments:read", "comments:create", "comments:update", "comments:delete",
-    "posts:read", "posts:create", "posts:update", "posts:write",
-    "categories:read"
+    'users:read',
+    'users:update',
+    'comments:read',
+    'comments:create',
+    'comments:update',
+    'comments:delete',
+    'posts:read',
+    'posts:create',
+    'posts:update',
+    'posts:write',
+    'categories:read',
 ];
 
 const adminPermissions = [
-    "users:read", "users:write", "users:delete", "users:create", "users:update",
-    "comments:read", "comments:write", "comments:delete", "comments:create", "comments:update",
-    "posts:read", "posts:write", "posts:delete", "posts:create", "posts:update",
-    "categories:read", "categories:write", "categories:delete", "categories:create", "categories:update",
-    "tags:read", "tags:write", "tags:delete", "tags:create", "tags:update"
+    'users:read',
+    'users:write',
+    'users:delete',
+    'users:create',
+    'users:update',
+    'comments:read',
+    'comments:write',
+    'comments:delete',
+    'comments:create',
+    'comments:update',
+    'posts:read',
+    'posts:write',
+    'posts:delete',
+    'posts:create',
+    'posts:update',
+    'categories:read',
+    'categories:write',
+    'categories:delete',
+    'categories:create',
+    'categories:update',
+    'tags:read',
+    'tags:write',
+    'tags:delete',
+    'tags:create',
+    'tags:update',
 ];
 
 // Mock users with permission-based authorization
@@ -34,21 +64,21 @@ const mockUser = {
     id: 1,
     role: 'user',
     fullName: 'Mock User',
-    permissions: userPermissions
+    permissions: userPermissions,
 };
 
 const mockEditorUser = {
     id: 2,
     role: 'editor',
     fullName: 'Mock Editor',
-    permissions: editorPermissions
+    permissions: editorPermissions,
 };
 
 const mockAdminUser = {
     id: 3,
     role: 'admin',
     fullName: 'Mock Admin',
-    permissions: adminPermissions
+    permissions: adminPermissions,
 };
 
 // Helper to create app with auth middleware and hooks
@@ -57,7 +87,7 @@ const createAppWithHooks = (tableOptions: any = {}) => {
     app.use(express.json());
 
     // Mock authentication middleware
-    app.use((req, res, next) => {
+    app.use((req, _res, next) => {
         // Default to regular user, tests can override this
         (req as any).user = mockUser;
         next();
@@ -75,7 +105,7 @@ const createAppWithAdminUser = (tableOptions: any = {}) => {
     app.use(express.json());
 
     // Mock authentication middleware with admin user
-    app.use((req, res, next) => {
+    app.use((req, _res, next) => {
         (req as any).user = mockAdminUser;
         next();
     });
@@ -98,24 +128,22 @@ describe.skip('Hook System Integration Tests', () => {
             const app = createAppWithHooks({
                 users: {
                     hooks: {
-                        beforeOperation: beforeOperationSpy
-                    }
-                }
+                        beforeOperation: beforeOperationSpy,
+                    },
+                },
             });
 
-            await request(app)
-                .post('/users')
-                .send(TEST_USERS.alice);
+            await request(app).post('/users').send(TEST_USERS.alice);
 
             expect(beforeOperationSpy).toHaveBeenCalledWith(
                 expect.objectContaining({
                     req: expect.objectContaining({
-                        user: mockUser
+                        user: mockUser,
                     }),
                     action: 'CREATE',
                     table: 'users',
-                    record: TEST_USERS.alice
-                })
+                    record: TEST_USERS.alice,
+                }),
             );
         });
 
@@ -125,14 +153,12 @@ describe.skip('Hook System Integration Tests', () => {
                     hooks: {
                         beforeOperation: async (_context: any) => {
                             throw new Error('Forbidden: Cannot create users');
-                        }
-                    }
-                }
+                        },
+                    },
+                },
             });
 
-            const res = await request(app)
-                .post('/users')
-                .send(TEST_USERS.alice);
+            const res = await request(app).post('/users').send(TEST_USERS.alice);
 
             expect(res.status).toBe(403);
             expect(res.body.error).toBe('Forbidden: Cannot create users');
@@ -146,29 +172,27 @@ describe.skip('Hook System Integration Tests', () => {
             const app = createAppWithHooks({
                 users: {
                     hooks: {
-                        afterOperation: afterOperationSpy
-                    }
-                }
+                        afterOperation: afterOperationSpy,
+                    },
+                },
             });
 
-            await request(app)
-                .post('/users')
-                .send(TEST_USERS.alice);
+            await request(app).post('/users').send(TEST_USERS.alice);
 
             expect(afterOperationSpy).toHaveBeenCalledWith(
                 expect.objectContaining({
                     req: expect.objectContaining({
-                        user: mockUser
+                        user: mockUser,
                     }),
                     action: 'CREATE',
                     table: 'users',
-                    record: TEST_USERS.alice
+                    record: TEST_USERS.alice,
                 }),
                 expect.objectContaining({
                     id: expect.any(Number),
                     fullName: TEST_USERS.alice.fullName,
-                    phone: TEST_USERS.alice.phone
-                })
+                    phone: TEST_USERS.alice.phone,
+                }),
             );
         });
 
@@ -181,18 +205,16 @@ describe.skip('Hook System Integration Tests', () => {
                                 return {
                                     ...result,
                                     fullName: 'Modified Name',
-                                    customField: 'Added by hook'
+                                    customField: 'Added by hook',
                                 };
                             }
                             return result;
-                        }
-                    }
-                }
+                        },
+                    },
+                },
             });
 
-            const res = await request(app)
-                .post('/users')
-                .send(TEST_USERS.alice);
+            const res = await request(app).post('/users').send(TEST_USERS.alice);
 
             expect(res.status).toBe(201);
             expect(res.body.fullName).toBe('Modified Name');
@@ -214,13 +236,12 @@ describe.skip('Hook System Integration Tests', () => {
                                 return filteredResult;
                             }
                             return result;
-                        }
-                    }
-                }
+                        },
+                    },
+                },
             });
 
-            const res = await request(app)
-                .get(`/users/${testUser.id}`);
+            const res = await request(app).get(`/users/${testUser.id}`);
 
             expect(res.status).toBe(200);
             expect(res.body.fullName).toBe(TEST_USERS.alice.fullName);
@@ -242,13 +263,12 @@ describe.skip('Hook System Integration Tests', () => {
                                 return filteredResult;
                             }
                             return result;
-                        }
-                    }
-                }
+                        },
+                    },
+                },
             });
 
-            const res = await request(app)
-                .get(`/users/${testUser.id}`);
+            const res = await request(app).get(`/users/${testUser.id}`);
 
             expect(res.status).toBe(200);
             expect(res.body.fullName).toBe(TEST_USERS.alice.fullName);
@@ -265,12 +285,12 @@ describe.skip('Hook System Integration Tests', () => {
         // Helper function to get required permission for action
         const getRequiredPermission = (table: string, action: string): string => {
             const actionMap: Record<string, string> = {
-                'CREATE': 'create',
-                'GET_ONE': 'read',
-                'GET_MANY': 'read',
-                'UPDATE': 'update',
-                'REPLACE': 'write',
-                'DELETE': 'delete'
+                CREATE: 'create',
+                GET_ONE: 'read',
+                GET_MANY: 'read',
+                UPDATE: 'update',
+                REPLACE: 'write',
+                DELETE: 'delete',
             };
             return `${table}:${actionMap[action]}`;
         };
@@ -284,14 +304,13 @@ describe.skip('Hook System Integration Tests', () => {
                             if (!hasPermission(context.req.user, requiredPermission)) {
                                 throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
                             }
-                        }
-                    }
-                }
+                        },
+                    },
+                },
             });
 
             // User has "users:read" permission
-            const res = await request(app)
-                .get('/users');
+            const res = await request(app).get('/users');
 
             expect(res.status).toBe(200);
         });
@@ -305,14 +324,13 @@ describe.skip('Hook System Integration Tests', () => {
                             if (!hasPermission(context.req.user, requiredPermission)) {
                                 throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
                             }
-                        }
-                    }
-                }
+                        },
+                    },
+                },
             });
 
             // User does NOT have "users:delete" permission
-            const res = await request(app)
-                .delete('/users/1');
+            const res = await request(app).delete('/users/1');
 
             expect(res.status).toBe(403);
             expect(res.body.error).toBe('Forbidden: Missing permission users:delete');
@@ -327,14 +345,13 @@ describe.skip('Hook System Integration Tests', () => {
                             if (!hasPermission(context.req.user, requiredPermission)) {
                                 throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
                             }
-                        }
-                    }
-                }
+                        },
+                    },
+                },
             });
 
             // Admin has "users:delete" permission
-            const res = await request(app)
-                .delete('/users/1');
+            const res = await request(app).delete('/users/1');
 
             expect(res.status).toBe(404); // 404 because user doesn't exist, but permission passed
         });
@@ -344,29 +361,30 @@ describe.skip('Hook System Integration Tests', () => {
             appWithEditor.use(express.json());
 
             // Mock authentication middleware with editor user
-            appWithEditor.use((req, res, next) => {
+            appWithEditor.use((req, _res, next) => {
                 (req as any).user = mockEditorUser;
                 next();
             });
 
-            const drizzleApiRouter = createExpressDrizzleRestAdapter(createTestAdapterOptions({
-                posts: {
-                    hooks: {
-                        beforeOperation: async (context: any) => {
-                            const requiredPermission = getRequiredPermission(context.table, context.action);
-                            if (!hasPermission(context.req.user, requiredPermission)) {
-                                throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
-                            }
-                        }
-                    }
-                }
-            }));
+            const drizzleApiRouter = createExpressDrizzleRestAdapter(
+                createTestAdapterOptions({
+                    posts: {
+                        hooks: {
+                            beforeOperation: async (context: any) => {
+                                const requiredPermission = getRequiredPermission(context.table, context.action);
+                                if (!hasPermission(context.req.user, requiredPermission)) {
+                                    throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
+                                }
+                            },
+                        },
+                    },
+                }),
+            );
 
             appWithEditor.use('', drizzleApiRouter);
 
             // Editor has "posts:read" permission
-            const readRes = await request(appWithEditor)
-                .get('/posts');
+            const readRes = await request(appWithEditor).get('/posts');
             expect(readRes.status).toBe(200);
 
             // Editor has "posts:create" permission
@@ -382,56 +400,54 @@ describe.skip('Hook System Integration Tests', () => {
                 id: 4,
                 role: 'limited',
                 fullName: 'Limited User',
-                permissions: ['posts:read', 'comments:read'] // Only read permissions
+                permissions: ['posts:read', 'comments:read'], // Only read permissions
             };
 
             const appWithLimitedUser = express();
             appWithLimitedUser.use(express.json());
-            appWithLimitedUser.use((req, res, next) => {
+            appWithLimitedUser.use((req, _res, next) => {
                 (req as any).user = limitedUser;
                 next();
             });
 
-            const drizzleApiRouter = createExpressDrizzleRestAdapter(createTestAdapterOptions({
-                posts: {
-                    hooks: {
-                        beforeOperation: async (context: any) => {
-                            const requiredPermission = getRequiredPermission(context.table, context.action);
-                            if (!hasPermission(context.req.user, requiredPermission)) {
-                                throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
-                            }
-                        }
-                    }
-                },
-                users: {
-                    hooks: {
-                        beforeOperation: async (context: any) => {
-                            const requiredPermission = getRequiredPermission(context.table, context.action);
-                            if (!hasPermission(context.req.user, requiredPermission)) {
-                                throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
-                            }
-                        }
-                    }
-                }
-            }));
+            const drizzleApiRouter = createExpressDrizzleRestAdapter(
+                createTestAdapterOptions({
+                    posts: {
+                        hooks: {
+                            beforeOperation: async (context: any) => {
+                                const requiredPermission = getRequiredPermission(context.table, context.action);
+                                if (!hasPermission(context.req.user, requiredPermission)) {
+                                    throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
+                                }
+                            },
+                        },
+                    },
+                    users: {
+                        hooks: {
+                            beforeOperation: async (context: any) => {
+                                const requiredPermission = getRequiredPermission(context.table, context.action);
+                                if (!hasPermission(context.req.user, requiredPermission)) {
+                                    throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
+                                }
+                            },
+                        },
+                    },
+                }),
+            );
 
             appWithLimitedUser.use('', drizzleApiRouter);
 
             // Limited user can read posts
-            const postsRes = await request(appWithLimitedUser)
-                .get('/posts');
+            const postsRes = await request(appWithLimitedUser).get('/posts');
             expect(postsRes.status).toBe(200);
 
             // Limited user cannot read users (no users:read permission)
-            const usersRes = await request(appWithLimitedUser)
-                .get('/users');
+            const usersRes = await request(appWithLimitedUser).get('/users');
             expect(usersRes.status).toBe(403);
             expect(usersRes.body.error).toBe('Forbidden: Missing permission users:read');
 
             // Limited user cannot create posts (no posts:create permission)
-            const createRes = await request(appWithLimitedUser)
-                .post('/posts')
-                .send({ title: 'Test', content: 'Test' });
+            const createRes = await request(appWithLimitedUser).post('/posts').send({ title: 'Test', content: 'Test' });
             expect(createRes.status).toBe(403);
             expect(createRes.body.error).toBe('Forbidden: Missing permission posts:create');
         });
@@ -450,13 +466,12 @@ describe.skip('Hook System Integration Tests', () => {
                             if (!context.req.user.permissions?.includes(requiredPermission)) {
                                 throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
                             }
-                        }
-                    }
-                }
+                        },
+                    },
+                },
             });
 
-            const res = await request(app)
-                .delete(`/users/${testUser.id}`);
+            const res = await request(app).delete(`/users/${testUser.id}`);
 
             expect(res.status).toBe(204);
         });
@@ -473,13 +488,12 @@ describe.skip('Hook System Integration Tests', () => {
                             if (!context.req.user.permissions?.includes(requiredPermission)) {
                                 throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
                             }
-                        }
-                    }
-                }
+                        },
+                    },
+                },
             });
 
-            const res = await request(app)
-                .delete(`/users/${testUser.id}`);
+            const res = await request(app).delete(`/users/${testUser.id}`);
 
             expect(res.status).toBe(403);
             expect(res.body.error).toBe('Forbidden: Missing permission users:delete');
@@ -500,15 +514,13 @@ describe.skip('Hook System Integration Tests', () => {
                             if (context.action === 'CREATE') {
                                 context.record.createdBy = context.req.user?.id;
                             }
-                        }
-                    }
-                }
+                        },
+                    },
+                },
             });
 
             // User does NOT have "users:create" permission, so this should fail
-            const res = await request(app)
-                .post('/users')
-                .send(TEST_USERS.alice);
+            const res = await request(app).post('/users').send(TEST_USERS.alice);
 
             expect(res.status).toBe(403);
             expect(res.body.error).toBe('Forbidden: Missing permission users:create');
@@ -520,46 +532,46 @@ describe.skip('Hook System Integration Tests', () => {
             // Create a user with create permissions
             const userWithCreatePermission = {
                 ...mockUser,
-                permissions: [...userPermissions, 'users:create']
+                permissions: [...userPermissions, 'users:create'],
             };
 
             const app = express();
             app.use(express.json());
-            app.use((req, res, next) => {
+            app.use((req, _res, next) => {
                 (req as any).user = userWithCreatePermission;
                 next();
             });
 
-            const drizzleApiRouter = createExpressDrizzleRestAdapter(createTestAdapterOptions({
-                users: {
-                    hooks: {
-                        beforeOperation: async (context: any) => {
-                            // Check permissions first
-                            const requiredPermission = `${context.table}:create`;
-                            if (!context.req.user.permissions?.includes(requiredPermission)) {
-                                throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
-                            }
+            const drizzleApiRouter = createExpressDrizzleRestAdapter(
+                createTestAdapterOptions({
+                    users: {
+                        hooks: {
+                            beforeOperation: async (context: any) => {
+                                // Check permissions first
+                                const requiredPermission = `${context.table}:create`;
+                                if (!context.req.user.permissions?.includes(requiredPermission)) {
+                                    throw new Error(`Forbidden: Missing permission ${requiredPermission}`);
+                                }
 
-                            // Auto-set createdBy to current user
-                            if (context.action === 'CREATE') {
-                                context.record.createdBy = context.req.user?.id;
-                                capturedRecord = context.record;
-                            }
-                        }
-                    }
-                }
-            }));
+                                // Auto-set createdBy to current user
+                                if (context.action === 'CREATE') {
+                                    context.record.createdBy = context.req.user?.id;
+                                    capturedRecord = context.record;
+                                }
+                            },
+                        },
+                    },
+                }),
+            );
 
             app.use('', drizzleApiRouter);
 
-            const res = await request(app)
-                .post('/users')
-                .send(TEST_USERS.alice);
+            const res = await request(app).post('/users').send(TEST_USERS.alice);
 
             expect(res.status).toBe(201);
             expect(capturedRecord).toEqual({
                 ...TEST_USERS.alice,
-                createdBy: userWithCreatePermission.id
+                createdBy: userWithCreatePermission.id,
             });
         });
     });
@@ -570,16 +582,14 @@ describe.skip('Hook System Integration Tests', () => {
                 users: {
                     hooks: {
                         beforeOperation: async (_context: any) => {
-                            await new Promise(resolve => setTimeout(resolve, 10));
+                            await new Promise((resolve) => setTimeout(resolve, 10));
                             throw new Error('Async error in beforeOperation');
-                        }
-                    }
-                }
+                        },
+                    },
+                },
             });
 
-            const res = await request(app)
-                .post('/users')
-                .send(TEST_USERS.alice);
+            const res = await request(app).post('/users').send(TEST_USERS.alice);
 
             expect(res.status).toBe(403);
             expect(res.body.error).toBe('Async error in beforeOperation');
@@ -590,16 +600,14 @@ describe.skip('Hook System Integration Tests', () => {
                 users: {
                     hooks: {
                         afterOperation: async (_context: any, _result: any) => {
-                            await new Promise(resolve => setTimeout(resolve, 10));
+                            await new Promise((resolve) => setTimeout(resolve, 10));
                             throw new Error('Async error in afterOperation');
-                        }
-                    }
-                }
+                        },
+                    },
+                },
             });
 
-            const res = await request(app)
-                .post('/users')
-                .send(TEST_USERS.alice);
+            const res = await request(app).post('/users').send(TEST_USERS.alice);
 
             expect(res.status).toBe(500);
             expect(res.body.error).toBe('Async error in afterOperation');
@@ -611,14 +619,12 @@ describe.skip('Hook System Integration Tests', () => {
                     hooks: {
                         beforeOperation: async (_context: any) => {
                             throw 'String error';
-                        }
-                    }
-                }
+                        },
+                    },
+                },
             });
 
-            const res = await request(app)
-                .post('/users')
-                .send(TEST_USERS.alice);
+            const res = await request(app).post('/users').send(TEST_USERS.alice);
 
             expect(res.status).toBe(403);
             expect(res.body.error).toBe('String error');
@@ -638,14 +644,12 @@ describe.skip('Hook System Integration Tests', () => {
                         afterOperation: async (_context: any, result: any) => {
                             executionOrder.push('afterOperation');
                             return result;
-                        }
-                    }
-                }
+                        },
+                    },
+                },
             });
 
-            await request(app)
-                .post('/users')
-                .send(TEST_USERS.alice);
+            await request(app).post('/users').send(TEST_USERS.alice);
 
             expect(executionOrder).toEqual(['beforeOperation', 'afterOperation']);
         });
@@ -663,14 +667,12 @@ describe.skip('Hook System Integration Tests', () => {
                         afterOperation: async (_context: any, result: any) => {
                             executionOrder.push('afterOperation');
                             return result;
-                        }
-                    }
-                }
+                        },
+                    },
+                },
             });
 
-            await request(app)
-                .post('/users')
-                .send(TEST_USERS.alice);
+            await request(app).post('/users').send(TEST_USERS.alice);
 
             expect(executionOrder).toEqual(['beforeOperation']);
         });

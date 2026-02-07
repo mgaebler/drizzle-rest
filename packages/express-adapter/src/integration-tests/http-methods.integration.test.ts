@@ -11,9 +11,7 @@ describe('HTTP Methods', () => {
     describe('PUT Method Tests', () => {
         it('should replace a user completely with PUT', async () => {
             // Create initial user
-            const createRes = await request(app)
-                .post('/users')
-                .send({ fullName: 'John Doe', phone: '123-456-7890' });
+            const createRes = await request(app).post('/users').send({ fullName: 'John Doe', phone: '123-456-7890' });
 
             expect(createRes.status).toBe(201);
             const userId = createRes.body.id;
@@ -34,9 +32,7 @@ describe('HTTP Methods', () => {
         });
 
         it('should return 404 for PUT on non-existent user', async () => {
-            const res = await request(app)
-                .put('/users/999')
-                .send({ fullName: 'Non Existent', phone: '000-000-0000' });
+            const res = await request(app).put('/users/999').send({ fullName: 'Non Existent', phone: '000-000-0000' });
 
             expect(res.status).toBe(404);
         });

@@ -44,20 +44,20 @@ describe('React Router v7 Server Integration - GET /api/users', () => {
             {
                 path: 'api/users',
                 id: 'api-users',
-                loader: async (args: any) => handler(args)
-            }
+                loader: async (args: any) => handler(args),
+            },
         ];
 
         const matches = matchRoutes(routes, pathname);
         expect(matches).toBeTruthy();
         expect(matches?.length).toBe(1);
 
-        const match = matches![0];
+        const match = matches?.[0];
         expect(typeof match.route.loader).toBe('function');
         const response: Response = await (match.route.loader as any)({
             request,
             params: match.params,
-            context: {}
+            context: {},
         });
 
         expect(response.status).toBe(200);
@@ -74,18 +74,18 @@ describe('React Router v7 Server Integration - GET /api/users', () => {
             {
                 path: 'api/users/:id',
                 id: 'api-user',
-                loader: async (args: any) => handler(args)
-            }
+                loader: async (args: any) => handler(args),
+            },
         ];
 
         const matches = matchRoutes(routes, pathname);
         expect(matches).toBeTruthy();
-        const match = matches![0];
+        const match = matches?.[0];
         expect(typeof match.route.loader).toBe('function');
         const response: Response = await (match.route.loader as any)({
             request,
             params: match.params,
-            context: {}
+            context: {},
         });
 
         expect(response.status).toBe(404);
