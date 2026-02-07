@@ -3,10 +3,10 @@
 {
     "name": "Node.js & TypeScript",
     // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-    "image": "mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm",
+    "image": "mcr.microsoft.com/devcontainers/typescript-node:4-24-trixie",
     "customizations": {
         "vscode": {
-            "extensions": ["biomejs.biome", "bruno-api-client.bruno", "streetsidesoftware.code-spell-checker"]
+            "extensions": ["biomejs.biome", "streetsidesoftware.code-spell-checker"]
         }
     }
 
